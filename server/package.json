@@ -1,0 +1,63 @@
+{
+  "name": "express-ts-template",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx --watch --env-file .env src/index.ts",
+    "start": "node --env-file .env dist/index.js",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest",
+    "test:run": "vitest --run",
+    "test:ui": "vitest --ui",
+    "coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.{json,yml,yaml,md}": [
+      "prettier --check"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/penspulse326/express-ts-template.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/penspulse326/express-ts-template/issues"
+  },
+  "homepage": "https://github.com/penspulse326/express-ts-template#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.27.0",
+    "@tsconfig/node22": "^22.0.2",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.27",
+    "@vitest/coverage-v8": "^3.1.4",
+    "@vitest/eslint-plugin": "^1.2.1",
+    "eslint": "^9.27.0",
+    "eslint-plugin-perfectionist": "^4.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.0",
+    "vitest": "^3.1.4"
+  }
+}
