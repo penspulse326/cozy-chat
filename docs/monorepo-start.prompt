@@ -1,30 +1,50 @@
-# 建置 Monorepo 專案
+## Description
+使用 pnpm 建置 Monorepo 專案
 
-## 任務流程
+## Environment
+Language: TypeScript
+Package Management: pnpm
+Sub Projects:
+ - Web: Next App
+ - Server: Express
 
-1. 將 JS/TS 環境下常見的依賴項目移動到根目錄
+## Tasks
+
+1. 將以下依賴項目與設定檔從子專案移動到根目錄的 package.json：
+   - husky (Git hooks)
+   - commitlint (提交訊息規範)
+   - ESLint (程式碼檢查)
+   - Prettier (程式碼格式化)
+   - TypeScript (型別檢查)
 2. 更新根目錄和 /apps 子專案的 package.json
 3. 執行 pnpm install
-4. 對子專案進行 lint 與 build，確定遷移依賴項目後子專案仍可以正常運行
+4. 調整共同依賴的設定，包含 TypeScript 與 ESLint
+5. 對子專案進行 lint 與 build，確定遷移依賴項目後子專案仍可以正常運行
+6. 最終驗證步驟：
+   - 確認根目錄的 pnpm install 成功執行
+   - 確認子專案可以獨立 lint, build, start
 
-## 任務細則
-
-### 共同依賴項目或設定
+## Dependency And Config Check
 
 1. husky
 2. commitlint
 3. ESLint
 4. Prettier
-5. .vscode
-6. TypeScript
+5. TypeScript
+6. .vscode
 7. 其他有必要遷移的項目
 
-### 注意事項
+## Notice
 
-子專案都是各自不同的框架環境，因此上述依賴項目遷移後，請在根目錄建立：
+子專案都是各自不同的框架環境，因此上述依賴項目遷移後，請在根目錄建立這兩個依賴項目的常見通用設定，
+並確保子專案環境的原有設定請勿更動，只需加入來自根目錄設定的繼承：
 
 1. ESLint
 2. TypeScript
 
-這兩個依賴項目的常見通用設定，並確保子專案也有一份設定來繼承根目錄的通用設定，並維持原本該專案環境的設定。
+## Expected Outcome
 
+- 根目錄包含所有共享依賴
+- 子專案依賴根目錄的通用設定
+- 各專案保持原有的框架特性
+- 完成設定後子專案皆能運行與編譯
