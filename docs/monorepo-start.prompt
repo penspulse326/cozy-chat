@@ -21,11 +21,10 @@
 3. 子專案需要保留原本的 TypeScript 與 ESLint 設定檔
 4. 在根目錄建立共同設定，包含 TypeScript 與 ESLint，並遵守下列規則：
   - 僅包含基本檢查格式，不包含編譯設定，編譯設定由子專案內的現有設定來決定
-  - 測試根目錄 shared/types/index.ts 的型別是否能在子專案中 import
-5. 最終驗證步驟：
+5. 測試 packages/shared 的函式與型別能在子專案中 import
+6. 最終驗證步驟：
    - 確認根目錄的 pnpm install 成功執行
-   - 確認子專案可以獨立執行 lint, build, start
-   - 以上步驟確認完成後移除子專案中 import 過的 shared/types/index.ts 的型別，將檔案還原
+   - 確認子專案可以獨立執行 npm run lint, npm run build, npm run start
 
 ## 最終結果
 
