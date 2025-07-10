@@ -14,6 +14,7 @@
     "server:start": "pnpm --filter @apps/server start",
     "server:lint": "pnpm --filter @apps/server lint",
     "server:test": "pnpm --filter @apps/server test",
+    "lib:build": "pnpm --filter @packages/lib build",
     "build": "pnpm --filter \"./apps/*\" build",
     "lint": "pnpm --filter \"./apps/*\" lint",
     "test": "pnpm --filter \"./apps/*\" test",
