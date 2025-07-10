@@ -1,17 +1,11 @@
 // @ts-check
 
-import eslint from '@eslint/js';
+import baseConfig from '../../eslint.config.base.js';
 import tseslint from 'typescript-eslint';
-import perfectionist from 'eslint-plugin-perfectionist';
 import vitest from '@vitest/eslint-plugin';
 
 export default tseslint.config(
-  {
-    ignores: ['**/*.js'],
-  },
-  eslint.configs.recommended,
-  tseslint.configs.strictTypeChecked,
-  tseslint.configs.stylisticTypeChecked,
+  ...baseConfig,
   {
     languageOptions: {
       parserOptions: {
@@ -20,7 +14,8 @@ export default tseslint.config(
       },
     },
   },
-  perfectionist.configs['recommended-natural'],
+  tseslint.configs.strictTypeChecked,
+  tseslint.configs.stylisticTypeChecked,
   {
     files: ['**/*.test.ts', '**/*.spec.ts'],
     plugins: {
