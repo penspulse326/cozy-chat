@@ -13,7 +13,7 @@
 1. 將依賴項目與設定檔從子專案移動到根目錄的 package.json
 2. 更新根目錄子專案的 package.json
 3. 子專案需要保留原本的 TypeScript 與 ESLint 設定檔
-4. 在根目錄建立 TypeScript 與 ESLint 的共同設定，可以參照 Nx 的建立方式
+4. 在根目錄建立 TypeScript 與 ESLint 的共同設定
 5. 建立共用庫 packages/lib 並測試函式與型別能在子專案中使用
 6. 在根目錄建立 Prettier 設定
 
