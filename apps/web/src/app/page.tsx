@@ -1,6 +1,7 @@
 'use client';
 
-import { AppShell, Burger, Button } from '@mantine/core';
+import { TestComp } from '@/components/TestComp';
+import { AppShell, Burger, Flex, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
 export default function Home() {
@@ -8,93 +9,46 @@ export default function Home() {
 
   return (
     <AppShell
-      header={{ height: 60 }}
       navbar={{
         width: 300,
         breakpoint: 'sm',
-        collapsed: { mobile: !opened },
+        collapsed: { mobile: !opened, desktop: !opened },
       }}
       padding="md"
     >
-      <AppShell.Header>
-        <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <div>Logo</div>
+      <AppShell.Header bg="transparent">
+        <Burger
+          opened={opened}
+          onClick={toggle}
+          size="sm"
+          style={{ margin: '16px' }}
+        />
       </AppShell.Header>
 
-      <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
+      <AppShell.Navbar p="md">
+        <Flex justify="space-between" align="center">
+          <div>Cozy Chat</div>
+          <Burger
+            opened={opened}
+            onClick={toggle}
+            size="sm"
+            style={{ margin: '16px' }}
+          />
+        </Flex>
 
-      <AppShell.Main>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-          <Button>primary</Button>
-        </div>
+        {/* Navbar content */}
+      </AppShell.Navbar>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: '10px',
-            flexWrap: 'wrap',
-            marginBottom: '10px',
-          }}
-        >
-          {Array(10)
-            .fill(0)
-            .map((_, index) => (
-              <Button key={index} color={`moss-green.${index}`}>
-                moss-green.{index}
-              </Button>
-            ))}
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            gap: '10px',
-            flexWrap: 'wrap',
-            marginBottom: '10px',
-          }}
-        >
-          {Array(10)
-            .fill(0)
-            .map((_, index) => (
-              <Button key={index} color={`deep-teal.${index}`}>
-                deep-teal.{index}
-              </Button>
-            ))}
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            gap: '10px',
-            flexWrap: 'wrap',
-            marginBottom: '10px',
-          }}
-        >
-          {Array(10)
-            .fill(0)
-            .map((_, index) => (
-              <Button key={index} color={`navy-steel.${index}`}>
-                navy-steel.{index}
-              </Button>
-            ))}
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            gap: '10px',
-            flexWrap: 'wrap',
-            marginBottom: '10px',
-          }}
-        >
-          {Array(10)
-            .fill(0)
-            .map((_, index) => (
-              <Button key={index} color={`soft-lime.${index}`}>
-                soft-lime.{index}
-              </Button>
-            ))}
-        </div>
+      <AppShell.Main
+        style={{
+          background:
+            'linear-gradient(to bottom, #A0C878 0%, #DDEB9D 50%, #A0C878 100%)',
+          minHeight: '100dvh',
+        }}
+      >
+        <Stack maw={480} mx="auto">
+          <TestComp />
+        </Stack>
       </AppShell.Main>
     </AppShell>
   );
