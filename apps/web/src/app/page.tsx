@@ -1,5 +1,6 @@
 'use client';
 
+import MessageBox from '@/components/MessageBox';
 import { TestComp } from '@/components/TestComp';
 import { AppShell, Burger, Flex, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -16,13 +17,8 @@ export default function Home() {
       }}
       padding="md"
     >
-      <AppShell.Header bg="transparent">
-        <Burger
-          opened={opened}
-          onClick={toggle}
-          size="sm"
-          style={{ margin: '16px' }}
-        />
+      <AppShell.Header bg="transparent" bd="none">
+        <Burger opened={opened} onClick={toggle} size="sm" m="16" />
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
@@ -46,8 +42,13 @@ export default function Home() {
           minHeight: '100dvh',
         }}
       >
-        <Stack maw={480} mx="auto">
-          <TestComp />
+        <Stack maw={480} mx="auto" bg="gray" gap="md">
+          <MessageBox isUser={false} message="Hello" created_at="2021-01-01" />
+          <MessageBox
+            isUser={true}
+            message="HelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHello"
+            created_at="2021-01-01"
+          />
         </Stack>
       </AppShell.Main>
     </AppShell>
