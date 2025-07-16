@@ -5,7 +5,7 @@ import { createTheme } from '@mantine/core';
 
 export const theme = createTheme({
   primaryColor: 'moss-green',
-  primaryShade: 4,
+  fontFamily: 'Noto Sans TC, sans-serif',
   colors: {
     'soft-lime': generateColors('#DDEB9D'),
     'moss-green': generateColors('#A0C878'),

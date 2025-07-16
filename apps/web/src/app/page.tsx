@@ -1,6 +1,5 @@
 'use client';
 
-import { TestComp } from '@/components/TestComp';
 import {
   AppShell,
   Burger,
@@ -8,7 +7,6 @@ import {
   Center,
   Flex,
   Stack,
-  Text,
   Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -39,25 +37,27 @@ export default function Home() {
 
       <AppShell.Main
         p={0}
-        bg="radial-gradient(circle, #DDEB9D 0%, #A0C878 75%, #27667B 150%)"
+        bg="linear-gradient(to bottom, #DDEB9D 50%, #27667B 150%)"
       >
         <Center mx="auto" maw={480} mih="100dvh">
-          <Stack align="center" gap="lg">
+          <Stack align="center" gap={0}>
             <Image
-              src="/logo-full.svg"
+              src="/logo-full.png"
               alt="Cozy Chat"
               width={256}
               height={256}
             />
-            <Title c="deep-teal.9" fz={32}>
-              放鬆心情，隨便聊聊
+            <Title c="navy-steel.9" fz={28}>
+              放輕鬆，隨便聊
             </Title>
             <Button
-              my="lg"
-              h={{ base: 56, md: 72 }}
+              px={12}
+              mt={64}
+              h={64}
               radius="lg"
-              color="deep-teal.9"
-              fz={{ base: 36, md: 48 }}
+              color="navy-steel.9"
+              fz={36}
+              fw={400}
             >
               開始聊天
             </Button>

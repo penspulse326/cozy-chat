@@ -1,4 +1,5 @@
 import '@mantine/core/styles.css';
+import { Noto_Sans_TC } from 'next/font/google';
 
 import {
   ColorSchemeScript,
@@ -6,6 +7,11 @@ import {
   mantineHtmlProps,
 } from '@mantine/core';
 import { theme } from './theme';
+
+const notoSansTC = Noto_Sans_TC({
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+});
 
 export const metadata = {
   title: 'My Mantine app',
@@ -18,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" {...mantineHtmlProps}>
+    <html lang="zh-hant" {...mantineHtmlProps} className={notoSansTC.className}>
       <head>
         <ColorSchemeScript />
       </head>
