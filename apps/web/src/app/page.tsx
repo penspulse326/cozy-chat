@@ -1,7 +1,7 @@
 'use client';
 
 import { TestComp } from '@/components/TestComp';
-import { AppShell, Burger, Flex, Stack } from '@mantine/core';
+import { AppShell, Burger, Center, Flex, Stack, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
 export default function Home() {
@@ -28,16 +28,24 @@ export default function Home() {
       </AppShell.Navbar>
 
       <AppShell.Main
-        style={{
-          background:
-            'linear-gradient(to bottom, #A0C878 0%, #DDEB9D 50%, #A0C878 100%)',
-          minHeight: '100dvh',
-        }}
+        p={0}
+        bg="linear-gradient(to bottom, #A0C878 0%, #DDEB9D 50%, #A0C878 100%)"
       >
-        <Stack maw={480} mx="auto" bg="gray" gap="md">
-          <TestComp />
-          <TestComp />
-        </Stack>
+        <Center mx="auto" maw={480} mih="100dvh">
+          <Stack align="center" gap="xl">
+            <img
+              src="/logo-full.svg"
+              alt="Cozy Chat"
+              style={{
+                maxWidth: '300px',
+                height: 'auto',
+                filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.1))',
+                transition: 'transform 0.3s ease',
+              }}
+            />
+            <Title>Cozy Chat</Title>
+          </Stack>
+        </Center>
       </AppShell.Main>
     </AppShell>
   );
