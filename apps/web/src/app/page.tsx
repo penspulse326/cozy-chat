@@ -11,6 +11,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
+import { BlurBubbleBackground } from '../components/BlurBubbleBackground';
 
 export default function Home() {
   const [opened, { toggle }] = useDisclosure();
@@ -26,7 +27,13 @@ export default function Home() {
       layout="alt"
     >
       <AppShell.Header bg="transparent" bd="none">
-        <Burger opened={opened} onClick={toggle} size="lg" m="16" />
+        <Burger
+          opened={opened}
+          onClick={toggle}
+          color="navy-steel.9"
+          size={36}
+          m={16}
+        />
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
@@ -35,10 +42,7 @@ export default function Home() {
         </Flex>
       </AppShell.Navbar>
 
-      <AppShell.Main
-        p={0}
-        bg="linear-gradient(to bottom, #DDEB9D 50%, #27667B 150%)"
-      >
+      <AppShell.Main p={0} bg="rgba(221, 235, 157, 0.5)">
         <Center mx="auto" maw={480} mih="100dvh">
           <Stack align="center" gap={0}>
             <Image
@@ -64,6 +68,8 @@ export default function Home() {
           </Stack>
         </Center>
       </AppShell.Main>
+
+      <BlurBubbleBackground />
     </AppShell>
   );
 }

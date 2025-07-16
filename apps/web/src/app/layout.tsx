@@ -1,6 +1,5 @@
 import '@mantine/core/styles.css';
 import { Noto_Sans_TC } from 'next/font/google';
-
 import {
   ColorSchemeScript,
   MantineProvider,
@@ -14,8 +13,8 @@ const notoSansTC = Noto_Sans_TC({
 });
 
 export const metadata = {
-  title: 'My Mantine app',
-  description: 'I have followed setup instructions carefully',
+  title: 'Cozy Chat',
+  description: '放輕鬆，隨便聊',
 };
 
 export default function RootLayout({
