@@ -1,8 +1,18 @@
 'use client';
 
 import { TestComp } from '@/components/TestComp';
-import { AppShell, Burger, Center, Flex, Stack, Title } from '@mantine/core';
+import {
+  AppShell,
+  Burger,
+  Button,
+  Center,
+  Flex,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import Image from 'next/image';
 
 export default function Home() {
   const [opened, { toggle }] = useDisclosure();
@@ -29,21 +39,28 @@ export default function Home() {
 
       <AppShell.Main
         p={0}
-        bg="linear-gradient(to bottom, #A0C878 0%, #DDEB9D 50%, #A0C878 100%)"
+        bg="radial-gradient(circle, #DDEB9D 0%, #A0C878 75%, #27667B 150%)"
       >
         <Center mx="auto" maw={480} mih="100dvh">
-          <Stack align="center" gap="xl">
-            <img
+          <Stack align="center" gap="lg">
+            <Image
               src="/logo-full.svg"
               alt="Cozy Chat"
-              style={{
-                maxWidth: '300px',
-                height: 'auto',
-                filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.1))',
-                transition: 'transform 0.3s ease',
-              }}
+              width={256}
+              height={256}
             />
-            <Title>Cozy Chat</Title>
+            <Title c="deep-teal.9" fz={32}>
+              放鬆心情，隨便聊聊
+            </Title>
+            <Button
+              my="lg"
+              h={{ base: 56, md: 72 }}
+              radius="lg"
+              color="deep-teal.9"
+              fz={{ base: 36, md: 48 }}
+            >
+              開始聊天
+            </Button>
           </Stack>
         </Center>
       </AppShell.Main>
