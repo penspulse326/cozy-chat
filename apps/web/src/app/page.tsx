@@ -1,6 +1,7 @@
 'use client';
 
 import BlobsBg from '@/components/BlobsBg';
+import ChatBox from '@/components/ChatBox';
 import {
   AppShell,
   Burger,
@@ -50,7 +51,7 @@ export default function Home() {
         }}
       >
         <BlobsBg />
-        <Center mx="auto" maw={480} mih="100dvh">
+        <Stack justify="center" align="center" mx="auto" maw={480} mih="100dvh">
           <Stack align="center" gap={0}>
             <Image
               src="/logo-full.png"
@@ -73,7 +74,8 @@ export default function Home() {
               開始聊天
             </Button>
           </Stack>
-        </Center>
+          <ChatBox />
+        </Stack>
       </AppShell.Main>
     </AppShell>
   );
