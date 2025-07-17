@@ -1,5 +1,6 @@
 'use client';
 
+import BlobsBg from '@/components/BlobsBg';
 import {
   AppShell,
   Burger,
@@ -11,7 +12,6 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
-import { BlurBubbleBackground } from '../components/BlurBubbleBackground';
 
 export default function Home() {
   const [opened, { toggle }] = useDisclosure();
@@ -42,7 +42,14 @@ export default function Home() {
         </Flex>
       </AppShell.Navbar>
 
-      <AppShell.Main p={0} bg="rgba(221, 235, 157, 0.5)">
+      <AppShell.Main
+        p={0}
+        bg="soft-lime.2"
+        style={{
+          backdropFilter: 'blur(1px)',
+        }}
+      >
+        <BlobsBg />
         <Center mx="auto" maw={480} mih="100dvh">
           <Stack align="center" gap={0}>
             <Image
@@ -68,8 +75,6 @@ export default function Home() {
           </Stack>
         </Center>
       </AppShell.Main>
-
-      <BlurBubbleBackground />
     </AppShell>
   );
 }
