@@ -1,15 +1,15 @@
 'use client';
 
-import BlobsBg from '@/components/BlobsBg';
+import Blobs from '@/components/Blobs';
 import ChatBox from '@/components/ChatBox';
 import {
   AppShell,
   Burger,
   Button,
-  Center,
   Flex,
   Stack,
   Title,
+  ScrollArea,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
@@ -48,34 +48,43 @@ export default function Home() {
         bg="soft-lime.2"
         style={{
           backdropFilter: 'blur(1px)',
+          overflow: 'hidden',
         }}
       >
-        <BlobsBg />
-        <Stack justify="center" align="center" mx="auto" maw={480} mih="100dvh">
-          <Stack align="center" gap={0}>
-            <Image
-              src="/logo-full.png"
-              alt="Cozy Chat"
-              width={256}
-              height={256}
-            />
-            <Title c="navy-steel.9" fz={28}>
-              放輕鬆，隨便聊
-            </Title>
-            <Button
-              px={12}
-              mt={64}
-              h={64}
-              radius="lg"
-              color="navy-steel.9"
-              fz={36}
-              fw={400}
-            >
-              開始聊天
-            </Button>
+        <Blobs />
+        <ScrollArea h="100dvh" scrollbarSize={8}>
+          <Stack
+            justify="center"
+            align="center"
+            mx="auto"
+            maw={480}
+            mih="100dvh"
+          >
+            <Stack align="center" gap={0}>
+              <Image
+                src="/logo-full.png"
+                alt="Cozy Chat"
+                width={256}
+                height={256}
+              />
+              <Title c="navy-steel.9" fz={28}>
+                放輕鬆，隨便聊
+              </Title>
+              <Button
+                px={12}
+                mt={64}
+                h={64}
+                radius="lg"
+                color="navy-steel.9"
+                fz={36}
+                fw={400}
+              >
+                開始聊天
+              </Button>
+            </Stack>
+            <ChatBox />
           </Stack>
-          <ChatBox />
-        </Stack>
+        </ScrollArea>
       </AppShell.Main>
     </AppShell>
   );

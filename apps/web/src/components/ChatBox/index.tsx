@@ -30,6 +30,11 @@ export default function ChatBox() {
           message="你好，我是小明，很開心認識你！"
           created_at="2025-01-01 12:00:00"
         />
+        <MessageContent
+          isUser={true}
+          message="你好，我是小明，很開心認識你！"
+          created_at="2025-01-01 12:00:00"
+        />
       </Stack>
     </Stack>
   );

@@ -102,7 +102,7 @@ const Blob = forwardRef<BlobRefType>((_, ref) => {
 
 Blob.displayName = 'Blob';
 
-export default function BlobsBg() {
+export default function Blobs() {
   const blobRefs = useRef<(BlobRefType | null)[]>(
     Array.from({ length: BLOB_COUNT }, () => null)
   );
