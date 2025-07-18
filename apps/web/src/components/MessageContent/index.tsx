@@ -1,16 +1,23 @@
 import { Flex, Stack, Text, alpha } from '@mantine/core';
+import { Device } from '@packages/lib';
 
-interface MessageContentProps {
-  isUser: boolean;
+const fake_user_id = '123';
+
+export type MessageContentData = {
+  id: string;
+  user_id: string;
+  device: keyof typeof Device;
   message: string;
   created_at: string;
+};
+
+export interface MessageContent {
+  data: MessageContentData;
 }
 
-export default function MessageContent({
-  isUser,
-  message,
-  created_at,
-}: MessageContentProps) {
+export default function MessageContent({ data }: MessageContent) {
+  const { user_id, device, message, created_at } = data;
+  const isUser = user_id === fake_user_id;
   const justify = isUser ? 'end' : 'start';
 
   return (
@@ -38,7 +45,7 @@ export default function MessageContent({
         ta={isUser ? 'right' : 'left'}
         style={{ order: isUser ? -1 : 1 }}
       >
-        <Text size="xs">行動裝置</Text>
+        <Text size="xs">{Device[device]}</Text>
         <Text size="xs">{created_at}</Text>
       </Stack>
     </Flex>
