@@ -10,12 +10,16 @@ import {
   Stack,
   Title,
   ScrollArea,
+  Text,
+  Center,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
+import { useState } from 'react';
 
 export default function Home() {
   const [opened, { toggle }] = useDisclosure();
+  const [isMatched, setIsMatched] = useState(false);
 
   return (
     <AppShell
@@ -67,22 +71,23 @@ export default function Home() {
                 width={256}
                 height={256}
               />
-              <Title c="navy-steel.9" fz={28}>
+              <Title order={2} c="navy-steel.9" fz={28}>
                 放輕鬆，隨便聊
               </Title>
               <Button
+                display={isMatched ? 'none' : 'block'}
                 px={12}
                 mt={64}
                 h={64}
                 radius="lg"
                 color="navy-steel.9"
                 fz={36}
-                fw={400}
+                onClick={() => setIsMatched(true)}
               >
                 開始聊天
               </Button>
             </Stack>
-            <ChatBox />
+            {isMatched && <ChatBox />}
           </Stack>
         </ScrollArea>
       </AppShell.Main>

@@ -1,4 +1,4 @@
-import { Box, Stack, alpha } from '@mantine/core';
+import { Stack, alpha } from '@mantine/core';
 import { Text } from '@mantine/core';
 import MessageContent from '../MessageContent';
 
