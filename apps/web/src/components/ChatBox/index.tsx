@@ -1,4 +1,4 @@
-import { Stack, alpha } from '@mantine/core';
+import { Button, Flex, Input, Stack, alpha } from '@mantine/core';
 import { Text } from '@mantine/core';
 import MessageContent from '../MessageContent/index';
 
@@ -49,28 +49,50 @@ const messages: MessageContentData[] = [
   },
 ];
 
-export default function ChatBox() {
+export default function ChatBox({ onLeaveChat }: { onLeaveChat: () => void }) {
   return (
-    <Stack
-      align="center"
-      mt={32}
-      p={32}
-      bdrs="lg"
-      bg={alpha('var(--mantine-color-moss-green-2)', 0.4)}
-      w="100%"
-      h="100%"
-      style={{
-        boxShadow: '0 0 8px 0 rgba(0, 0, 0, 0.1)',
-      }}
-    >
-      <Text>配對成功！</Text>
-      <Text mb={32}>開始聊天吧！</Text>
+    <>
+      <Stack
+        align="center"
+        mt={60}
+        p={32}
+        bg={alpha('var(--mantine-color-moss-green-4)', 0.8)}
+        w="100%"
+        h="100%"
+        style={{
+          boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.1)',
+          borderRadius: '16px 16px 0 0',
+        }}
+      >
+        <Text>配對成功！</Text>
+        <Text mb={32}>開始聊天吧！</Text>
 
-      <Stack w="100%" h="100%" gap={32}>
-        {messages.map((message: MessageContentData) => (
-          <MessageContent key={message.id} data={message} />
-        ))}
+        <Stack w="100%" h="100%" gap={32}>
+          {messages.map((message: MessageContentData) => (
+            <MessageContent key={message.id} data={message} />
+          ))}
+        </Stack>
       </Stack>
-    </Stack>
+      <Flex
+        pos="sticky"
+        bottom={0}
+        align="center"
+        gap={4}
+        bg="soft-lime.0"
+        p={8}
+        w="100%"
+      >
+        <Button variant="subtle" px={4} c="moss-green.9" onClick={onLeaveChat}>
+          離開
+        </Button>
+        <Input
+          flex={1}
+          rightSection={<Input.ClearButton />}
+          rightSectionPointerEvents="auto"
+          rightSectionWidth="auto"
+        />
+        <Button px={12}>送出</Button>
+      </Flex>
+    </>
   );
 }

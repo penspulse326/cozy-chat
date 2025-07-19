@@ -10,8 +10,6 @@ import {
   Stack,
   Title,
   ScrollArea,
-  Text,
-  Center,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
@@ -19,7 +17,15 @@ import { useState } from 'react';
 
 export default function Home() {
   const [opened, { toggle }] = useDisclosure();
-  const [isMatched, setIsMatched] = useState(false);
+  const [isMatched, setIsMatched] = useState(true);
+
+  function handleStartChat() {
+    setIsMatched(true);
+  }
+
+  function handleLeaveChat() {
+    setIsMatched(false);
+  }
 
   return (
     <AppShell
@@ -60,6 +66,7 @@ export default function Home() {
           <Stack
             justify="center"
             align="center"
+            gap={0}
             mx="auto"
             maw={480}
             mih="100dvh"
@@ -74,6 +81,11 @@ export default function Home() {
               <Title order={2} c="navy-steel.9" fz={28}>
                 放輕鬆，隨便聊
               </Title>
+            </Stack>
+
+            {isMatched ? (
+              <ChatBox onLeaveChat={handleLeaveChat} />
+            ) : (
               <Button
                 display={isMatched ? 'none' : 'block'}
                 px={12}
@@ -86,8 +98,7 @@ export default function Home() {
               >
                 開始聊天
               </Button>
-            </Stack>
-            {isMatched && <ChatBox />}
+            )}
           </Stack>
         </ScrollArea>
       </AppShell.Main>

@@ -11,11 +11,11 @@ export type MessageContentData = {
   created_at: string;
 };
 
-export interface MessageContent {
+interface MessageContentProps {
   data: MessageContentData;
 }
 
-export default function MessageContent({ data }: MessageContent) {
+export default function MessageContent({ data }: MessageContentProps) {
   const { user_id, device, message, created_at } = data;
   const isUser = user_id === fake_user_id;
   const justify = isUser ? 'end' : 'start';
