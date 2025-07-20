@@ -1,7 +1,6 @@
 import { Flex, Stack, Text, alpha } from '@mantine/core';
 import { Device } from '@packages/lib';
-
-const fake_user_id = '123';
+import styles from './styles.module.css';
 
 export type MessageContentData = {
   id: string;
@@ -13,37 +12,23 @@ export type MessageContentData = {
 
 interface MessageContentProps {
   data: MessageContentData;
+  isUser: boolean;
 }
 
-export default function MessageContent({ data }: MessageContentProps) {
-  const { user_id, device, message, created_at } = data;
-  const isUser = user_id === fake_user_id;
-  const justify = isUser ? 'end' : 'start';
+export default function MessageContent({ data, isUser }: MessageContentProps) {
+  const { device, message, created_at } = data;
+  const justify = isUser ? styles.wrapperEnd : styles.wrapperStart;
 
   return (
-    <Flex justify={justify} align="end">
+    <Flex className={`${styles.wrapper} ${justify}`}>
       <Flex
-        p="xs"
-        maw={360}
-        bdrs="md"
+        className={styles.messageBox}
         bg={alpha('var(--mantine-color-soft-lime-0)', 0.5)}
       >
-        <Text
-          style={{
-            wordBreak: 'break-word',
-            overflowWrap: 'break-word',
-            whiteSpace: 'pre-wrap',
-          }}
-        >
-          {message}
-        </Text>
+        <Text className={styles.messageText}>{message}</Text>
       </Flex>
       <Stack
-        gap={0}
-        mx="8"
-        mb="4"
-        ta={isUser ? 'right' : 'left'}
-        style={{ order: isUser ? -1 : 1 }}
+        className={`${styles.infoStack} ${isUser ? styles.infoStackRight : styles.infoStackLeft}`}
       >
         <Text size="xs">{Device[device]}</Text>
         <Text size="xs">{created_at}</Text>
