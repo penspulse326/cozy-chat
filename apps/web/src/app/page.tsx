@@ -15,12 +15,17 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import MessageInput from '@/components/MessageInput';
 import styles from './styles.module.css';
 
 export default function Home() {
   const [opened, { toggle }] = useDisclosure();
+  const viewport = useRef<HTMLDivElement>(null);
+
+  const [matchingStatus, setMatchingStatus] =
+    useState<MatchingStatus>('standby');
+
   const [messages, setMessages] = useState<MessageContentData[]>([
     {
       id: '1',
@@ -65,11 +70,23 @@ export default function Home() {
       created_at: '2025-01-01 12:03:00',
     },
   ]);
-  const [matchingStatus, setMatchingStatus] =
-    useState<MatchingStatus>('standby');
 
-  function handleStartChat() {
-    setMatchingStatus('matched');
+  function handleScrollToBottom() {
+    viewport.current?.scrollTo({
+      top: viewport.current.scrollHeight,
+      behavior: 'smooth',
+    });
+  }
+
+  async function handleStartChat() {
+    setMatchingStatus('waiting');
+
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        setMatchingStatus('matched');
+        resolve(true);
+      }, 1000)
+    );
   }
 
   function handleLeaveChat() {
@@ -87,7 +104,12 @@ export default function Home() {
         created_at: new Date().toISOString(),
       },
     ]);
+    handleScrollToBottom();
   }
+
+  useEffect(() => {
+    handleScrollToBottom();
+  }, [matchingStatus, messages]);
 
   return (
     <AppShell
@@ -107,7 +129,6 @@ export default function Home() {
             root: styles.burger,
             burger: styles['mantine-Burger-burger'],
           }}
-          size={36}
         />
       </AppShell.Header>
 
@@ -118,7 +139,13 @@ export default function Home() {
       </AppShell.Navbar>
 
       <AppShell.Main className={styles.appShellMain}>
-        <ScrollArea type="auto" scrollbarSize={8} className={styles.scrollArea}>
+        <ScrollArea
+          type="auto"
+          scrollbarSize={8}
+          className={styles.scrollArea}
+          viewportRef={viewport}
+        >
+          <Blobs />
           <Stack mx="auto" maw={480} className={styles.outerStack}>
             <Stack className={styles.innerStack}>
               <Image

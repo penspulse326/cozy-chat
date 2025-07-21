@@ -6,7 +6,7 @@
 }
 
 .burger {
-  font-size: 36px;
+  --burger-size: 36px;
   margin: 16px;
 }
 
@@ -56,12 +56,17 @@
 
 .button {
   position: absolute;
-  bottom: 10%;
+  bottom: 15%;
   margin-top: 64px;
   padding-inline: 12px;
   height: 64px;
   border-radius: var(--mantine-radius-lg);
-  color: var(--mantine-color-soft-lime-2);
+  color: white;
   background-color: var(--mantine-color-navy-steel-9);
   font-size: 36px;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: var(--mantine-color-navy-steel-8);
 }

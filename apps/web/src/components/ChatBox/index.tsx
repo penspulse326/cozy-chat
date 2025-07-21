@@ -24,7 +24,7 @@ export default function ChatBox({
     <>
       <Stack
         className={styles.chatBoxWrapper}
-        bg={alpha('var(--mantine-color-moss-green-4)', 0.4)}
+        bg={alpha('var(--mantine-color-moss-green-2)', 0.4)}
       >
         {matchingStatus === 'waiting' ? (
           <Text>配對中...</Text>
