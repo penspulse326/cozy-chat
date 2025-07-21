@@ -5,7 +5,7 @@ import {
   MantineProvider,
   mantineHtmlProps,
 } from '@mantine/core';
-import { theme } from './theme';
+import { theme } from '../theme';
 
 const notoSansTC = Noto_Sans_TC({
   weight: ['400', '500', '700'],

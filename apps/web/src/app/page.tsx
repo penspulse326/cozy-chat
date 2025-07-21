@@ -17,6 +17,7 @@ import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
 import { useState } from 'react';
 import MessageInput from '@/components/MessageInput';
+import styles from './styles.module.css';
 
 export default function Home() {
   const [opened, { toggle }] = useDisclosure();
@@ -98,68 +99,54 @@ export default function Home() {
       padding="md"
       layout="alt"
     >
-      <AppShell.Header bg="transparent" bd="none">
+      <AppShell.Header className={styles.appShellHeader}>
         <Burger
           opened={opened}
           onClick={toggle}
-          color="navy-steel.9"
+          classNames={{
+            root: styles.burger,
+            burger: styles['mantine-Burger-burger'],
+          }}
           size={36}
-          m={16}
         />
       </AppShell.Header>
 
-      <AppShell.Navbar p="md">
-        <Flex justify="space-between" align="center">
+      <AppShell.Navbar className={styles.appShellNavbar}>
+        <Flex className={styles.flexContainer}>
           <div>Cozy Chat</div>
         </Flex>
       </AppShell.Navbar>
 
-      <AppShell.Main
-        p={0}
-        bg="soft-lime.2"
-        style={{
-          backdropFilter: 'blur(1px)',
-          overflow: 'hidden',
-        }}
-      >
-        {/* <Blobs /> */}
-        <Stack mx="auto" maw={480}>
-          <Stack justify="center" align="center" gap={0} flex={1} mih="100dvh">
-            <Image
-              src="/logo-full.png"
-              alt="Cozy Chat"
-              width={256}
-              height={256}
-            />
-            <Title order={2} c="navy-steel.9" fz={28}>
-              放輕鬆，隨便聊
-            </Title>
-            {matchingStatus === 'standby' && (
-              <Button
-                pos="absolute"
-                bottom="10%"
-                mt={64}
-                px={12}
-                h={64}
-                radius="lg"
-                color="navy-steel.9"
-                fz={36}
-                onClick={handleStartChat}
-              >
-                開始聊天
-              </Button>
+      <AppShell.Main className={styles.appShellMain}>
+        <ScrollArea type="auto" scrollbarSize={8} className={styles.scrollArea}>
+          <Stack mx="auto" maw={480} className={styles.outerStack}>
+            <Stack className={styles.innerStack}>
+              <Image
+                src="/logo-full.png"
+                alt="Cozy Chat"
+                width={256}
+                height={256}
+              />
+              <Title order={2} c="navy-steel.9" className={styles.title}>
+                放輕鬆，隨便聊
+              </Title>
+              {matchingStatus === 'standby' && (
+                <Button onClick={handleStartChat} className={styles.button}>
+                  開始聊天
+                </Button>
+              )}
+            </Stack>
+
+            {matchingStatus !== 'standby' && (
+              <ChatBox
+                userId="123"
+                messages={messages}
+                matchingStatus={matchingStatus}
+                onLeaveChat={handleLeaveChat}
+              />
             )}
           </Stack>
-
-          {matchingStatus !== 'standby' && (
-            <ChatBox
-              userId="123"
-              messages={messages}
-              matchingStatus={matchingStatus}
-              onLeaveChat={handleLeaveChat}
-            />
-          )}
-        </Stack>
+        </ScrollArea>
       </AppShell.Main>
 
       <MessageInput
