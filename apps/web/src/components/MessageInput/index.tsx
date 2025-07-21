@@ -1,7 +1,7 @@
-import { Button, Flex, Input } from '@mantine/core';
-import styles from './styles.module.css';
 import { MatchingStatus } from '@/types';
+import { Button, Flex, Input } from '@mantine/core';
 import { useState } from 'react';
+import styles from './styles.module.css';
 
 interface MessageInputProps {
   matchingStatus: MatchingStatus;

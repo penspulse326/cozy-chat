@@ -1,10 +1,10 @@
-import '@mantine/core/styles.css';
-import { Noto_Sans_TC } from 'next/font/google';
 import {
   ColorSchemeScript,
   MantineProvider,
   mantineHtmlProps,
 } from '@mantine/core';
+import '@mantine/core/styles.css';
+import { Noto_Sans_TC } from 'next/font/google';
 import { theme } from '../theme';
 
 const notoSansTC = Noto_Sans_TC({

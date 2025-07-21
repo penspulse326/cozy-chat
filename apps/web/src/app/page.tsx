@@ -3,20 +3,20 @@
 import Blobs from '@/components/Blobs';
 import ChatBox from '@/components/ChatBox';
 import { MessageContentData } from '@/components/MessageContent';
+import MessageInput from '@/components/MessageInput';
 import { MatchingStatus } from '@/types';
 import {
   AppShell,
   Burger,
   Button,
   Flex,
+  ScrollArea,
   Stack,
   Title,
-  ScrollArea,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Image from 'next/image';
-import { useState, useRef, useEffect } from 'react';
-import MessageInput from '@/components/MessageInput';
+import { useEffect, useRef, useState } from 'react';
 import styles from './styles.module.css';
 
 export default function Home() {

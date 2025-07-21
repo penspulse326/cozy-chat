@@ -1,4 +1,4 @@
-import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import styles from './styles.module.css';
 
 const MIN_SPEED = 0.5;
@@ -95,7 +95,7 @@ const Blob = forwardRef<BlobRefType>((_, ref) => {
   // 初始化泡泡位置
   useEffect(() => {
     initBlob();
-  }, [blobRef.current]);
+  }, []);
 
   return <div ref={blobRef} />;
 });

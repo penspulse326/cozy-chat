@@ -1,11 +1,9 @@
-import { Box, Stack, alpha } from '@mantine/core';
-import { Text } from '@mantine/core';
+import { Stack, Text, alpha } from '@mantine/core';
 import MessageContent from '../MessageContent';
-import MessageInput from '../MessageInput';
 import styles from './styles.module.css';
 
-import type { MessageContentData } from '../MessageContent';
 import { MatchingStatus } from '@/types';
+import type { MessageContentData } from '../MessageContent';
 
 interface ChatBoxProps {
   userId: string;
@@ -18,7 +16,6 @@ export default function ChatBox({
   userId,
   messages,
   matchingStatus,
-  onLeaveChat,
 }: ChatBoxProps) {
   return (
     <>
