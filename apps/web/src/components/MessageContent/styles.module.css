@@ -1,0 +1,47 @@
+.wrapper {
+  display: flex;
+  align-items: flex-end;
+}
+
+.wrapperEnd {
+  justify-content: flex-end;
+}
+
+.wrapperStart {
+  justify-content: flex-start;
+}
+
+.messageBox {
+  padding: var(--mantine-spacing-xs);
+  max-width: 300px;
+  border-radius: var(--mantine-radius-md);
+
+  @media (max-width: 768px) {
+    max-width: 240px;
+  }
+}
+
+.messageText {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.infoStack {
+  margin-left: 8px;
+  margin-right: 8px;
+  margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.infoStackRight {
+  text-align: right;
+  order: -1;
+}
+
+.infoStackLeft {
+  text-align: left;
+  order: 1;
+}

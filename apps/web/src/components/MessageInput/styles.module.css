@@ -1,0 +1,38 @@
+.wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--mantine-color-soft-lime-0);
+  padding: 16px 12px 12px 8px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  border-radius: 16px 16px 0 0;
+
+  @media (max-width: 768px) {
+    margin: 0 auto;
+    max-width: 100%;
+  }
+}
+
+.leaveButtonRoot {
+  padding-left: 4px;
+  padding-right: 4px;
+  color: var(--mantine-color-moss-green-9);
+  border-radius: 16px;
+}
+
+.inputWrapper {
+  flex: 1;
+  border-radius: 12px;
+}
+
+.sendButtonRoot {
+  padding-left: 12px;
+  padding-right: 12px;
+  border-radius: 12px;
+}

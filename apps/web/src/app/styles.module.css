@@ -1,0 +1,72 @@
+.appShellMain {
+  padding: 0;
+  background-color: var(--mantine-color-soft-lime-2);
+  backdrop-filter: blur(1px);
+  overflow: hidden;
+}
+
+.burger {
+  --burger-size: 36px;
+  margin: 16px;
+}
+
+.mantine-Burger-burger,
+.mantine-Burger-burger::after,
+.mantine-Burger-burger::before {
+  height: 4px;
+  border-radius: 20px;
+  background: var(--mantine-color-navy-steel-9);
+}
+
+.appShellHeader {
+  background-color: transparent;
+  border: none;
+}
+
+.appShellNavbar {
+  padding: var(--mantine-spacing-md);
+}
+
+.flexContainer {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scrollArea {
+  height: 100dvh;
+}
+
+.outerStack {
+  margin-inline: auto;
+  max-width: 480px;
+}
+
+.innerStack {
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  min-height: 100dvh;
+}
+
+.title {
+  color: var(--mantine-color-navy-steel-9);
+  font-size: 28px;
+}
+
+.button {
+  position: absolute;
+  bottom: 15%;
+  margin-top: 64px;
+  padding-inline: 12px;
+  height: 64px;
+  border-radius: var(--mantine-radius-lg);
+  color: white;
+  background-color: var(--mantine-color-navy-steel-9);
+  font-size: 36px;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: var(--mantine-color-navy-steel-8);
+}
