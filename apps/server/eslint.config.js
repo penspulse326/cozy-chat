@@ -1,6 +1,5 @@
 // @ts-check
-
-import { baseConfig } from '../../eslint.config.js';
+import baseConfig from '../../eslint.config.base.js';
 import tseslint from 'typescript-eslint';
 import vitest from '@vitest/eslint-plugin';
 
