@@ -97,6 +97,12 @@
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
       });
+
+      socket.on('match:fail', () => {
+        const item = document.createElement('li');
+        item.textContent = '配對失敗';
+        messages.appendChild(item);
+      });
     </script>
   </body>
 </html>

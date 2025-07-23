@@ -2,7 +2,6 @@
   padding: 0;
   background-color: var(--mantine-color-soft-lime-2);
   backdrop-filter: blur(1px);
-  overflow: hidden;
 }
 
 .burger {
