@@ -1,4 +1,4 @@
-import { ChatRoom } from '@packages/lib';
+import { ChatRoom, User } from '@packages/lib';
 import mongoose, { Schema } from 'mongoose';
 
 const ChatRoomSchema: Schema = new Schema(
@@ -8,13 +8,20 @@ const ChatRoomSchema: Schema = new Schema(
       required: true,
       unique: true,
     },
-    users: [
-      {
-        type: String,
-        ref: 'User',
-        required: true,
+    users: {
+      type: [
+        {
+          type: String,
+          ref: 'MatchedUser',
+          required: true,
+        },
+      ],
+      validate: {
+        validator: (v: User[]) => v.length <= 2,
+        message: (props: any) =>
+          `Chat room cannot have more than 2 users, but got ${props.value.length}.`,
       },
-    ],
+    },
   },
   {
     _id: false,
@@ -22,6 +29,7 @@ const ChatRoomSchema: Schema = new Schema(
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     },
+    collection: 'chat_rooms',
   }
 );
 
