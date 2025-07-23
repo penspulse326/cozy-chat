@@ -4,8 +4,9 @@ export const CHAT_EVENT = {
   MATCH_CANCEL: 'match:cancel',
   MATCH_FAIL: 'match:fail',
 
-  MESSAGE_SEND: 'message:send',
-  MESSAGE_RECEIVE: 'message:receive',
+  CHAT_SEND: 'chat:send',
+  CHAT_RECEIVE: 'chat:receive',
+  CHAT_LOAD: 'chat:load',
 };
 
 export type ChatMessage = {

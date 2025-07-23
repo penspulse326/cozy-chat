@@ -19,7 +19,7 @@ class SocketServerService {
       this.handleMatchRequest(socket.id);
     });
 
-    socket.on(CHAT_EVENT.MESSAGE_SEND, ({ message, roomId }) => {
+    socket.on(CHAT_EVENT.CHAT_SEND, ({ message, roomId }) => {
       this.sendMessageToRoom(message, roomId);
     });
 
@@ -79,7 +79,7 @@ class SocketServerService {
   }
 
   private sendMessageToRoom(message: string, roomId: string) {
-    this.io.to(roomId).emit(CHAT_EVENT.MESSAGE_RECEIVE, message);
+    this.io.to(roomId).emit(CHAT_EVENT.CHAT_RECEIVE, message);
   }
 
   private onClientDisconnect(socket: Socket) {
