@@ -18,8 +18,15 @@ app.get('/', (_, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-connectDB();
+(async function startServer() {
+  try {
+    await connectDB();
 
-server.listen(port, () => {
-  console.log(`listening on *:${port}`);
-});
+    server.listen(port, () => {
+      console.log(`server 啟動成功: *:${port}`);
+    });
+  } catch (error) {
+    console.error('server 啟動失敗:', error);
+    process.exit(1);
+  }
+})();
