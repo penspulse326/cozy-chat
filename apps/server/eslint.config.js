@@ -1,8 +1,7 @@
 // @ts-check
-
-import { baseConfig } from '../../eslint.config.js';
-import tseslint from 'typescript-eslint';
 import vitest from '@vitest/eslint-plugin';
+import tseslint from 'typescript-eslint';
+import baseConfig from '../../eslint.config.base.js';
 
 export default tseslint.config(
   // 忽略不需要檢查的檔案
@@ -10,14 +9,6 @@ export default tseslint.config(
     ignores: ['dist/**', 'coverage/**', '*.config.js', '*.config.mjs'],
   },
   ...baseConfig,
-  {
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
   {
@@ -28,6 +19,7 @@ export default tseslint.config(
     rules: {
       ...vitest.configs.recommended.rules,
       '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/consistent-type-definitions': 'off',
     },
   }
 );
