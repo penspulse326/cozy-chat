@@ -29,10 +29,12 @@
   "homepage": "https://github.com/penspulse326/express-ts-template#readme",
   "description": "",
   "dependencies": {
+    "@packages/lib": "workspace:*",
     "express": "^5.1.0",
-    "@packages/lib": "workspace:*"
+    "mongoose": "^8.16.4"
   },
   "devDependencies": {
-    "@types/express": "^5.0.2"
+    "@types/express": "^5.0.2",
+    "@types/mongoose": "^5.11.97"
   }
 }
