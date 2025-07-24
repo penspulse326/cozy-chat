@@ -1,35 +1,33 @@
-import { ChatRoom, User } from '@packages/lib';
-import mongoose, { HydratedDocument, Schema } from 'mongoose';
+import { ChatRoom } from '@packages/lib';
+import mongoose, { Schema } from 'mongoose';
+
+import type { User } from '@packages/lib';
+import type { HydratedDocument } from 'mongoose';
 
 const ChatRoomSchema: Schema = new Schema(
   {
     _id: {
-      type: String,
       required: true,
+      type: String,
       unique: true,
     },
     users: {
       type: [
         {
-          type: String,
           ref: 'MatchedUser',
           required: true,
+          type: String,
         },
       ],
-      validate: {
-        validator: (v: User[]) => v.length <= 2,
-        message: (props: any) =>
-          `Chat room cannot have more than 2 users, but got ${props.value.length}.`,
-      },
     },
   },
   {
     _id: false,
+    collection: 'chat_rooms',
     timestamps: {
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     },
-    collection: 'chat_rooms',
   }
 );
 
@@ -37,11 +35,14 @@ ChatRoomSchema.pre(
   'save',
   async function (this: HydratedDocument<ChatRoom>, next) {
     if (this.isNew || this.isModified('users')) {
-      const MatchedUser = mongoose.model('MatchedUser');
+      const MatchedUser = mongoose.model<User>('MatchedUser');
+
       for (const userId of this.users) {
         const userExists = await MatchedUser.findById(userId);
+
         if (!userExists) {
-          return next(new Error(`MatchedUser with ID ${userId} not found.`));
+          next(new Error(`${JSON.stringify(this)} 資料處理失敗`));
+          return;
         }
       }
     }

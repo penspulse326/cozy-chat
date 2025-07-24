@@ -1,6 +1,7 @@
-import { Server, Socket } from 'socket.io';
-
 import { CHAT_EVENT } from '@/types';
+
+import type { ChatMessage } from '@/types';
+import type { Server, Socket } from 'socket.io';
 
 class SocketServerService {
   private waitingUsers: string[] = [];
@@ -9,42 +10,6 @@ class SocketServerService {
     io.on('connection', (socket: Socket) => {
       this.onClientConnect(socket);
     });
-  }
-
-  private onClientConnect(socket: Socket) {
-    const newUserId = socket.id;
-    console.log('新的用戶連線:', newUserId);
-
-    socket.on(CHAT_EVENT.MATCH_START, () => {
-      this.handleMatchRequest(socket.id);
-    });
-
-    socket.on(CHAT_EVENT.CHAT_SEND, ({ message, roomId }) => {
-      this.sendMessageToRoom(message, roomId);
-    });
-
-    socket.on('disconnect', () => {
-      this.onClientDisconnect(socket);
-    });
-  }
-
-  private handleMatchRequest(newUserId: string) {
-    // 無人等待時加入等待池
-    if (this.waitingUsers.length === 0) {
-      this.addWaitingUser(newUserId);
-      return;
-    }
-
-    // 從等待池中移除用戶
-    const peerUserId = this.waitingUsers.shift();
-
-    if (!peerUserId) {
-      this.addWaitingUser(newUserId);
-      return;
-    }
-
-    // 配對成功
-    this.processMatchSuccess(newUserId, peerUserId);
   }
 
   private addWaitingUser(newUserId: string) {
@@ -63,6 +28,47 @@ class SocketServerService {
     }, 3000);
   }
 
+  private async handleMatchRequest(newUserId: string) {
+    // 無人等待時加入等待池
+    if (this.waitingUsers.length === 0) {
+      this.addWaitingUser(newUserId);
+      return;
+    }
+
+    // 從等待池中移除用戶
+    const peerUserId = this.waitingUsers.shift();
+
+    if (!peerUserId) {
+      this.addWaitingUser(newUserId);
+      return;
+    }
+
+    // 配對成功
+    await this.processMatchSuccess(newUserId, peerUserId);
+  }
+
+  private onClientConnect(socket: Socket) {
+    const newUserId = socket.id;
+    console.log('新的用戶連線:', newUserId);
+
+    socket.on(CHAT_EVENT.MATCH_START, async () => {
+      await this.handleMatchRequest(socket.id);
+    });
+
+    socket.on(CHAT_EVENT.CHAT_SEND, ({ message, roomId }: ChatMessage) => {
+      this.sendMessageToRoom(message, roomId);
+    });
+
+    socket.on('disconnect', () => {
+      this.onClientDisconnect(socket);
+    });
+  }
+
+  private onClientDisconnect(socket: Socket) {
+    const userId = socket.id;
+    console.log('用戶斷開連線:', userId);
+  }
+
   private async processMatchSuccess(newUserId: string, peerUserId: string) {
     const roomId = `room-${peerUserId}-${newUserId}`;
 
@@ -71,8 +77,8 @@ class SocketServerService {
 
     // 通知雙方配對成功，附帶 roomId
     this.io.to(roomId).emit(CHAT_EVENT.MATCH_SUCCESS, {
-      userIds: [newUserId, peerUserId],
       roomId,
+      userIds: [newUserId, peerUserId],
     });
 
     console.log(`配對成功: ${peerUserId} <-> ${newUserId} 房間 ID: ${roomId}`);
@@ -80,11 +86,6 @@ class SocketServerService {
 
   private sendMessageToRoom(message: string, roomId: string) {
     this.io.to(roomId).emit(CHAT_EVENT.CHAT_RECEIVE, message);
-  }
-
-  private onClientDisconnect(socket: Socket) {
-    const userId = socket.id;
-    console.log('用戶斷開連線:', userId);
   }
 }
 

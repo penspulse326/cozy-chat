@@ -1,41 +1,44 @@
-import { Device, User, UserStatus } from '@packages/lib';
-import mongoose, { HydratedDocument, Schema } from 'mongoose';
+import { Device, UserStatus } from '@packages/lib';
+import mongoose, { Schema } from 'mongoose';
+
+import type { ChatRoom, User } from '@packages/lib';
+import type { HydratedDocument } from 'mongoose';
 
 const MatchedUserSchema: Schema = new Schema(
   {
     _id: {
-      type: String,
       required: true,
+      type: String,
       unique: true,
     },
-    room_id: {
-      type: String,
-      ref: 'ChatRoom',
-      required: false,
-    },
     device: {
-      type: String,
       enum: Object.keys(Device),
       required: true,
-    },
-    status: {
       type: String,
-      enum: Object.values(UserStatus),
-      required: true,
     },
     last_active_at: {
-      type: Date,
       default: Date.now,
       required: true,
+      type: Date,
+    },
+    room_id: {
+      ref: 'ChatRoom',
+      required: false,
+      type: String,
+    },
+    status: {
+      enum: Object.values(UserStatus),
+      required: true,
+      type: String,
     },
   },
   {
     _id: false,
+    collection: 'matched_users',
     timestamps: {
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     },
-    collection: 'matched_users',
   }
 );
 
@@ -44,10 +47,12 @@ MatchedUserSchema.pre(
   async function (this: HydratedDocument<User>, next) {
     if (this.isNew || this.isModified('room_id')) {
       if (this.room_id) {
-        const ChatRoom = mongoose.model('ChatRoom');
+        const ChatRoom = mongoose.model<ChatRoom>('ChatRoom');
         const roomExists = await ChatRoom.findById(this.room_id);
+
         if (!roomExists) {
-          return next(new Error(`ChatRoom with ID ${this.room_id} not found.`));
+          next(new Error(`${JSON.stringify(this)} 資料處理失敗`));
+          return;
         }
       }
     }

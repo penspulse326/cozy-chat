@@ -1,3 +1,3 @@
-export * from './data';
+export type * from './data';
 export * from './maps';
-export * from './models';
+export type * from './models';

@@ -1,16 +1,16 @@
-import { Device, UserStatus } from './maps';
+import type { Device, UserStatus } from './maps';
 
 export interface ChatRoom {
   _id: string;
-  users: string[];
   created_at: Date;
+  users: string[];
 }
 
 export interface User {
   _id: string;
-  room_id: string;
-  device: keyof typeof Device;
-  status: keyof typeof UserStatus;
-  last_active_at: Date;
   created_at: Date;
+  device: keyof typeof Device;
+  last_active_at: Date;
+  room_id: string;
+  status: keyof typeof UserStatus;
 }

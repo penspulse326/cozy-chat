@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 async function connectDB() {
   try {
     await mongoose.connect(
-      process.env.MONGODB_URI || 'mongodb://localhost:27017/cozychat'
+      process.env.MONGODB_URI ?? 'mongodb://localhost:27017/cozychat'
     );
     console.log('DB 連線成功！');
   } catch (error) {
