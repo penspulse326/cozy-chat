@@ -1,5 +1,5 @@
 import { ChatRoom, User } from '@packages/lib';
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { HydratedDocument, Schema } from 'mongoose';
 
 const ChatRoomSchema: Schema = new Schema(
   {
@@ -30,6 +30,22 @@ const ChatRoomSchema: Schema = new Schema(
       updatedAt: 'updated_at',
     },
     collection: 'chat_rooms',
+  }
+);
+
+ChatRoomSchema.pre(
+  'save',
+  async function (this: HydratedDocument<ChatRoom>, next) {
+    if (this.isNew || this.isModified('users')) {
+      const MatchedUser = mongoose.model('MatchedUser');
+      for (const userId of this.users) {
+        const userExists = await MatchedUser.findById(userId);
+        if (!userExists) {
+          return next(new Error(`MatchedUser with ID ${userId} not found.`));
+        }
+      }
+    }
+    next();
   }
 );
 
