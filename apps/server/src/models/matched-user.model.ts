@@ -4,7 +4,7 @@ import mongoose, { Schema } from 'mongoose';
 import type { ChatRoom, User } from '@packages/lib';
 import type { HydratedDocument } from 'mongoose';
 
-const MatchedUserSchema: Schema = new Schema(
+const MatchedUserSchema = new Schema<User>(
   {
     _id: {
       required: true,
@@ -45,17 +45,22 @@ const MatchedUserSchema: Schema = new Schema(
 MatchedUserSchema.pre(
   'save',
   async function (this: HydratedDocument<User>, next) {
-    if (this.isNew || this.isModified('room_id')) {
-      if (this.room_id) {
-        const ChatRoom = mongoose.model<ChatRoom>('ChatRoom');
-        const roomExists = await ChatRoom.findById(this.room_id);
+    // 非新增且有修改 room_id 時進行檢查
+    if (!this.isNew && this.isModified('room_id')) {
+      if (!this.room_id) {
+        next(new Error('須指定有效的 room_id'));
+        return;
+      }
 
-        if (!roomExists) {
-          next(new Error(`${JSON.stringify(this)} 資料處理失敗`));
-          return;
-        }
+      const ChatRoom = mongoose.model<ChatRoom>('ChatRoom');
+      const roomExists = await ChatRoom.findById(this.room_id);
+
+      if (!roomExists) {
+        next(new Error(`無效的 room_id: ${this.room_id}`));
+        return;
       }
     }
+
     next();
   }
 );

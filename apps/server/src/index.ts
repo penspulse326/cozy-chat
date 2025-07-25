@@ -1,4 +1,3 @@
-import { Device, UserStatus } from '@packages/lib';
 import express from 'express';
 import http from 'http';
 import { dirname } from 'path';
@@ -9,6 +8,9 @@ import { connectDB } from './config/db.config';
 import ChatRoom from './models/chat-room.model';
 import MatchedUser from './models/matched-user.model';
 import SocketServerService from './services/socket-server.service';
+
+import type { User } from '@packages/lib';
+import type { HydratedDocument } from 'mongoose';
 
 const port = process.env.PORT ?? '9001';
 const __filename = fileURLToPath(import.meta.url);
@@ -23,16 +25,25 @@ app.get('/', (_, res) => {
 });
 
 async function addFakeData() {
-  await MatchedUser.create({
-    _id: '1',
-    device: Device.PC,
-    status: UserStatus.ACTIVE,
+  const newUser: HydratedDocument<User> = new MatchedUser({
+    device: 'APP',
+    status: 'active',
   });
 
-  await ChatRoom.create({
+  await newUser.save();
+
+  const newRoom = new ChatRoom({
     _id: '1',
     users: ['1'],
   });
+
+  await newRoom.save();
+  await ChatRoom.create({
+    _id: '1',
+    users: ['999'],
+  });
+
+  console.log('fake data added');
 }
 
 async function startServer() {

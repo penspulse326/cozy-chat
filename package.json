@@ -5,11 +5,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "web:dev": "pnpm lib:dev && pnpm --filter @apps/web dev",
+    "web:dev:app": "pnpm --filter @apps/web dev",
+    "web:dev": "npm-run-all --parallel lib:dev web:dev:app",
     "web:build": "pnpm --filter @apps/web build",
     "web:start": "pnpm --filter @apps/web start",
     "web:lint": "pnpm --filter @apps/web lint",
-    "server:dev": "pnpm lib:dev && pnpm --filter @apps/server dev",
+    "server:dev:app": "pnpm --filter @apps/server dev",
+    "server:dev": "npm-run-all --parallel lib:dev server:dev:app",
     "server:build": "pnpm --filter @apps/server build",
     "server:start": "pnpm --filter @apps/server start",
     "server:lint": "pnpm --filter @apps/server lint",
@@ -55,6 +57,7 @@
     "vitest": "^3.1.4"
   },
   "dependencies": {
+    "npm-run-all": "^4.1.5",
     "socket.io": "^4.8.1"
   }
 }
