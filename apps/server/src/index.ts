@@ -4,9 +4,10 @@ import { dirname } from 'path';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 
-import { AppDataSource } from './config/db.config';
-import userModel from './models/user.model';
-import SocketServerService from './services/socket-server.service';
+import { ObjectId } from 'mongodb';
+import { connectToDB, db, disconnectFromDB } from './config/db.config';
+import UserModel from './models/user.model';
+import SocketServer from './socket';
 
 const port = process.env.PORT ?? '9001';
 const __filename = fileURLToPath(import.meta.url);
@@ -20,31 +21,36 @@ app.get('/', (_, res) => {
 });
 
 async function addFakeData() {
+  const fakeId = new ObjectId().toHexString();
+  const userModel = new UserModel(db);
+  const currentTime = new Date();
   const newUser = await userModel.createUser({
-    _id: 'user-123',
+    _id: fakeId,
     device: 'APP',
-    room_id: 'room-456',
     status: 'ACTIVE',
+    last_active_at: currentTime,
+    created_at: currentTime,
   });
 
   console.log('hello user', newUser);
+
+  const user = await userModel.getUserById(fakeId);
+  console.log('find user', user);
 }
 
-async function startServer() {
+async function bootstrap() {
   try {
-    await AppDataSource.connect();
-
-    new SocketServerService(new Server(server));
+    await connectToDB();
+    new SocketServer(new Server(server));
 
     server.listen(port, () => {
       console.log(`Server 啟動成功: *:${port}`);
     });
   } catch (error) {
     console.error('Server 啟動失敗:', error);
+    await disconnectFromDB();
     process.exit(1);
   }
 }
-
-await startServer();
-
+await bootstrap();
 await addFakeData();

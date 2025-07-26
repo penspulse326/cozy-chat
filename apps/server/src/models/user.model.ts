@@ -1,23 +1,26 @@
 import { z } from 'zod';
 
-import { AppDataSource } from '@/config/db.config';
+import type { Collection, Db, InsertOneResult } from 'mongodb';
 
-import type { User } from '@packages/lib/types/models';
-import type { Collection, Db } from 'mongodb';
-
-export const CreateUserSchema = z.object({
-  _id: z.string().min(1),
+const UserSchema = z.object({
+  _id: z.string(),
+  room_id: z.string().optional(),
   device: z.enum(['APP', 'MB', 'PC']),
-  room_id: z.string(),
   status: z.enum(['ACTIVE', 'LEFT']),
-});
-
-export const UpdateUserSchema = z.object({
   last_active_at: z.date(),
-  room_id: z.string(),
-  status: z.enum(['ACTIVE', 'LEFT']),
+  created_at: z.date(),
 });
 
+const CreateUserSchema = UserSchema.omit({
+  room_id: true,
+});
+
+const UpdateUserSchema = UserSchema.omit({
+  device: true,
+  created_at: true,
+});
+
+type User = z.infer<typeof UserSchema>;
 type CreateUserPayload = z.infer<typeof CreateUserSchema>;
 type UpdateUserPayload = z.infer<typeof UpdateUserSchema>;
 
@@ -28,26 +31,22 @@ class UserModel {
     this.users = this.db.collection<User>('users');
   }
 
-  async createUser(user: CreateUserPayload): Promise<User> {
+  async createUser(
+    user: CreateUserPayload
+  ): Promise<null | InsertOneResult<User>> {
     try {
-      const currentTime = new Date();
-      const newUser: User = {
-        _id: user._id,
-        created_at: currentTime,
-        device: user.device,
-        last_active_at: currentTime,
-        room_id: user.room_id,
-        status: user.status,
-      };
-
-      await this.users.insertOne(newUser);
+      const result = await this.users.insertOne(user);
       console.log('新增 User 成功');
-
-      return newUser;
-    } catch (error) {
+      return result;
+    } catch (error: unknown) {
       console.error(error);
-      throw error;
+      return null;
     }
+  }
+
+  async getUserById(_id: string): Promise<User | null> {
+    const user = await this.users.findOne({ _id });
+    return user;
   }
 
   async updateUser(_id: string, payload: UpdateUserPayload): Promise<void> {
@@ -61,11 +60,8 @@ class UserModel {
       console.log('更新 User 成功');
     } catch (error) {
       console.error(error);
-      throw error;
     }
   }
 }
 
-const userModel = new UserModel(AppDataSource.getDb());
-
-export default userModel;
+export default UserModel;

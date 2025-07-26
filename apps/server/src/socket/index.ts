@@ -3,13 +3,35 @@ import { CHAT_EVENT } from '@/types';
 import type { ChatMessage } from '@/types';
 import type { Server, Socket } from 'socket.io';
 
-class SocketServerService {
+class SocketServer {
   private waitingUsers: string[] = [];
 
   constructor(private readonly io: Server) {
     io.on('connection', (socket: Socket) => {
       this.onClientConnect(socket);
     });
+  }
+
+  private onClientConnect(socket: Socket) {
+    const newUserId = socket.id;
+    console.log('新的用戶連線:', newUserId);
+
+    socket.on(CHAT_EVENT.MATCH_START, () => {
+      this.handleMatchRequest(socket.id);
+    });
+
+    socket.on(CHAT_EVENT.CHAT_SEND, ({ message, roomId }: ChatMessage) => {
+      this.sendMessageToRoom(message, roomId);
+    });
+
+    socket.on('disconnect', () => {
+      this.onClientDisconnect(socket);
+    });
+  }
+
+  private onClientDisconnect(socket: Socket) {
+    const userId = socket.id;
+    console.log('用戶斷開連線:', userId);
   }
 
   private addWaitingUser(newUserId: string) {
@@ -47,28 +69,6 @@ class SocketServerService {
     await this.processMatchSuccess(newUserId, peerUserId);
   }
 
-  private onClientConnect(socket: Socket) {
-    const newUserId = socket.id;
-    console.log('新的用戶連線:', newUserId);
-
-    socket.on(CHAT_EVENT.MATCH_START, async () => {
-      await this.handleMatchRequest(socket.id);
-    });
-
-    socket.on(CHAT_EVENT.CHAT_SEND, ({ message, roomId }: ChatMessage) => {
-      this.sendMessageToRoom(message, roomId);
-    });
-
-    socket.on('disconnect', () => {
-      this.onClientDisconnect(socket);
-    });
-  }
-
-  private onClientDisconnect(socket: Socket) {
-    const userId = socket.id;
-    console.log('用戶斷開連線:', userId);
-  }
-
   private async processMatchSuccess(newUserId: string, peerUserId: string) {
     const roomId = `room-${peerUserId}-${newUserId}`;
 
@@ -89,4 +89,4 @@ class SocketServerService {
   }
 }
 
-export default SocketServerService;
+export default SocketServer;
