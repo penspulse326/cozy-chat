@@ -4,13 +4,9 @@ import { dirname } from 'path';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 
-import { connectDB } from './config/db.config';
-import ChatRoom from './models/chat-room.model';
-import MatchedUser from './models/matched-user.model';
+import { AppDataSource } from './config/db.config';
+import userModel from './models/user.model';
 import SocketServerService from './services/socket-server.service';
-
-import type { User } from '@packages/lib';
-import type { HydratedDocument } from 'mongoose';
 
 const port = process.env.PORT ?? '9001';
 const __filename = fileURLToPath(import.meta.url);
@@ -18,47 +14,37 @@ const __dirname = dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-new SocketServerService(new Server(server));
 
 app.get('/', (_, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
 async function addFakeData() {
-  const newUser: HydratedDocument<User> = new MatchedUser({
+  const newUser = await userModel.createUser({
+    _id: 'user-123',
     device: 'APP',
-    status: 'active',
+    room_id: 'room-456',
+    status: 'ACTIVE',
   });
 
-  await newUser.save();
-
-  const newRoom = new ChatRoom({
-    _id: '1',
-    users: ['1'],
-  });
-
-  await newRoom.save();
-  await ChatRoom.create({
-    _id: '1',
-    users: ['999'],
-  });
-
-  console.log('fake data added');
+  console.log('hello user', newUser);
 }
 
 async function startServer() {
   try {
-    await connectDB();
+    await AppDataSource.connect();
+
+    new SocketServerService(new Server(server));
 
     server.listen(port, () => {
-      console.log(`server 啟動成功: *:${port}`);
+      console.log(`Server 啟動成功: *:${port}`);
     });
-
-    await addFakeData();
   } catch (error) {
-    console.error('server 啟動失敗:', error);
+    console.error('Server 啟動失敗:', error);
     process.exit(1);
   }
 }
 
 await startServer();
+
+await addFakeData();
