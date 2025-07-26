@@ -8,7 +8,7 @@ let db: Db;
 async function connectToDB() {
   try {
     client = new MongoClient(
-      process.env.MONGODB_URI ?? 'mongodb://localhost:27017'
+      process.env.MONGODB_URI ?? 'mongodb://root:1234@localhost:27017'
     );
     db = client.db(process.env.DB_NAME ?? 'cozychat');
     await client.connect();

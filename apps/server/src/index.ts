@@ -1,11 +1,11 @@
 import express from 'express';
 import http from 'http';
+import { ObjectId } from 'mongodb';
 import { dirname } from 'path';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 
-import { ObjectId } from 'mongodb';
-import { connectToDB, db, disconnectFromDB } from './config/db.config';
+import { connectToDB, db, disconnectFromDB } from './config/db';
 import UserModel from './models/user.model';
 import SocketServer from './socket';
 

@@ -17,7 +17,7 @@ class SocketServer {
     console.log('新的用戶連線:', newUserId);
 
     socket.on(CHAT_EVENT.MATCH_START, () => {
-      this.handleMatchRequest(socket.id);
+      void this.handleMatchRequest(socket.id);
     });
 
     socket.on(CHAT_EVENT.CHAT_SEND, ({ message, roomId }: ChatMessage) => {
