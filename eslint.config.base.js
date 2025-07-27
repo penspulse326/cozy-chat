@@ -31,9 +31,9 @@ export default tseslint.config(
           ignoreCase: true,
           newlinesBetween: 'always',
           groups: [
-            ['builtin', 'external'],
+            'type',
+            ['external', 'builtin'],
             ['internal', 'parent', 'sibling', 'index'],
-            ['type'],
           ],
         },
       ],
@@ -53,7 +53,12 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          disallowTypeAnnotations: true,
+        },
+      ],
       '@typescript-eslint/consistent-type-exports': 'error',
       '@typescript-eslint/consistent-type-definitions': 'off',
     },

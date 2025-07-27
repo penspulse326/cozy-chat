@@ -1,92 +1,69 @@
+// socket-server.ts
 import { CHAT_EVENT } from '@/types';
 
 import type { ChatMessage } from '@/types';
 import type { Server, Socket } from 'socket.io';
 
-class SocketServer {
-  private waitingUsers: string[] = [];
+export function createSocketServer(io: Server) {
+  const waitingUsers: string[] = [];
 
-  constructor(private readonly io: Server) {
-    io.on('connection', (socket: Socket) => {
-      this.onClientConnect(socket);
-    });
-  }
-
-  private onClientConnect(socket: Socket) {
+  io.on('connection', (socket: Socket) => {
     const newUserId = socket.id;
     console.log('新的用戶連線:', newUserId);
 
     socket.on(CHAT_EVENT.MATCH_START, () => {
-      void this.handleMatchRequest(socket.id);
+      void handleMatchRequest(socket.id);
     });
 
     socket.on(CHAT_EVENT.CHAT_SEND, ({ message, roomId }: ChatMessage) => {
-      this.sendMessageToRoom(message, roomId);
+      sendMessageToRoom(message, roomId);
     });
 
     socket.on('disconnect', () => {
-      this.onClientDisconnect(socket);
+      console.log('用戶斷開連線:', newUserId);
     });
-  }
+  });
 
-  private onClientDisconnect(socket: Socket) {
-    const userId = socket.id;
-    console.log('用戶斷開連線:', userId);
-  }
-
-  private addWaitingUser(newUserId: string) {
-    this.waitingUsers.push(newUserId);
-    console.log(`找不到等待中的用戶，${newUserId} 加入等待池`);
+  function addWaitingUser(userId: string) {
+    waitingUsers.push(userId);
+    console.log(`加入等待池: ${userId}`);
 
     setTimeout(() => {
-      if (this.waitingUsers.includes(newUserId)) {
-        this.waitingUsers = this.waitingUsers.filter(
-          (userId) => userId !== newUserId
-        );
-
-        console.log(`${newUserId} 等待超時，從等待池移除`);
-        this.io.of('/').sockets.get(newUserId)?.emit(CHAT_EVENT.MATCH_FAIL);
+      const index = waitingUsers.indexOf(userId);
+      if (index !== -1) {
+        waitingUsers.splice(index, 1);
+        io.of('/').sockets.get(userId)?.emit(CHAT_EVENT.MATCH_FAIL);
       }
     }, 3000);
   }
 
-  private async handleMatchRequest(newUserId: string) {
-    // 無人等待時加入等待池
-    if (this.waitingUsers.length === 0) {
-      this.addWaitingUser(newUserId);
+  async function handleMatchRequest(userId: string) {
+    if (waitingUsers.length === 0) {
+      addWaitingUser(userId);
       return;
     }
 
-    // 從等待池中移除用戶
-    const peerUserId = this.waitingUsers.shift();
-
-    if (!peerUserId) {
-      this.addWaitingUser(newUserId);
+    const peerId = waitingUsers.shift();
+    if (!peerId) {
+      addWaitingUser(userId);
       return;
     }
 
-    // 配對成功
-    await this.processMatchSuccess(newUserId, peerUserId);
+    await processMatchSuccess(userId, peerId);
   }
 
-  private async processMatchSuccess(newUserId: string, peerUserId: string) {
-    const roomId = `room-${peerUserId}-${newUserId}`;
+  async function processMatchSuccess(userA: string, userB: string) {
+    const roomId = `room-${userA}-${userB}`;
+    await io.of('/').sockets.get(userA)?.join(roomId);
+    await io.of('/').sockets.get(userB)?.join(roomId);
 
-    await this.io.of('/').sockets.get(newUserId)?.join(roomId);
-    await this.io.of('/').sockets.get(peerUserId)?.join(roomId);
-
-    // 通知雙方配對成功，附帶 roomId
-    this.io.to(roomId).emit(CHAT_EVENT.MATCH_SUCCESS, {
+    io.to(roomId).emit(CHAT_EVENT.MATCH_SUCCESS, {
       roomId,
-      userIds: [newUserId, peerUserId],
+      userIds: [userA, userB],
     });
-
-    console.log(`配對成功: ${peerUserId} <-> ${newUserId} 房間 ID: ${roomId}`);
   }
 
-  private sendMessageToRoom(message: string, roomId: string) {
-    this.io.to(roomId).emit(CHAT_EVENT.CHAT_RECEIVE, message);
+  function sendMessageToRoom(message: string, roomId: string) {
+    io.to(roomId).emit(CHAT_EVENT.CHAT_RECEIVE, message);
   }
 }
-
-export default SocketServer;

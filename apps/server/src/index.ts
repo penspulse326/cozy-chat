@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 import { connectToDB, db, disconnectFromDB } from './config/db';
 import UserModel from './models/user.model';
-import SocketServer from './socket';
+import { createSocketServer } from './socket';
 
 const port = process.env.PORT ?? '9001';
 const __filename = fileURLToPath(import.meta.url);
@@ -41,7 +41,7 @@ async function addFakeData() {
 async function bootstrap() {
   try {
     await connectToDB();
-    new SocketServer(new Server(server));
+    createSocketServer(new Server(server));
 
     server.listen(port, () => {
       console.log(`Server 啟動成功: *:${port}`);
