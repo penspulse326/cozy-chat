@@ -19,8 +19,8 @@ class UserModel {
 
       const result = await this.users.insertOne({
         ...validatedUser,
-        last_active_at: new Date(),
         created_at: new Date(),
+        last_active_at: new Date(),
       });
 
       console.log('新增 User 成功');
@@ -31,6 +31,16 @@ class UserModel {
       } else {
         console.error('資料庫錯誤:', error);
       }
+      return null;
+    }
+  }
+
+  async getUserById(id: string): Promise<null | User> {
+    try {
+      const user = await this.users.findOne({ _id: id });
+      return user;
+    } catch (error: unknown) {
+      console.error('資料庫錯誤:', error);
       return null;
     }
   }

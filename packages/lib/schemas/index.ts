@@ -5,11 +5,11 @@ export const UserStatus = z.enum(['ACTIVE', 'LEFT']);
 
 export const UserSchema = z.object({
   _id: z.string(),
-  room_id: z.string().optional(),
-  device: Device,
-  status: UserStatus,
-  last_active_at: z.date(),
   created_at: z.date(),
+  device: Device,
+  last_active_at: z.date(),
+  room_id: z.string().optional(),
+  status: UserStatus,
 });
 
 export const CreateUserSchema = UserSchema.omit({
@@ -17,6 +17,19 @@ export const CreateUserSchema = UserSchema.omit({
 });
 
 export const UpdateUserSchema = UserSchema.omit({
-  device: true,
   created_at: true,
+  device: true,
+});
+
+export const ChatRoomSchema = z.object({
+  _id: z.string(),
+  created_at: z.date(),
+  updated_at: z.date(),
+  users: z.array(z.string()),
+});
+
+export const CreateChatRoomSchema = ChatRoomSchema.omit({
+  _id: true,
+  created_at: true,
+  updated_at: true,
 });

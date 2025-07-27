@@ -18,27 +18,7 @@ export default tseslint.config(
   eslint.configs.recommended,
   tseslint.configs.recommended,
   tseslint.configs.stylistic,
-  {
-    plugins: {
-      perfectionist,
-    },
-    rules: {
-      'perfectionist/sort-imports': [
-        'error',
-        {
-          type: 'natural',
-          order: 'asc',
-          ignoreCase: true,
-          newlinesBetween: 'always',
-          groups: [
-            'type',
-            ['external', 'builtin'],
-            ['internal', 'parent', 'sibling', 'index'],
-          ],
-        },
-      ],
-    },
-  },
+  perfectionist.configs['recommended-natural'],
   {
     languageOptions: {
       ecmaVersion: 2022,

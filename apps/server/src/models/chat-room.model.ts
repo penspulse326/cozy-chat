@@ -1,55 +1,42 @@
-// import { ChatRoom } from '@packages/lib';
-// import mongoose, { Schema } from 'mongoose';
+import type { ChatRoom, CreateChatRoomPayload } from '@packages/lib';
+import type { Collection, Db, InsertOneResult } from 'mongodb';
 
-// import type { User } from '@packages/lib';
-// import type { HydratedDocument } from 'mongoose';
+import { CreateChatRoomSchema } from '@packages/lib/dist';
+import z from 'zod';
 
-// const ChatRoomSchema: Schema = new Schema(
-//   {
-//     _id: {
-//       required: true,
-//       type: String,
-//       unique: true,
-//     },
-//     users: {
-//       type: [
-//         {
-//           ref: 'MatchedUser',
-//           required: true,
-//           type: String,
-//         },
-//       ],
-//     },
-//   },
-//   {
-//     _id: false,
-//     collection: 'chat_rooms',
-//     timestamps: {
-//       createdAt: 'created_at',
-//       updatedAt: 'updated_at',
-//     },
-//   }
-// );
+class ChatRoomModel {
+  private chatRooms: Collection<ChatRoom>;
 
-// ChatRoomSchema.pre(
-//   'save',
-//   async function (this: HydratedDocument<ChatRoom>, next) {
-//     if (this.isNew || this.isModified('users')) {
-//       const MatchedUser = mongoose.model<User>('MatchedUser');
+  constructor(private readonly db: Db) {
+    this.chatRooms = this.db.collection<ChatRoom>('chat_rooms');
+  }
 
-//       for (const userId of this.users) {
-//         const userExists = await MatchedUser.findById(userId);
+  async createChatRoom(
+    chatRoomPayload: CreateChatRoomPayload
+  ): Promise<InsertOneResult<ChatRoom> | null> {
+    try {
+      const validatedChatRoom: z.infer<typeof CreateChatRoomSchema> =
+        CreateChatRoomSchema.parse(chatRoomPayload);
+      const newChatRoom: ChatRoom = {
+        _id: new Date().getTime().toString(),
+        ...validatedChatRoom,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
 
-//         if (!userExists) {
-//           next(new Error(`${JSON.stringify(this)} 資料處理失敗`));
-//           return;
-//         }
-//       }
-//     }
-//     next();
-//   }
-// );
+      const result = await this.chatRooms.insertOne(newChatRoom);
 
-// const ChatRoom = mongoose.model<ChatRoom>('ChatRoom', ChatRoomSchema);
+      console.log('新增 ChatRoom 成功');
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof z.ZodError) {
+        console.error('資料驗證失敗:', error.issues);
+      } else {
+        console.error('資料庫錯誤:', error);
+      }
+      return null;
+    }
+  }
+}
 
-// export default ChatRoom;
+export default ChatRoomModel;

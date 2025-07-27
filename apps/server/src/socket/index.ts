@@ -1,8 +1,7 @@
-// socket-server.ts
-import { CHAT_EVENT } from '@/types';
-
-import type { ChatMessage } from '@/types';
+import type { ChatMessage } from '@packages/lib/dist';
 import type { Server, Socket } from 'socket.io';
+
+import { CHAT_EVENT } from '@packages/lib/dist';
 
 export function createSocketServer(io: Server) {
   const waitingUsers: string[] = [];

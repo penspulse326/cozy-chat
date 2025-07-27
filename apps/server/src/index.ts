@@ -5,9 +5,9 @@ import { dirname } from 'path';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 
-import { connectToDB, db, disconnectFromDB } from './config/db';
-import UserModel from './models/user.model';
-import { createSocketServer } from './socket';
+import { connectToDB, db, disconnectFromDB } from '@/config/db';
+import UserModel from '@/models/user.model';
+import { createSocketServer } from '@/socket';
 
 const port = process.env.PORT ?? '9001';
 const __filename = fileURLToPath(import.meta.url);
@@ -26,10 +26,10 @@ async function addFakeData() {
   const currentTime = new Date();
   const newUser = await userModel.createUser({
     _id: fakeId,
-    device: 'APP',
-    status: 'ACTIVE',
-    last_active_at: currentTime,
     created_at: currentTime,
+    device: 'APP',
+    last_active_at: currentTime,
+    status: 'ACTIVE',
   });
 
   console.log('hello user', newUser);
