@@ -1,41 +1,24 @@
-import type { ChatRoom, CreateChatRoomPayload } from '@packages/lib';
-import type { Collection, Db, InsertOneResult } from 'mongodb';
-import type z from 'zod';
+import type { ChatRoom } from '@packages/lib';
+import type { InsertOneResult } from 'mongodb';
 
-import { CreateChatRoomSchema } from '@packages/lib/dist';
+import { ChatRoomSchema } from '@packages/lib';
 
-import { catchDbError } from '@/utils/catch-db-error';
+import { db } from '@/config/db';
 
-class ChatRoomModel {
-  private chatRooms: Collection<ChatRoom>;
+export async function createChatRoom(
+  data: ChatRoom
+): Promise<InsertOneResult<ChatRoom> | null> {
+  const chatRooms = db.collection<ChatRoom>('chat_rooms');
 
-  constructor(private readonly db: Db) {
-    this.chatRooms = this.db.collection<ChatRoom>('chat_rooms');
-  }
+  try {
+    const validatedChatRoom = ChatRoomSchema.parse(data);
 
-  async createChatRoom(
-    chatRoomPayload: CreateChatRoomPayload
-  ): Promise<InsertOneResult<ChatRoom> | null> {
-    try {
-      const validatedChatRoom: z.infer<typeof CreateChatRoomSchema> =
-        CreateChatRoomSchema.parse(chatRoomPayload);
+    const result = await chatRooms.insertOne(validatedChatRoom);
+    console.log('新增 ChatRoom 成功');
 
-      const newChatRoom: ChatRoom = {
-        _id: new Date().getTime().toString(),
-        ...validatedChatRoom,
-        created_at: new Date(),
-        updated_at: new Date(),
-      };
-
-      const result = await this.chatRooms.insertOne(newChatRoom);
-      console.log('新增 ChatRoom 成功');
-
-      return result;
-    } catch (error) {
-      catchDbError(error);
-      return null;
-    }
+    return result;
+  } catch (error) {
+    console.error('新增 ChatRoom 失敗', error);
+    return null;
   }
 }
-
-export default ChatRoomModel;

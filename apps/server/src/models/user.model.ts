@@ -1,46 +1,36 @@
-import type { CreateUserPayload, User } from '@packages/lib/dist';
-import type { Collection, Db, InsertOneResult } from 'mongodb';
+import type { User } from '@packages/lib/dist';
+import type { InsertOneResult } from 'mongodb';
 
-import { CreateUserSchema } from '@packages/lib/dist';
+import { UserSchema } from '@packages/lib/dist';
 
-import { catchDbError } from '@/utils/catch-db-error';
+import { db } from '@/config/db';
 
-class UserModel {
-  private users: Collection<User>;
+export async function createUser(
+  data: User
+): Promise<InsertOneResult<User> | null> {
+  const users = db.collection<User>('users');
 
-  constructor(private readonly db: Db) {
-    this.users = this.db.collection<User>('users');
-  }
+  try {
+    const validatedUser = UserSchema.parse(data);
 
-  async createUser(
-    user: CreateUserPayload
-  ): Promise<InsertOneResult<User> | null> {
-    try {
-      const validatedUser = CreateUserSchema.parse(user);
+    const result = await users.insertOne(validatedUser);
+    console.log('新增 User 成功');
 
-      const result = await this.users.insertOne({
-        ...validatedUser,
-        created_at: new Date(),
-        last_active_at: new Date(),
-      });
-      console.log('新增 User 成功');
-
-      return result;
-    } catch (error: unknown) {
-      catchDbError(error);
-      return null;
-    }
-  }
-
-  async getUserById(id: string): Promise<null | User> {
-    try {
-      const user = await this.users.findOne({ _id: id });
-      return user;
-    } catch (error: unknown) {
-      catchDbError(error);
-      return null;
-    }
+    return result;
+  } catch (error: unknown) {
+    console.error('新增 User 失敗', error);
+    return null;
   }
 }
 
-export default UserModel;
+export async function getUserById(id: string): Promise<null | User> {
+  const users = db.collection<User>('users');
+
+  try {
+    const user = await users.findOne({ _id: id });
+    return user;
+  } catch (error: unknown) {
+    console.error('查詢 User 失敗', error);
+    return null;
+  }
+}

@@ -1,12 +1,10 @@
 import express from 'express';
 import http from 'http';
-import { ObjectId } from 'mongodb';
 import { dirname } from 'path';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 
-import { connectToDB, db, disconnectFromDB } from '@/config/db';
-import UserModel from '@/models/user.model';
+import { connectToDB, disconnectFromDB } from '@/config/db';
 import { createSocketServer } from '@/socket';
 
 const port = process.env.PORT ?? '9001';
@@ -19,24 +17,6 @@ const server = http.createServer(app);
 app.get('/', (_, res) => {
   res.sendFile(__dirname + '/index.html');
 });
-
-async function addFakeData() {
-  const fakeId = new ObjectId().toHexString();
-  const userModel = new UserModel(db);
-  const currentTime = new Date();
-  const newUser = await userModel.createUser({
-    _id: fakeId,
-    created_at: currentTime,
-    device: 'APP',
-    last_active_at: currentTime,
-    status: 'ACTIVE',
-  });
-
-  console.log('hello user', newUser);
-
-  const user = await userModel.getUserById(fakeId);
-  console.log('find user', user);
-}
 
 async function bootstrap() {
   try {
@@ -53,4 +33,3 @@ async function bootstrap() {
   }
 }
 await bootstrap();
-await addFakeData();

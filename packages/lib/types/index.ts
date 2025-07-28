@@ -1,9 +1,9 @@
 import type { z } from 'zod';
 
 import type {
-  CreateChatRoomSchema,
-  CreateUserSchema,
-  UpdateUserSchema,
+  ChatRoomSchema,
+  UpdateUserLastActiveAtSchema,
+  UpdateUserStatusSchema,
   UserSchema,
 } from '../schemas';
 
@@ -12,16 +12,12 @@ export type ChatMessage = {
   message: string;
   roomId: string;
 };
-export type ChatRoom = {
-  _id: string;
-  created_at: Date;
-  updated_at: Date;
-  users: string[];
-};
-export type CreateChatRoomPayload = z.infer<typeof CreateChatRoomSchema>;
 
-export type CreateUserPayload = z.infer<typeof CreateUserSchema>;
+export type ChatRoom = z.infer<typeof ChatRoomSchema>;
 
-export type UpdateUserPayload = z.infer<typeof UpdateUserSchema>;
+export type UpdateUserLastActiveAtPayload = z.infer<
+  typeof UpdateUserLastActiveAtSchema
+>;
+export type UpdateUserStatusPayload = z.infer<typeof UpdateUserStatusSchema>;
 
 export type User = z.infer<typeof UserSchema>;
