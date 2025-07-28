@@ -42,9 +42,6 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-exports': 'error',
       '@typescript-eslint/consistent-type-definitions': 'off',
       'perfectionist/sort-classes': 'off',
-      'perfectionist/sort-objects': 'off',
-      'perfectionist/sort-object-types': 'off',
-      'perfectionist/sort-interfaces': 'off',
     },
   }
 );

@@ -1,29 +1,26 @@
-// import type { CreateUserPayload } from '@packages/lib/dist';
+import { UserStatus } from '@packages/lib/dist';
 
-// import UserModel from '@/models/user.model';
+import type { WaitingUser } from '@/types';
 
-// async function createUser(user: CreateUserPayload) {
-//   const currentTime = new Date();
-//   const newUser = await UserModel.createUser({
-//     ...user,
-//     created_at: currentTime,
-//     last_active_at: currentTime,
-//   });
+import userModel from '@/models/user.model';
 
-//   return newUser;
-// }
+async function createUsers(users: WaitingUser[]) {
+  const currentTime = new Date();
+  const roomId = `room-${users[0].socketId}-${users[1].socketId}`;
+  const payload = users.map((user) => ({
+    _id: user.socketId,
+    created_at: currentTime,
+    device: user.device,
+    last_active_at: currentTime,
+    room_id: roomId,
+    status: UserStatus.enum.ACTIVE,
+  }));
 
-// async function getUserById(id: string) {
-//   const user = await UserModel.getUserById(id);
-//   return user;
-// }
+  const result = await userModel.createUsers(payload);
 
-// // async function updateUser(user: UpdateUserPayload) {
-// //   const updatedUser = await UserModel.updateUser(user);
-// //   return updatedUser;
-// // }
+  return result;
+}
 
-// export default {
-//   createUser,
-//   getUserById,
-// };
+export default {
+  createUsers,
+};

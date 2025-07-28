@@ -5,11 +5,11 @@ export const UserStatus = z.enum(['ACTIVE', 'LEFT']);
 
 export const UserSchema = z.object({
   _id: z.string(),
-  room_id: z.string(),
-  device: Device,
-  status: UserStatus,
-  last_active_at: z.date(),
   created_at: z.date(),
+  device: Device,
+  last_active_at: z.date(),
+  room_id: z.string(),
+  status: UserStatus,
 });
 
 export const UpdateUserStatusSchema = UserSchema.pick({
@@ -24,6 +24,6 @@ export const UpdateUserLastActiveAtSchema = UserSchema.pick({
 
 export const ChatRoomSchema = z.object({
   _id: z.string(),
-  users: z.array(z.string()),
   created_at: z.date(),
+  users: z.array(z.string()),
 });
