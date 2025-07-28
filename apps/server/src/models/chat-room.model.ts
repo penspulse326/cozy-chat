@@ -1,8 +1,10 @@
 import type { ChatRoom, CreateChatRoomPayload } from '@packages/lib';
 import type { Collection, Db, InsertOneResult } from 'mongodb';
+import type z from 'zod';
 
 import { CreateChatRoomSchema } from '@packages/lib/dist';
-import z from 'zod';
+
+import { catchDbError } from '@/utils/catch-db-error';
 
 class ChatRoomModel {
   private chatRooms: Collection<ChatRoom>;
@@ -17,6 +19,7 @@ class ChatRoomModel {
     try {
       const validatedChatRoom: z.infer<typeof CreateChatRoomSchema> =
         CreateChatRoomSchema.parse(chatRoomPayload);
+
       const newChatRoom: ChatRoom = {
         _id: new Date().getTime().toString(),
         ...validatedChatRoom,
@@ -25,15 +28,11 @@ class ChatRoomModel {
       };
 
       const result = await this.chatRooms.insertOne(newChatRoom);
-
       console.log('新增 ChatRoom 成功');
+
       return result;
-    } catch (error: unknown) {
-      if (error instanceof z.ZodError) {
-        console.error('資料驗證失敗:', error.issues);
-      } else {
-        console.error('資料庫錯誤:', error);
-      }
+    } catch (error) {
+      catchDbError(error);
       return null;
     }
   }

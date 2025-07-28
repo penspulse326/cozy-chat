@@ -2,7 +2,8 @@ import type { CreateUserPayload, User } from '@packages/lib/dist';
 import type { Collection, Db, InsertOneResult } from 'mongodb';
 
 import { CreateUserSchema } from '@packages/lib/dist';
-import z from 'zod';
+
+import { catchDbError } from '@/utils/catch-db-error';
 
 class UserModel {
   private users: Collection<User>;
@@ -22,15 +23,11 @@ class UserModel {
         created_at: new Date(),
         last_active_at: new Date(),
       });
-
       console.log('新增 User 成功');
+
       return result;
     } catch (error: unknown) {
-      if (error instanceof z.ZodError) {
-        console.error('資料驗證失敗:', error.issues);
-      } else {
-        console.error('資料庫錯誤:', error);
-      }
+      catchDbError(error);
       return null;
     }
   }
@@ -40,7 +37,7 @@ class UserModel {
       const user = await this.users.findOne({ _id: id });
       return user;
     } catch (error: unknown) {
-      console.error('資料庫錯誤:', error);
+      catchDbError(error);
       return null;
     }
   }
