@@ -7,7 +7,6 @@ export const UserSchema = z.object({
   _id: z.string(),
   created_at: z.date(),
   device: Device,
-  last_active_at: z.date(),
   room_id: z.string(),
   status: UserStatus,
 });
@@ -26,4 +25,16 @@ export const ChatRoomSchema = z.object({
   _id: z.string(),
   created_at: z.date(),
   users: z.array(z.string()),
+});
+
+export const ChatMessageSchema = z.object({
+  _id: z.string(),
+  content: z.string(),
+  created_at: z.date(),
+  room_id: z.string(),
+  user_id: z.string(),
+});
+
+export const CreateChatMessageSchema = ChatMessageSchema.omit({
+  _id: true,
 });

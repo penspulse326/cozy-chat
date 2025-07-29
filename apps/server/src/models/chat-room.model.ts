@@ -1,4 +1,4 @@
-import type { ChatRoom } from '@packages/lib';
+import type { ChatRoomPayload } from '@packages/lib';
 import type { InsertOneResult } from 'mongodb';
 
 import { ChatRoomSchema } from '@packages/lib';
@@ -6,9 +6,9 @@ import { ChatRoomSchema } from '@packages/lib';
 import { db } from '@/config/db';
 
 async function createChatRoom(
-  data: ChatRoom
-): Promise<InsertOneResult<ChatRoom> | null> {
-  const chatRooms = db.collection<ChatRoom>('chat_rooms');
+  data: ChatRoomPayload
+): Promise<InsertOneResult<ChatRoomPayload> | null> {
+  const chatRooms = db.collection<ChatRoomPayload>('chat_rooms');
 
   try {
     const validatedChatRoom = ChatRoomSchema.parse(data);

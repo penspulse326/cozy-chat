@@ -75,7 +75,7 @@
       socket.on('match:success', ({ roomId, userIds }) => {
         currentRoomId = roomId;
         const item = document.createElement('li');
-        item.textContent = `配對成功，已與用戶 ${userIds.filter((id) => id !== socket.id).join(', ')} 建立連線`;
+        item.textContent = `配對成功，已與用戶 ${userIds.filter((id) => id !== socket.id).join(', ')} 建立連線，房間 ID: ${roomId}`;
         messages.appendChild(item);
       });
 
@@ -83,7 +83,8 @@
         e.preventDefault();
 
         if (input.value && currentRoomId) {
-          socket.emit('send:message', {
+          socket.emit('chat:send', {
+            userId: socket.id,
             roomId: currentRoomId,
             message: input.value,
           });
@@ -91,9 +92,9 @@
         }
       });
 
-      socket.on('send:message', (msg) => {
+      socket.on('chat:receive', (chatMessage) => {
         const item = document.createElement('li');
-        item.textContent = msg;
+        item.textContent = `${chatMessage.content}`;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
       });

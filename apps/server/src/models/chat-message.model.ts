@@ -1,20 +1,50 @@
-// import mongoose from 'mongoose';
+import type { CreateChatMessagePayload } from '@packages/lib';
+import type { InsertOneResult } from 'mongodb';
 
-// const ChatMessageSchema = new mongoose.Schema(
-//   {
-//     content: { required: true, type: String },
-//     room_id: { ref: 'ChatRoom', required: true, type: String },
-//     user_id: { ref: 'MatchedUser', required: true, type: String },
-//   },
-//   {
-//     collection: 'chat_messages',
-//     timestamps: {
-//       createdAt: 'created_at',
-//       updatedAt: 'updated_at',
-//     },
-//   }
-// );
+import { CreateChatMessageSchema } from '@packages/lib';
+import { ObjectId } from 'mongodb';
 
-// const ChatMessage = mongoose.model('ChatMessage', ChatMessageSchema);
+import { db } from '@/config/db';
 
-// export default ChatMessage;
+async function createChatMessage(
+  data: CreateChatMessagePayload
+): Promise<InsertOneResult<CreateChatMessagePayload> | null> {
+  const chatMessages = db.collection<CreateChatMessagePayload>('chat_messages');
+
+  try {
+    const validatedChatMessage = CreateChatMessageSchema.parse(data);
+    const result = await chatMessages.insertOne(validatedChatMessage);
+    console.log('新增 ChatMessage 成功');
+
+    return result;
+  } catch (error) {
+    console.error('新增 ChatMessage 失敗', error);
+
+    return null;
+  }
+}
+
+async function findChatMessageById(
+  id: string
+): Promise<CreateChatMessagePayload | null> {
+  const chatMessages = db.collection<CreateChatMessagePayload>('chat_messages');
+
+  try {
+    const result = await chatMessages.findOne({ _id: new ObjectId(id) });
+    if (result) {
+      console.log(`找到 ChatMessage: ${id}: ${JSON.stringify(result)}`);
+      return result;
+    } else {
+      console.log(`找不到 ChatMessage: ${id}`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`查詢 ChatMessage 失敗: ${id}`, error);
+    return null;
+  }
+}
+
+export default {
+  createChatMessage,
+  findChatMessageById,
+};

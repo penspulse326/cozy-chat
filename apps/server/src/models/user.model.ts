@@ -1,31 +1,14 @@
-import type { User } from '@packages/lib/dist';
-import type { InsertManyResult, InsertOneResult } from 'mongodb';
+import type { UserPayload } from '@packages/lib';
+import type { InsertManyResult } from 'mongodb';
 
-import { UserSchema } from '@packages/lib/dist';
+import { UserSchema } from '@packages/lib';
 
 import { db } from '@/config/db';
 
-async function createUser(data: User): Promise<InsertOneResult<User> | null> {
-  const users = db.collection<User>('users');
-
-  try {
-    const validatedUser = UserSchema.parse(data);
-
-    const result = await users.insertOne(validatedUser);
-    console.log('新增 User 成功');
-
-    return result;
-  } catch (error: unknown) {
-    console.error('新增 User 失敗', error);
-
-    return null;
-  }
-}
-
 async function createUsers(
-  users: User[]
-): Promise<InsertManyResult<User> | null> {
-  const usersCollection = db.collection<User>('users');
+  users: UserPayload[]
+): Promise<InsertManyResult<UserPayload> | null> {
+  const usersCollection = db.collection<UserPayload>('users');
 
   try {
     const validatedUsers = users.map((user) => UserSchema.parse(user));
@@ -40,8 +23,8 @@ async function createUsers(
   }
 }
 
-async function getUserById(id: string): Promise<null | User> {
-  const users = db.collection<User>('users');
+async function getUserById(id: string): Promise<null | UserPayload> {
+  const users = db.collection<UserPayload>('users');
 
   try {
     const user = await users.findOne({ _id: id });
@@ -55,7 +38,6 @@ async function getUserById(id: string): Promise<null | User> {
 }
 
 export default {
-  createUser,
   createUsers,
   getUserById,
 };

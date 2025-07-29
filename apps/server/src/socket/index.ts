@@ -1,10 +1,11 @@
-import type { ChatMessage, DeviceMap } from '@packages/lib/dist';
+import type { DeviceMap } from '@packages/lib';
 import type { Server, Socket } from 'socket.io';
 
-import { CHAT_EVENT } from '@packages/lib/dist';
+import { CHAT_EVENT, MATCH_EVENT } from '@packages/lib';
 
-import type { WaitingUser } from '@/types';
+import type { SocketChatMessage, WaitingUser } from '@/types';
 
+import chatMessageService from '@/services/chat-message.service';
 import chatRoomService from '@/services/chat-room.service';
 
 export function createSocketServer(io: Server) {
@@ -14,12 +15,12 @@ export function createSocketServer(io: Server) {
     const newUserId = socket.id;
     console.log('新的用戶連線:', newUserId);
 
-    socket.on(CHAT_EVENT.MATCH_START, (device: keyof typeof DeviceMap) => {
+    socket.on(MATCH_EVENT.START, (device: keyof typeof DeviceMap) => {
       void handleMatchStart({ device, socketId: socket.id });
     });
 
-    socket.on(CHAT_EVENT.CHAT_SEND, ({ message, roomId }: ChatMessage) => {
-      handleChatSend(message, roomId);
+    socket.on(CHAT_EVENT.SEND, (data: SocketChatMessage) => {
+      void handleChatSend(data);
     });
 
     socket.on('disconnect', () => {
@@ -53,9 +54,9 @@ export function createSocketServer(io: Server) {
       );
       if (index !== -1) {
         waitingUsers.splice(index, 1);
-        io.of('/').sockets.get(newUser.socketId)?.emit(CHAT_EVENT.MATCH_FAIL);
+        io.of('/').sockets.get(newUser.socketId)?.emit(MATCH_EVENT.FAIL);
       }
-    }, 3000);
+    }, 10000);
   }
 
   async function handleMatchSuccess(users: WaitingUser[]) {
@@ -66,16 +67,31 @@ export function createSocketServer(io: Server) {
       return;
     }
 
-    await io.of('/').sockets.get(users[0].socketId)?.join(roomId);
-    await io.of('/').sockets.get(users[1].socketId)?.join(roomId);
+    await Promise.all(
+      users.map((user) => io.of('/').sockets.get(user.socketId)?.join(roomId))
+    );
 
-    io.to(roomId).emit(CHAT_EVENT.MATCH_SUCCESS, {
+    io.to(roomId).emit(MATCH_EVENT.SUCCESS, {
       roomId,
       userIds: [users[0].socketId, users[1].socketId],
     });
   }
 
-  function handleChatSend(message: string, roomId: string) {
-    io.to(roomId).emit(CHAT_EVENT.CHAT_RECEIVE, message);
+  async function handleChatSend(data: SocketChatMessage) {
+    const result = await chatMessageService.createChatMessage(data);
+
+    if (!result) {
+      return;
+    }
+
+    const chatMessage = await chatMessageService.findChatMessageById(
+      result.insertedId.toString()
+    );
+
+    if (!chatMessage) {
+      return;
+    }
+
+    io.to(data.roomId).emit(CHAT_EVENT.RECEIVE, chatMessage);
   }
 }
