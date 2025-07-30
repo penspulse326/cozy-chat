@@ -11,6 +11,7 @@ async function createUsers(users: WaitingUser[]) {
     _id: user.socketId,
     created_at: currentTime,
     device: user.device,
+    last_active_at: currentTime,
     room_id: roomId,
     status: UserStatus.enum.ACTIVE,
   }));

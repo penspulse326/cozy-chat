@@ -7,6 +7,7 @@ export const UserSchema = z.object({
   _id: z.string(),
   created_at: z.date(),
   device: Device,
+  last_active_at: z.date(),
   room_id: z.string(),
   status: UserStatus,
 });
