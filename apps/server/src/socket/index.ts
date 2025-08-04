@@ -5,8 +5,9 @@ import { CHAT_EVENT, MATCH_EVENT } from '@packages/lib';
 
 import type { SocketChatMessage, WaitingUser } from '@/types';
 
-import chatMessageService from '@/services/chat-message.service';
-import chatRoomService from '@/services/chat-room.service';
+import ChatMessageService from '@/services/chat-message.service';
+import ChatRoomService from '@/services/chat-room.service';
+import UserService from '@/services/user.service';
 
 export function createSocketServer(io: Server) {
   const waitingUsers: WaitingUser[] = [];
@@ -60,31 +61,71 @@ export function createSocketServer(io: Server) {
   }
 
   async function handleMatchSuccess(users: WaitingUser[]) {
-    const newChatRoom = await chatRoomService.createChatRoom(users);
-    const roomId = newChatRoom?.insertedId;
+    const createdNewUser = await UserService.createUser(users[0]);
+    const createdPeerUser = await UserService.createUser(users[1]);
+
+    if (!createdNewUser || !createdPeerUser) {
+      return;
+    }
+
+    console.log('createdNewUser', createdNewUser);
+    console.log('createdPeerUser', createdPeerUser);
+
+    const newChatRoom = await ChatRoomService.createChatRoom([
+      createdNewUser.insertedId.toString(),
+      createdPeerUser.insertedId.toString(),
+    ]);
+
+    const roomId = newChatRoom?.insertedId.toString();
 
     if (!roomId) {
       return;
     }
 
+    console.log('newChatRoom', newChatRoom);
+
+    const createdUsers = [
+      {
+        ...users[0],
+        userId: createdNewUser.insertedId.toString(),
+      },
+      {
+        ...users[1],
+        userId: createdPeerUser.insertedId.toString(),
+      },
+    ];
+
     await Promise.all(
-      users.map((user) => io.of('/').sockets.get(user.socketId)?.join(roomId))
+      createdUsers.map(
+        async (user) => await UserService.updateUserRoomId(user.userId, roomId)
+      )
     );
 
-    io.to(roomId).emit(MATCH_EVENT.SUCCESS, {
-      roomId,
-      userIds: [users[0].socketId, users[1].socketId],
+    await Promise.all(
+      createdUsers.map((user) => handleNotifyMatchSuccess(user, roomId))
+    );
+  }
+
+  async function handleNotifyMatchSuccess(
+    user: WaitingUser & { userId: string },
+    roomId: string
+  ) {
+    await io.of('/').sockets.get(user.socketId)?.join(roomId);
+
+    io.to(user.socketId).emit(MATCH_EVENT.SUCCESS, {
+      roomId: roomId,
+      userId: user.userId,
     });
   }
 
   async function handleChatSend(data: SocketChatMessage) {
-    const result = await chatMessageService.createChatMessage(data);
+    const result = await ChatMessageService.createChatMessage(data);
 
     if (!result) {
       return;
     }
 
-    const chatMessage = await chatMessageService.findChatMessageById(
+    const chatMessage = await ChatMessageService.findChatMessageById(
       result.insertedId.toString()
     );
 

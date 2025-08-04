@@ -1,33 +1,39 @@
-import type { UserPayload } from '@packages/lib';
-import type { InsertManyResult } from 'mongodb';
+import type { CreateUserPayload, User } from '@packages/lib';
+import type { InsertOneResult, UpdateResult } from 'mongodb';
 
-import { UserSchema } from '@packages/lib';
+import { CreateUserSchema } from '@packages/lib';
+import { ObjectId } from 'mongodb';
 
 import { db } from '@/config/db';
 
-async function createUsers(
-  users: UserPayload[]
-): Promise<InsertManyResult<UserPayload> | null> {
-  const usersCollection = db.collection<UserPayload>('users');
+async function createUser(
+  data: CreateUserPayload
+): Promise<InsertOneResult<CreateUserPayload> | null> {
+  const users = db.collection<User>('users');
 
   try {
-    const validatedUsers = users.map((user) => UserSchema.parse(user));
-    const result = await usersCollection.insertMany(validatedUsers);
-    console.log('新增 Users 成功');
+    const validatedUser = CreateUserSchema.parse(data);
+    const result = await users.insertOne({
+      ...validatedUser,
+      _id: new ObjectId().toHexString(),
+      room_id: '',
+    });
+
+    console.log('新增 User 成功');
 
     return result;
   } catch (error: unknown) {
-    console.error('新增 Users 失敗', error);
+    console.error('新增 User 失敗', error);
 
     return null;
   }
 }
 
-async function getUserById(id: string): Promise<null | UserPayload> {
-  const users = db.collection<UserPayload>('users');
+async function getUserById(_id: string): Promise<null | User> {
+  const users = db.collection<User>('users');
 
   try {
-    const user = await users.findOne({ _id: id });
+    const user = await users.findOne({ _id });
 
     return user;
   } catch (error: unknown) {
@@ -37,7 +43,27 @@ async function getUserById(id: string): Promise<null | UserPayload> {
   }
 }
 
+async function updateUserRoomId(
+  userId: string,
+  roomId: string
+): Promise<null | UpdateResult<User>> {
+  const users = db.collection<User>('users');
+
+  try {
+    const result = await users.updateOne(
+      { _id: userId },
+      { $set: { room_id: roomId } }
+    );
+
+    return result;
+  } catch (error: unknown) {
+    console.error('更新 User RoomId 失敗', error);
+    return null;
+  }
+}
+
 export default {
-  createUsers,
+  createUser,
   getUserById,
+  updateUserRoomId,
 };

@@ -72,10 +72,10 @@
 
       socket.emit('match:start', 'PC');
 
-      socket.on('match:success', ({ roomId, userIds }) => {
+      socket.on('match:success', ({ roomId, userId }) => {
         currentRoomId = roomId;
         const item = document.createElement('li');
-        item.textContent = `配對成功，已與用戶 ${userIds.filter((id) => id !== socket.id).join(', ')} 建立連線，房間 ID: ${roomId}`;
+        item.textContent = `配對成功，我的 ID: ${userId}，房間 ID: ${roomId}`;
         messages.appendChild(item);
       });
 

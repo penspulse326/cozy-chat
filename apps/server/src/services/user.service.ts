@@ -4,23 +4,27 @@ import type { WaitingUser } from '@/types';
 
 import userModel from '@/models/user.model';
 
-async function createUsers(users: WaitingUser[]) {
+async function createUser(user: WaitingUser) {
   const currentTime = new Date();
-  const roomId = `room-${users[0].socketId}-${users[1].socketId}`;
-  const payload = users.map((user) => ({
-    _id: user.socketId,
+  const payload = {
     created_at: currentTime,
     device: user.device,
     last_active_at: currentTime,
-    room_id: roomId,
     status: UserStatus.enum.ACTIVE,
-  }));
+  };
 
-  const result = await userModel.createUsers(payload);
+  const result = await userModel.createUser(payload);
+
+  return result;
+}
+
+async function updateUserRoomId(userId: string, roomId: string) {
+  const result = await userModel.updateUserRoomId(userId, roomId);
 
   return result;
 }
 
 export default {
-  createUsers,
+  createUser,
+  updateUserRoomId,
 };

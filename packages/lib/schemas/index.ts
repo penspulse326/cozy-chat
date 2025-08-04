@@ -28,6 +28,15 @@ export const ChatRoomSchema = z.object({
   users: z.array(z.string()),
 });
 
+export const CreateUserSchema = UserSchema.omit({
+  _id: true,
+  room_id: true,
+});
+
+export const CreateChatRoomSchema = ChatRoomSchema.omit({
+  _id: true,
+});
+
 export const ChatMessageSchema = z.object({
   _id: z.string(),
   content: z.string(),

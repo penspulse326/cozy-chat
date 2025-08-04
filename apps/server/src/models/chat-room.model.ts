@@ -1,18 +1,22 @@
-import type { ChatRoomPayload } from '@packages/lib';
+import type { ChatRoom, CreateChatRoomPayload } from '@packages/lib';
 import type { InsertOneResult } from 'mongodb';
 
-import { ChatRoomSchema } from '@packages/lib';
+import { CreateChatRoomSchema } from '@packages/lib';
+import { ObjectId } from 'mongodb';
 
 import { db } from '@/config/db';
 
 async function createChatRoom(
-  data: ChatRoomPayload
-): Promise<InsertOneResult<ChatRoomPayload> | null> {
-  const chatRooms = db.collection<ChatRoomPayload>('chat_rooms');
+  data: CreateChatRoomPayload
+): Promise<InsertOneResult<CreateChatRoomPayload> | null> {
+  const chatRooms = db.collection<ChatRoom>('chat_rooms');
 
   try {
-    const validatedChatRoom = ChatRoomSchema.parse(data);
-    const result = await chatRooms.insertOne(validatedChatRoom);
+    const validatedChatRoom = CreateChatRoomSchema.parse(data);
+    const result = await chatRooms.insertOne({
+      ...validatedChatRoom,
+      _id: new ObjectId().toHexString(),
+    });
     console.log('新增 ChatRoom 成功');
 
     return result;

@@ -1,14 +1,10 @@
-import type { WaitingUser } from '@/types';
-
 import chatRoomModel from '@/models/chat-room.model';
 
-async function createChatRoom(users: WaitingUser[]) {
+async function createChatRoom(userIds: string[]) {
   const currentTime = new Date();
-  const roomId = `room-${users[0].socketId}-${users[1].socketId}`;
   const payload = {
-    _id: roomId,
     created_at: currentTime,
-    users: [users[0].socketId, users[1].socketId],
+    users: userIds,
   };
 
   const result = await chatRoomModel.createChatRoom(payload);
