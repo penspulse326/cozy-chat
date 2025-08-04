@@ -1,4 +1,4 @@
-import chatRoomModel from '@/models/chat-room.model';
+import ChatRoomModel from '@/models/chat-room.model';
 
 async function createChatRoom(userIds: string[]) {
   const currentTime = new Date();
@@ -7,7 +7,7 @@ async function createChatRoom(userIds: string[]) {
     users: userIds,
   };
 
-  const result = await chatRoomModel.createChatRoom(payload);
+  const result = await ChatRoomModel.createChatRoom(payload);
 
   return result;
 }

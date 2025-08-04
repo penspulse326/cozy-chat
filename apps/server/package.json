@@ -30,11 +30,9 @@
   "description": "",
   "dependencies": {
     "@packages/lib": "workspace:*",
-    "express": "^5.1.0",
-    "mongodb": "^6.18.0"
+    "express": "^5.1.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.2",
-    "@types/mongodb": "^4.0.7"
+    "@types/express": "^5.0.2"
   }
 }

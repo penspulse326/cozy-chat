@@ -1,15 +1,21 @@
+import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 
 export const Device = z.enum(['APP', 'MB', 'PC']);
 export const UserStatus = z.enum(['ACTIVE', 'LEFT']);
 
 export const UserSchema = z.object({
-  _id: z.string(),
+  _id: z.instanceof(ObjectId),
   created_at: z.date(),
   device: Device,
   last_active_at: z.date(),
   room_id: z.string(),
   status: UserStatus,
+});
+
+export const CreateUserSchema = UserSchema.omit({
+  _id: true,
+  room_id: true,
 });
 
 export const UpdateUserStatusSchema = UserSchema.pick({
@@ -23,14 +29,9 @@ export const UpdateUserLastActiveAtSchema = UserSchema.pick({
 });
 
 export const ChatRoomSchema = z.object({
-  _id: z.string(),
+  _id: z.instanceof(ObjectId),
   created_at: z.date(),
   users: z.array(z.string()),
-});
-
-export const CreateUserSchema = UserSchema.omit({
-  _id: true,
-  room_id: true,
 });
 
 export const CreateChatRoomSchema = ChatRoomSchema.omit({
@@ -38,7 +39,7 @@ export const CreateChatRoomSchema = ChatRoomSchema.omit({
 });
 
 export const ChatMessageSchema = z.object({
-  _id: z.string(),
+  _id: z.instanceof(ObjectId),
   content: z.string(),
   created_at: z.date(),
   room_id: z.string(),

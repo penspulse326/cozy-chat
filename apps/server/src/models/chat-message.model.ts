@@ -1,4 +1,4 @@
-import type { CreateChatMessagePayload } from '@packages/lib';
+import type { ChatMessage, CreateChatMessagePayload } from '@packages/lib';
 import type { InsertOneResult } from 'mongodb';
 
 import { CreateChatMessageSchema } from '@packages/lib';
@@ -24,22 +24,21 @@ async function createChatMessage(
   }
 }
 
-async function findChatMessageById(
-  id: string
-): Promise<CreateChatMessagePayload | null> {
-  const chatMessages = db.collection<CreateChatMessagePayload>('chat_messages');
+async function findChatMessageById(_id: string): Promise<ChatMessage | null> {
+  const chatMessages = db.collection<ChatMessage>('chat_messages');
 
   try {
-    const result = await chatMessages.findOne({ _id: new ObjectId(id) });
+    const result = await chatMessages.findOne({ _id: new ObjectId(_id) });
+
     if (result) {
-      console.log(`找到 ChatMessage: ${id}: ${JSON.stringify(result)}`);
+      console.log(`找到 ChatMessage: ${_id}: ${JSON.stringify(result)}`);
       return result;
     } else {
-      console.log(`找不到 ChatMessage: ${id}`);
+      console.log(`找不到 ChatMessage: ${_id}`);
       return null;
     }
   } catch (error) {
-    console.error(`查詢 ChatMessage 失敗: ${id}`, error);
+    console.error(`查詢 ChatMessage 失敗: ${_id}`, error);
     return null;
   }
 }
