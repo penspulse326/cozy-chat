@@ -1,7 +1,7 @@
 import type { DeviceMap } from '@packages/lib';
 import type { Server, Socket } from 'socket.io';
 
-import { CHAT_EVENT, MATCH_EVENT } from '@packages/lib';
+import { CHAT_EVENT, MATCH_EVENT, UserStatusSchema } from '@packages/lib';
 
 import type { SocketChatMessage, WaitingUser } from '@/types';
 
@@ -19,8 +19,12 @@ export function createSocketServer(io: Server) {
       void handleMatchStart({ device, socketId: socket.id });
     });
 
-    socket.on(MATCH_EVENT.LEAVE, () => {
-      handleMatchLeave(socket.id);
+    socket.on(MATCH_EVENT.CANCEL, () => {
+      handleMatchBreak(socket.id);
+    });
+
+    socket.on(MATCH_EVENT.LEAVE, (userId: string) => {
+      void handleMatchLeave(userId);
     });
 
     socket.on(CHAT_EVENT.SEND, (data: SocketChatMessage) => {
@@ -123,12 +127,27 @@ export function createSocketServer(io: Server) {
     );
   }
 
-  function handleMatchLeave(socketId: string) {
+  function handleMatchBreak(socketId: string) {
     const hasRemoved = removeWaitingUser(socketId);
 
     if (hasRemoved) {
-      io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.LEAVE);
+      io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.CANCEL);
     }
+  }
+
+  async function handleMatchLeave(userId: string) {
+    const user = await UserService.findUserById(userId);
+
+    if (!user) {
+      return;
+    }
+
+    await UserService.updateUserStatus(
+      user._id.toString(),
+      UserStatusSchema.enum.LEFT
+    );
+
+    handleNotifyMatchLeave(user.room_id);
   }
 
   async function handleNotifyMatchSuccess(
@@ -141,6 +160,10 @@ export function createSocketServer(io: Server) {
       roomId: roomId,
       userId: user.userId,
     });
+  }
+
+  function handleNotifyMatchLeave(roomId: string) {
+    io.to(roomId).emit(MATCH_EVENT.LEAVE);
   }
 
   async function handleChatSend(data: SocketChatMessage) {

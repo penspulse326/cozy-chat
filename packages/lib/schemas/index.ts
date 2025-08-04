@@ -1,16 +1,16 @@
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 
-export const Device = z.enum(['APP', 'MB', 'PC']);
-export const UserStatus = z.enum(['ACTIVE', 'LEFT']);
+export const DeviceSchema = z.enum(['APP', 'MB', 'PC']);
+export const UserStatusSchema = z.enum(['ACTIVE', 'LEFT']);
 
 export const UserSchema = z.object({
   _id: z.instanceof(ObjectId),
   created_at: z.date(),
-  device: Device,
+  device: DeviceSchema,
   last_active_at: z.date(),
   room_id: z.string(),
-  status: UserStatus,
+  status: UserStatusSchema,
 });
 
 export const CreateUserSchema = UserSchema.omit({

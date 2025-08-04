@@ -1,4 +1,9 @@
-import type { CreateUserPayload, User } from '@packages/lib';
+import type {
+  CreateUserPayload,
+  UpdateUserStatusPayload,
+  User,
+  UserStatus,
+} from '@packages/lib';
 import type { InsertOneResult } from 'mongodb';
 
 import { CreateUserSchema } from '@packages/lib';
@@ -25,7 +30,7 @@ async function createUser(
   }
 }
 
-async function getUserById(_id: string): Promise<null | User> {
+async function findUserById(_id: string): Promise<null | User> {
   const users = db.collection<User>('users');
 
   try {
@@ -58,8 +63,28 @@ async function updateUserRoomId(
   }
 }
 
+async function updateUserStatus(
+  _id: string,
+  status: UserStatus
+): Promise<null | UpdateResult<UpdateUserStatusPayload>> {
+  const users = db.collection<User>('users');
+
+  try {
+    const result = await users.updateOne(
+      { _id: new ObjectId(_id) },
+      { $set: { status } }
+    );
+
+    return result;
+  } catch (error: unknown) {
+    console.error('更新 User Status 失敗', error);
+    return null;
+  }
+}
+
 export default {
   createUser,
-  getUserById,
+  findUserById,
   updateUserRoomId,
+  updateUserStatus,
 };

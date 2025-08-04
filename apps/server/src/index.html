@@ -87,7 +87,12 @@
       });
 
       matchLeaveButton.addEventListener('click', () => {
-        socket.emit('match:leave');
+        if (!localUserId) {
+          socket.emit('match:cancel');
+          return;
+        }
+
+        socket.emit('match:leave', localUserId);
       });
 
       socket.emit('match:start', 'PC');
@@ -108,7 +113,7 @@
 
       socket.on('match:leave', () => {
         const item = document.createElement('li');
-        item.textContent = '離開配對';
+        item.textContent = '對方離開配對';
         messages.appendChild(item);
       });
 
