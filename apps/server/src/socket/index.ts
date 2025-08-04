@@ -13,11 +13,14 @@ export function createSocketServer(io: Server) {
   const waitingUsers: WaitingUser[] = [];
 
   io.on('connection', (socket: Socket) => {
-    const newUserId = socket.id;
-    console.log('新的用戶連線:', newUserId);
+    console.log('新的用戶連線:', socket.id);
 
     socket.on(MATCH_EVENT.START, (device: keyof typeof DeviceMap) => {
       void handleMatchStart({ device, socketId: socket.id });
+    });
+
+    socket.on(MATCH_EVENT.LEAVE, () => {
+      handleMatchLeave(socket.id);
     });
 
     socket.on(CHAT_EVENT.SEND, (data: SocketChatMessage) => {
@@ -25,7 +28,8 @@ export function createSocketServer(io: Server) {
     });
 
     socket.on('disconnect', () => {
-      console.log('用戶斷開連線:', newUserId);
+      console.log('用戶斷開連線:', socket.id);
+      removeWaitingUser(socket.id);
     });
   });
 
@@ -42,7 +46,7 @@ export function createSocketServer(io: Server) {
       return;
     }
 
-    await handleMatchSuccess([newUser, peerUser]);
+    await handleMatchSuccess(newUser, peerUser);
   }
 
   function addWaitingUser(newUser: WaitingUser) {
@@ -50,19 +54,32 @@ export function createSocketServer(io: Server) {
     console.log(`加入等待池: ${newUser.socketId}`);
 
     setTimeout(() => {
-      const index = waitingUsers.findIndex(
-        (user) => user.socketId === newUser.socketId
-      );
-      if (index !== -1) {
-        waitingUsers.splice(index, 1);
+      const hasRemoved = removeWaitingUser(newUser.socketId);
+
+      if (hasRemoved) {
         io.of('/').sockets.get(newUser.socketId)?.emit(MATCH_EVENT.FAIL);
       }
     }, 10000);
   }
 
-  async function handleMatchSuccess(users: WaitingUser[]) {
-    const createdNewUser = await UserService.createUser(users[0]);
-    const createdPeerUser = await UserService.createUser(users[1]);
+  function removeWaitingUser(socketId: string): boolean {
+    const index = waitingUsers.findIndex((user) => user.socketId === socketId);
+
+    if (index === -1) {
+      return false;
+    }
+
+    waitingUsers.splice(index, 1);
+
+    return true;
+  }
+
+  async function handleMatchSuccess(
+    newUser: WaitingUser,
+    peerUser: WaitingUser
+  ) {
+    const createdNewUser = await UserService.createUser(newUser);
+    const createdPeerUser = await UserService.createUser(peerUser);
 
     if (!createdNewUser || !createdPeerUser) {
       return;
@@ -86,24 +103,32 @@ export function createSocketServer(io: Server) {
 
     const createdUsers = [
       {
-        ...users[0],
+        ...newUser,
         userId: createdNewUser.insertedId.toString(),
       },
       {
-        ...users[1],
+        ...peerUser,
         userId: createdPeerUser.insertedId.toString(),
       },
     ];
 
     await Promise.all(
-      createdUsers.map(
-        async (user) => await UserService.updateUserRoomId(user.userId, roomId)
+      createdUsers.map((user) =>
+        UserService.updateUserRoomId(user.userId, roomId)
       )
     );
 
     await Promise.all(
       createdUsers.map((user) => handleNotifyMatchSuccess(user, roomId))
     );
+  }
+
+  function handleMatchLeave(socketId: string) {
+    const hasRemoved = removeWaitingUser(socketId);
+
+    if (hasRemoved) {
+      io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.LEAVE);
+    }
   }
 
   async function handleNotifyMatchSuccess(
@@ -133,6 +158,6 @@ export function createSocketServer(io: Server) {
       return;
     }
 
-    io.to(data.roomId).emit(CHAT_EVENT.RECEIVE, chatMessage);
+    io.to(data.room_id).emit(CHAT_EVENT.RECEIVE, chatMessage);
   }
 }

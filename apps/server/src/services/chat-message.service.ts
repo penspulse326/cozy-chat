@@ -5,10 +5,10 @@ import ChatMessageModel from '@/models/chat-message.model';
 async function createChatMessage(data: SocketChatMessage) {
   const currentTime = new Date();
   const payload = {
-    content: data.message,
+    content: data.content,
     created_at: currentTime,
-    room_id: data.roomId,
-    user_id: data.userId,
+    room_id: data.room_id,
+    user_id: data.user_id,
   };
 
   const result = await ChatMessageModel.createChatMessage(payload);
