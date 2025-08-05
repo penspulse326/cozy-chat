@@ -1,12 +1,11 @@
-import type { DeviceMap } from '@packages/lib';
+import type { DeviceMap, SocketChatMessage } from '@packages/lib';
 import type { Server, Socket } from 'socket.io';
 
 import { CHAT_EVENT, MATCH_EVENT, UserStatusSchema } from '@packages/lib';
 
-import type { SocketChatMessage, WaitingUser } from '@/types';
+import type { WaitingUser } from '@/types';
 
 import ChatMessageService from '@/services/chat-message.service';
-import ChatRoomService from '@/services/chat-room.service';
 import UserService from '@/services/user.service';
 
 export function createSocketServer(io: Server) {
@@ -82,48 +81,16 @@ export function createSocketServer(io: Server) {
     newUser: WaitingUser,
     peerUser: WaitingUser
   ) {
-    const createdNewUser = await UserService.createUser(newUser);
-    const createdPeerUser = await UserService.createUser(peerUser);
+    const matchResult = await UserService.createMatchedUsers(newUser, peerUser);
 
-    if (!createdNewUser || !createdPeerUser) {
+    if (!matchResult) {
       return;
     }
 
-    console.log('createdNewUser', createdNewUser);
-    console.log('createdPeerUser', createdPeerUser);
-
-    const newChatRoom = await ChatRoomService.createChatRoom([
-      createdNewUser.insertedId.toString(),
-      createdPeerUser.insertedId.toString(),
-    ]);
-
-    const roomId = newChatRoom?.insertedId.toString();
-
-    if (!roomId) {
-      return;
-    }
-
-    console.log('newChatRoom', newChatRoom);
-
-    const createdUsers = [
-      {
-        ...newUser,
-        userId: createdNewUser.insertedId.toString(),
-      },
-      {
-        ...peerUser,
-        userId: createdPeerUser.insertedId.toString(),
-      },
-    ];
+    const { matchedUsers, roomId } = matchResult;
 
     await Promise.all(
-      createdUsers.map((user) =>
-        UserService.updateUserRoomId(user.userId, roomId)
-      )
-    );
-
-    await Promise.all(
-      createdUsers.map((user) => handleNotifyMatchSuccess(user, roomId))
+      matchedUsers.map((user) => handleNotifyMatchSuccess(user, roomId))
     );
   }
 
@@ -167,26 +134,12 @@ export function createSocketServer(io: Server) {
   }
 
   async function handleChatSend(data: SocketChatMessage) {
-    const targetChatRoom = await ChatRoomService.findChatRoomById(data.roomId);
+    const newChatMessage = await ChatMessageService.sendChatMessage(data);
 
-    if (!targetChatRoom) {
+    if (!newChatMessage) {
       return;
     }
 
-    const result = await ChatMessageService.createChatMessage(data);
-
-    if (!result) {
-      return;
-    }
-
-    const chatMessage = await ChatMessageService.findChatMessageById(
-      result.insertedId.toString()
-    );
-
-    if (!chatMessage) {
-      return;
-    }
-
-    io.to(data.roomId).emit(CHAT_EVENT.RECEIVE, chatMessage);
+    io.to(data.roomId).emit(CHAT_EVENT.RECEIVE, newChatMessage);
   }
 }

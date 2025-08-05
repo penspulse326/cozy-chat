@@ -25,3 +25,4 @@ export type UpdateUserLastActiveAtPayload = z.infer<
 export type UpdateUserStatusPayload = z.infer<typeof UpdateUserStatusSchema>;
 export type User = z.infer<typeof UserSchema>;
 export type UserStatus = z.infer<typeof UserStatusSchema>;
+export type * from './data';

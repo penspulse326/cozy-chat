@@ -6,6 +6,48 @@ import type { WaitingUser } from '@/types';
 
 import UserModel from '@/models/user.model';
 
+import ChatRoomService from './chat-room.service';
+
+async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
+  const createdNewUser = await createUser(newUser);
+  const createdPeerUser = await createUser(peerUser);
+
+  if (!createdNewUser || !createdPeerUser) {
+    return null;
+  }
+
+  const newChatRoom = await ChatRoomService.createChatRoom([
+    createdNewUser.insertedId.toString(),
+    createdPeerUser.insertedId.toString(),
+  ]);
+
+  const roomId = newChatRoom?.insertedId.toString();
+
+  if (!roomId) {
+    return null;
+  }
+
+  const matchedUsers = [
+    {
+      ...newUser,
+      userId: createdNewUser.insertedId.toString(),
+    },
+    {
+      ...peerUser,
+      userId: createdPeerUser.insertedId.toString(),
+    },
+  ];
+
+  await Promise.all(
+    matchedUsers.map((user) => updateUserRoomId(user.userId, roomId))
+  );
+
+  return {
+    matchedUsers,
+    roomId,
+  };
+}
+
 async function createUser(user: WaitingUser) {
   const currentTime = new Date();
   const payload = {
@@ -39,6 +81,7 @@ async function updateUserStatus(userId: string, status: UserStatus) {
 }
 
 export default {
+  createMatchedUsers,
   createUser,
   findUserById,
   updateUserRoomId,
