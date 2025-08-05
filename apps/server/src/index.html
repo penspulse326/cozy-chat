@@ -111,6 +111,12 @@
         messages.appendChild(item);
       });
 
+      socket.on('match:cancel', () => {
+        const item = document.createElement('li');
+        item.textContent = '配對失敗';
+        messages.appendChild(item);
+      });
+
       socket.on('match:leave', () => {
         const item = document.createElement('li');
         item.textContent = '對方離開配對';

@@ -20,7 +20,7 @@ export function createSocketServer(io: Server) {
     });
 
     socket.on(MATCH_EVENT.CANCEL, () => {
-      handleMatchBreak(socket.id);
+      handleMatchCancel(socket.id);
     });
 
     socket.on(MATCH_EVENT.LEAVE, (userId: string) => {
@@ -127,7 +127,7 @@ export function createSocketServer(io: Server) {
     );
   }
 
-  function handleMatchBreak(socketId: string) {
+  function handleMatchCancel(socketId: string) {
     const hasRemoved = removeWaitingUser(socketId);
 
     if (hasRemoved) {
