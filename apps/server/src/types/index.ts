@@ -2,8 +2,8 @@ import type { DeviceMap } from '@packages/lib/dist';
 
 export type SocketChatMessage = {
   content: string;
-  room_id: string;
-  user_id: string;
+  roomId: string;
+  userId: string;
 };
 
 export type WaitingUser = {

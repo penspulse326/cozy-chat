@@ -12,6 +12,13 @@ async function createChatRoom(userIds: string[]) {
   return result;
 }
 
+async function findChatRoomById(id: string) {
+  const result = await ChatRoomModel.findChatRoomById(id);
+
+  return result;
+}
+
 export default {
   createChatRoom,
+  findChatRoomById,
 };

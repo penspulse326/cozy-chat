@@ -167,6 +167,12 @@ export function createSocketServer(io: Server) {
   }
 
   async function handleChatSend(data: SocketChatMessage) {
+    const targetChatRoom = await ChatRoomService.findChatRoomById(data.roomId);
+
+    if (!targetChatRoom) {
+      return;
+    }
+
     const result = await ChatMessageService.createChatMessage(data);
 
     if (!result) {
@@ -181,6 +187,6 @@ export function createSocketServer(io: Server) {
       return;
     }
 
-    io.to(data.room_id).emit(CHAT_EVENT.RECEIVE, chatMessage);
+    io.to(data.roomId).emit(CHAT_EVENT.RECEIVE, chatMessage);
   }
 }
