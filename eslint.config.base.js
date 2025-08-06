@@ -1,8 +1,8 @@
 // @ts-check
 
 import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
 import perfectionist from 'eslint-plugin-perfectionist';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
@@ -33,31 +33,15 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/consistent-type-exports': 'error',
-      'perfectionist/sort-imports': [
+      '@typescript-eslint/consistent-type-imports': [
         'error',
         {
-          type: 'natural',
-          order: 'asc',
-          ignoreCase: true,
-          newlinesBetween: 'always',
-          groups: [
-            'type',
-            ['builtin', 'external'],
-            [
-              'internal-type',
-              'internal',
-              'parent-type',
-              'sibling-type',
-              'index-type',
-            ],
-            ['parent', 'sibling', 'index'],
-            'object',
-            'unknown',
-          ],
+          disallowTypeAnnotations: true,
         },
       ],
+      '@typescript-eslint/consistent-type-exports': 'error',
+      '@typescript-eslint/consistent-type-definitions': 'off',
+      'perfectionist/sort-classes': 'off',
     },
   }
 );

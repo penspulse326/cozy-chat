@@ -1,84 +1,28 @@
-// Basic types
-export type TestType = 'test';
+import type { z } from 'zod';
 
-export interface TestInterface {
-  id: string;
-  name: string;
-}
+import type {
+  ChatMessageSchema,
+  ChatRoomSchema,
+  CreateChatMessageSchema,
+  CreateChatRoomSchema,
+  CreateUserSchema,
+  DeviceSchema,
+  UpdateUserLastActiveAtSchema,
+  UpdateUserStatusSchema,
+  UserSchema,
+  UserStatusSchema,
+} from '../schemas';
 
-// User-related types
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CreateUserRequest {
-  email: string;
-  name: string;
-  avatar?: string;
-}
-
-export interface UpdateUserRequest {
-  name?: string;
-  avatar?: string;
-}
-
-// API Response types
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-// Meeting-related types
-export interface Meeting {
-  id: string;
-  title: string;
-  description?: string;
-  startTime: Date;
-  endTime: Date;
-  organizer: User;
-  participants: User[];
-  status: MeetingStatus;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export type MeetingStatus = 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
-
-export interface CreateMeetingRequest {
-  title: string;
-  description?: string;
-  startTime: Date;
-  endTime: Date;
-  participantIds: string[];
-}
-
-// Utility types
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type RequiredKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
-}[keyof T];
-export type OptionalKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? K : never;
-}[keyof T];
-
-export enum Device {
-  PC = '網站',
-  MB = '行動裝置',
-  APP = 'APP',
-}
+export type ChatMessage = z.infer<typeof ChatMessageSchema>;
+export type ChatRoom = z.infer<typeof ChatRoomSchema>;
+export type CreateChatMessagePayload = z.infer<typeof CreateChatMessageSchema>;
+export type CreateChatRoomPayload = z.infer<typeof CreateChatRoomSchema>;
+export type CreateUserPayload = z.infer<typeof CreateUserSchema>;
+export type Device = z.infer<typeof DeviceSchema>;
+export type UpdateUserLastActiveAtPayload = z.infer<
+  typeof UpdateUserLastActiveAtSchema
+>;
+export type UpdateUserStatusPayload = z.infer<typeof UpdateUserStatusSchema>;
+export type User = z.infer<typeof UserSchema>;
+export type UserStatus = z.infer<typeof UserStatusSchema>;
+export type * from './data';

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx --watch --env-file .env src/index.ts",
+    "dev": "docker compose up -d && tsx --watch --env-file .env src/index.ts",
     "start": "node dist/index.js",
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest",
@@ -29,8 +29,8 @@
   "homepage": "https://github.com/penspulse326/express-ts-template#readme",
   "description": "",
   "dependencies": {
-    "express": "^5.1.0",
-    "@packages/lib": "workspace:*"
+    "@packages/lib": "workspace:*",
+    "express": "^5.1.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.2"

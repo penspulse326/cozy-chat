@@ -3,21 +3,33 @@ import http from 'http';
 import { dirname } from 'path';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
-import SocketServerService from './services/socket-server.service';
 
+import { connectToDB, disconnectFromDB } from '@/config/db';
+import { createSocketServer } from '@/socket';
+
+const port = process.env.PORT ?? '9001';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-const port = process.env.PORT ?? '9001';
 
 app.get('/', (_, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-new SocketServerService(new Server(server));
+async function bootstrap() {
+  try {
+    await connectToDB();
+    createSocketServer(new Server(server));
 
-server.listen(port, () => {
-  console.log(`listening on *:${port}`);
-});
+    server.listen(port, () => {
+      console.log(`Server 啟動成功: *:${port}`);
+    });
+  } catch (error) {
+    console.error('Server 啟動失敗:', error);
+    await disconnectFromDB();
+    process.exit(1);
+  }
+}
+await bootstrap();

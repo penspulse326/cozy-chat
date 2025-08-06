@@ -59,49 +59,84 @@
   <body>
     <ul id="messages"></ul>
     <form id="form" action="">
+      <button type="button" id="match-leave">離開</button>
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
+      let localUserId = null;
       let currentRoomId = null;
 
       const messages = document.getElementById('messages');
       const form = document.getElementById('form');
       const input = document.getElementById('input');
-
-      socket.emit('match:start');
-
-      socket.on('match:success', ({ roomId, userIds }) => {
-        currentRoomId = roomId;
-        const item = document.createElement('li');
-        item.textContent = `配對成功，已與用戶 ${userIds.filter((id) => id !== socket.id).join(', ')} 建立連線`;
-        messages.appendChild(item);
-      });
+      const matchLeaveButton = document.getElementById('match-leave');
 
       form.addEventListener('submit', (e) => {
         e.preventDefault();
 
         if (input.value && currentRoomId) {
-          socket.emit('send:message', {
+          socket.emit('chat:send', {
+            content: input.value,
             roomId: currentRoomId,
-            message: input.value,
+            userId: localUserId,
           });
           input.value = '';
         }
       });
 
-      socket.on('send:message', (msg) => {
+      matchLeaveButton.addEventListener('click', () => {
+        if (!localUserId) {
+          socket.emit('match:cancel');
+          return;
+        }
+
+        socket.emit('match:leave', localUserId);
+      });
+
+      // socket.emit('match:start', 'PC');
+
+      socket.on('match:success', ({ roomId, userId }) => {
+        currentRoomId = roomId;
+        localUserId = userId;
         const item = document.createElement('li');
-        item.textContent = msg;
+        item.textContent = `配對成功，我的 ID: ${userId}，房間 ID: ${roomId}`;
         messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
       });
 
       socket.on('match:fail', () => {
         const item = document.createElement('li');
         item.textContent = '配對失敗';
         messages.appendChild(item);
+      });
+
+      socket.on('match:cancel', () => {
+        const item = document.createElement('li');
+        item.textContent = '配對失敗';
+        messages.appendChild(item);
+      });
+
+      socket.on('match:leave', () => {
+        const item = document.createElement('li');
+        item.textContent = '對方離開配對';
+        messages.appendChild(item);
+      });
+
+      socket.on('chat:receive', (chatMessage) => {
+        const item = document.createElement('li');
+        item.textContent = `${chatMessage.content}`;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      socket.on('chat:load', (chatMessages) => {
+        chatMessages.forEach((chatMessage) => {
+          const item = document.createElement('li');
+          item.textContent = `${chatMessage.content}`;
+          messages.appendChild(item);
+          window.scrollTo(0, document.body.scrollHeight);
+        });
       });
     </script>
   </body>

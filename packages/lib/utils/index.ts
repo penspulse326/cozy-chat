@@ -1,14 +1,10 @@
-// String utilities
-export function sayHello(name: string): string {
-  return `Hello ${name}`;
-}
-
-export function sayGoodbye(name: string): string {
-  return `Goodbye ${name}`;
-}
-
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+// Date utilities
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString('zh-TW');
 }
 
 export function formatName(firstName: string, lastName: string): string {
@@ -20,8 +16,9 @@ export function isEmpty<T>(array: T[]): boolean {
   return array.length === 0;
 }
 
-export function unique<T>(array: T[]): T[] {
-  return [...new Set(array)];
+export function isToday(date: Date): boolean {
+  const today = new Date();
+  return date.toDateString() === today.toDateString();
 }
 
 // Object utilities
@@ -38,12 +35,15 @@ export function pick<T extends Record<string, unknown>, K extends keyof T>(
   return result;
 }
 
-// Date utilities
-export function formatDate(date: Date): string {
-  return date.toLocaleDateString('zh-TW');
+export function sayGoodbye(name: string): string {
+  return `Goodbye ${name}`;
 }
 
-export function isToday(date: Date): boolean {
-  const today = new Date();
-  return date.toDateString() === today.toDateString();
+// String utilities
+export function sayHello(name: string): string {
+  return `Hello ${name}`;
+}
+
+export function unique<T>(array: T[]): T[] {
+  return [...new Set(array)];
 }
