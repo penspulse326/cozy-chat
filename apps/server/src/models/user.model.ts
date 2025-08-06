@@ -1,20 +1,21 @@
 import type { CreateUserPayload, User, UserStatus } from '@packages/lib';
-import type { InsertOneResult } from 'mongodb';
+import type { InsertOneResult, OptionalId } from 'mongodb';
 
 import { CreateUserSchema } from '@packages/lib';
 import { ObjectId, type UpdateResult } from 'mongodb';
 
 import { db } from '@/config/db';
 
+type UserData = Omit<User, '_id'> & { _id: ObjectId };
+
 async function createUser(
   data: CreateUserPayload
-): Promise<InsertOneResult | null> {
-  const users = db.collection<User>('users');
+): Promise<InsertOneResult<UserData> | null> {
+  const users = db.collection<OptionalId<UserData>>('users');
 
   try {
     const validatedUser = CreateUserSchema.parse(data);
     const result = await users.insertOne(validatedUser);
-
     console.log('新增 User 成功');
 
     return result;
@@ -25,11 +26,12 @@ async function createUser(
   }
 }
 
-async function findUserById(userId: string): Promise<null | User> {
-  const users = db.collection<User>('users');
+async function findUserById(userId: string): Promise<null | UserData> {
+  const users = db.collection<UserData>('users');
 
   try {
     const user = await users.findOne({ _id: new ObjectId(userId) });
+    console.log('查詢 User 成功');
 
     return user;
   } catch (error: unknown) {
@@ -39,11 +41,12 @@ async function findUserById(userId: string): Promise<null | User> {
   }
 }
 
-async function findUsersByRoomId(roomId: string): Promise<null | User[]> {
-  const users = db.collection<User>('users');
+async function findUsersByRoomId(roomId: string): Promise<null | UserData[]> {
+  const users = db.collection<UserData>('users');
 
   try {
     const result = await users.find({ room_id: roomId }).toArray();
+    console.log('查詢 User 成功');
 
     return result;
   } catch (error: unknown) {
@@ -56,14 +59,15 @@ async function findUsersByRoomId(roomId: string): Promise<null | User[]> {
 async function updateUserRoomId(
   userId: string,
   roomId: string
-): Promise<null | UpdateResult> {
-  const users = db.collection<User>('users');
+): Promise<null | UpdateResult<UserData>> {
+  const users = db.collection<UserData>('users');
 
   try {
     const result = await users.updateOne(
       { _id: new ObjectId(userId) },
       { $set: { room_id: roomId } }
     );
+    console.log('更新 User RoomId 成功');
 
     return result;
   } catch (error: unknown) {
@@ -75,8 +79,8 @@ async function updateUserRoomId(
 async function updateUserStatus(
   userId: string,
   status: UserStatus
-): Promise<null | UpdateResult> {
-  const users = db.collection<User>('users');
+): Promise<null | UpdateResult<UserData>> {
+  const users = db.collection<UserData>('users');
 
   try {
     const result = await users.updateOne(

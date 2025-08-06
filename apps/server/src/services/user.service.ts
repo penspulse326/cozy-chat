@@ -93,7 +93,7 @@ async function updateUserRoomId(userId: string, roomId: string) {
 async function updateUserStatus(userId: string, status: UserStatus) {
   const user = await findUserById(userId);
 
-  if (!user) {
+  if (!user || !user.room_id) {
     return;
   }
 

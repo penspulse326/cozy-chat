@@ -1,15 +1,18 @@
 import type { ChatMessage, CreateChatMessagePayload } from '@packages/lib';
-import type { InsertOneResult } from 'mongodb';
+import type { InsertOneResult, OptionalId } from 'mongodb';
 
 import { CreateChatMessageSchema } from '@packages/lib';
 import { ObjectId } from 'mongodb';
 
 import { db } from '@/config/db';
 
+type ChatMessageData = Omit<ChatMessage, '_id'> & { _id: ObjectId };
+
 async function createChatMessage(
   data: CreateChatMessagePayload
-): Promise<InsertOneResult<CreateChatMessagePayload> | null> {
-  const chatMessages = db.collection<ChatMessage>('chat_messages');
+): Promise<InsertOneResult<OptionalId<ChatMessageData>> | null> {
+  const chatMessages =
+    db.collection<OptionalId<ChatMessageData>>('chat_messages');
 
   try {
     const validatedChatMessage = CreateChatMessageSchema.parse(data);
@@ -24,8 +27,10 @@ async function createChatMessage(
   }
 }
 
-async function findChatMessageById(_id: string): Promise<ChatMessage | null> {
-  const chatMessages = db.collection<ChatMessage>('chat_messages');
+async function findChatMessageById(
+  _id: string
+): Promise<ChatMessageData | null> {
+  const chatMessages = db.collection<ChatMessageData>('chat_messages');
 
   try {
     const result = await chatMessages.findOne({ _id: new ObjectId(_id) });
@@ -45,8 +50,8 @@ async function findChatMessageById(_id: string): Promise<ChatMessage | null> {
 
 async function findChatMessagesByRoomId(
   roomId: string
-): Promise<ChatMessage[] | null> {
-  const chatMessages = db.collection<ChatMessage>('chat_messages');
+): Promise<ChatMessageData[] | null> {
+  const chatMessages = db.collection<ChatMessageData>('chat_messages');
 
   try {
     const result = await chatMessages.find({ room_id: roomId }).toArray();
