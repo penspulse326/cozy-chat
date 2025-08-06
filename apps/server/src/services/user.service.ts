@@ -8,6 +8,16 @@ import UserModel from '@/models/user.model';
 
 import ChatRoomService from './chat-room.service';
 
+async function checkUserStatus(roomId: string) {
+  const users = await findUsersByRoomId(roomId);
+
+  if (!users) {
+    return false;
+  }
+
+  return users.some((user) => user.status === UserStatusSchema.enum.LEFT);
+}
+
 async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
   const createdNewUser = await createUser(newUser);
   const createdPeerUser = await createUser(peerUser);
@@ -68,6 +78,12 @@ async function findUserById(userId: string) {
   return result;
 }
 
+async function findUsersByRoomId(roomId: string) {
+  const result = await UserModel.findUsersByRoomId(roomId);
+
+  return result;
+}
+
 async function updateUserRoomId(userId: string, roomId: string) {
   const result = await UserModel.updateUserRoomId(userId, roomId);
 
@@ -89,9 +105,11 @@ async function updateUserStatus(userId: string, status: UserStatus) {
 }
 
 export default {
+  checkUserStatus,
   createMatchedUsers,
   createUser,
   findUserById,
+  findUsersByRoomId,
   updateUserRoomId,
   updateUserStatus,
 };

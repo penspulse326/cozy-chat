@@ -30,11 +30,11 @@ async function createUser(
   }
 }
 
-async function findUserById(_id: string): Promise<null | User> {
+async function findUserById(userId: string): Promise<null | User> {
   const users = db.collection<User>('users');
 
   try {
-    const user = await users.findOne({ _id: new ObjectId(_id) });
+    const user = await users.findOne({ _id: new ObjectId(userId) });
 
     return user;
   } catch (error: unknown) {
@@ -44,15 +44,29 @@ async function findUserById(_id: string): Promise<null | User> {
   }
 }
 
+async function findUsersByRoomId(roomId: string): Promise<null | User[]> {
+  const users = db.collection<User>('users');
+
+  try {
+    const result = await users.find({ room_id: roomId }).toArray();
+
+    return result;
+  } catch (error: unknown) {
+    console.error('查詢 User 失敗', error);
+
+    return null;
+  }
+}
+
 async function updateUserRoomId(
-  _id: string,
+  userId: string,
   roomId: string
 ): Promise<null | UpdateResult<User>> {
   const users = db.collection<User>('users');
 
   try {
     const result = await users.updateOne(
-      { _id: new ObjectId(_id) },
+      { _id: new ObjectId(userId) },
       { $set: { room_id: roomId } }
     );
 
@@ -64,14 +78,14 @@ async function updateUserRoomId(
 }
 
 async function updateUserStatus(
-  _id: string,
+  userId: string,
   status: UserStatus
 ): Promise<null | UpdateResult<UpdateUserStatusPayload>> {
   const users = db.collection<User>('users');
 
   try {
     const result = await users.updateOne(
-      { _id: new ObjectId(_id) },
+      { _id: new ObjectId(userId) },
       { $set: { status } }
     );
 
@@ -85,6 +99,7 @@ async function updateUserStatus(
 export default {
   createUser,
   findUserById,
+  findUsersByRoomId,
   updateUserRoomId,
   updateUserStatus,
 };

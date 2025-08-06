@@ -30,7 +30,6 @@ async function findChatRoomById(id: string): Promise<ChatRoom | null> {
   try {
     const result = await chatRooms.findOne({ _id: new ObjectId(id) });
     console.log('查詢 ChatRoom 成功');
-
     return result;
   } catch (error) {
     console.error('查詢 ChatRoom 失敗', error);

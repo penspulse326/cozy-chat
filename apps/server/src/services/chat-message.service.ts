@@ -1,7 +1,6 @@
 import type { SocketChatMessage } from '@packages/lib';
 
 import ChatMessageModel from '@/models/chat-message.model';
-import ChatRoomService from '@/services/chat-room.service';
 
 async function createChatMessage(data: SocketChatMessage) {
   const currentTime = new Date();
@@ -30,12 +29,6 @@ async function findChatMessagesByRoomId(roomId: string) {
 }
 
 async function sendChatMessage(data: SocketChatMessage) {
-  const targetChatRoom = await ChatRoomService.findChatRoomById(data.roomId);
-
-  if (!targetChatRoom) {
-    return null;
-  }
-
   const result = await createChatMessage(data);
 
   if (!result) {

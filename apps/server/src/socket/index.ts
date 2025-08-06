@@ -6,17 +6,17 @@ import { CHAT_EVENT, MATCH_EVENT, UserStatusSchema } from '@packages/lib';
 import type { WaitingUser } from '@/types';
 
 import ChatMessageService from '@/services/chat-message.service';
+import ChatRoomService from '@/services/chat-room.service';
 import UserService from '@/services/user.service';
 
 export function createSocketServer(io: Server) {
   const waitingUsers: WaitingUser[] = [];
 
   io.on('connection', (socket: Socket) => {
-    const userId = socket.handshake.query.userId;
     const roomId = socket.handshake.query.roomId;
 
     if (typeof roomId === 'string') {
-      void handleChatLoad(roomId);
+      void handleCheckUser(socket.id, roomId);
     }
 
     socket.on(MATCH_EVENT.START, (device: keyof typeof DeviceMap) => {
@@ -146,18 +146,33 @@ export function createSocketServer(io: Server) {
     io.to(data.roomId).emit(CHAT_EVENT.RECEIVE, newChatMessage);
   }
 
-  async function handleCheckUser(roomId: string) {
-    if (!roomId) {
+  async function handleCheckUser(socketId: string, roomId: string) {
+    const targetRoom = await ChatRoomService.findChatRoomById(roomId);
+
+    if (!targetRoom) {
+      io.to(socketId).emit(MATCH_EVENT.RECONNECT_FAIL);
       return;
     }
 
-    const newChatMessage =
+    await io.of('/').sockets.get(socketId)?.join(roomId);
+
+    await handleChatLoad(roomId);
+
+    const isLeft = await UserService.checkUserStatus(roomId);
+
+    if (isLeft) {
+      io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.LEAVE);
+    }
+  }
+
+  async function handleChatLoad(roomId: string) {
+    const chatMessages =
       await ChatMessageService.findChatMessagesByRoomId(roomId);
 
-    if (!newChatMessage) {
+    if (!chatMessages) {
       return;
     }
 
-    io.to(roomId).emit(CHAT_EVENT.LOAD, newChatMessage);
+    io.to(roomId).emit(CHAT_EVENT.LOAD, chatMessages);
   }
 }

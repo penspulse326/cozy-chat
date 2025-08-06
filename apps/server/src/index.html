@@ -79,8 +79,8 @@
         if (input.value && currentRoomId) {
           socket.emit('chat:send', {
             content: input.value,
-            room_id: currentRoomId,
-            user_id: localUserId,
+            roomId: currentRoomId,
+            userId: localUserId,
           });
           input.value = '';
         }
@@ -95,7 +95,7 @@
         socket.emit('match:leave', localUserId);
       });
 
-      socket.emit('match:start', 'PC');
+      // socket.emit('match:start', 'PC');
 
       socket.on('match:success', ({ roomId, userId }) => {
         currentRoomId = roomId;
@@ -128,6 +128,15 @@
         item.textContent = `${chatMessage.content}`;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      socket.on('chat:load', (chatMessages) => {
+        chatMessages.forEach((chatMessage) => {
+          const item = document.createElement('li');
+          item.textContent = `${chatMessage.content}`;
+          messages.appendChild(item);
+          window.scrollTo(0, document.body.scrollHeight);
+        });
       });
     </script>
   </body>
