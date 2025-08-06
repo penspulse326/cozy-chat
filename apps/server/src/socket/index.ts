@@ -12,7 +12,12 @@ export function createSocketServer(io: Server) {
   const waitingUsers: WaitingUser[] = [];
 
   io.on('connection', (socket: Socket) => {
-    console.log('新的用戶連線:', socket.id);
+    const userId = socket.handshake.query.userId;
+    const roomId = socket.handshake.query.roomId;
+
+    if (typeof roomId === 'string') {
+      void handleChatLoad(roomId);
+    }
 
     socket.on(MATCH_EVENT.START, (device: keyof typeof DeviceMap) => {
       void handleMatchStart({ device, socketId: socket.id });
@@ -103,18 +108,16 @@ export function createSocketServer(io: Server) {
   }
 
   async function handleMatchLeave(userId: string) {
-    const user = await UserService.findUserById(userId);
-
-    if (!user) {
-      return;
-    }
-
-    await UserService.updateUserStatus(
-      user._id.toString(),
+    const result = await UserService.updateUserStatus(
+      userId,
       UserStatusSchema.enum.LEFT
     );
 
-    handleNotifyMatchLeave(user.room_id);
+    if (!result) {
+      return;
+    }
+
+    handleNotifyMatchLeave(result.roomId);
   }
 
   async function handleNotifyMatchSuccess(
@@ -141,5 +144,20 @@ export function createSocketServer(io: Server) {
     }
 
     io.to(data.roomId).emit(CHAT_EVENT.RECEIVE, newChatMessage);
+  }
+
+  async function handleCheckUser(roomId: string) {
+    if (!roomId) {
+      return;
+    }
+
+    const newChatMessage =
+      await ChatMessageService.findChatMessagesByRoomId(roomId);
+
+    if (!newChatMessage) {
+      return;
+    }
+
+    io.to(roomId).emit(CHAT_EVENT.LOAD, newChatMessage);
   }
 }

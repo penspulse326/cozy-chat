@@ -23,6 +23,12 @@ async function findChatMessageById(id: string) {
   return result;
 }
 
+async function findChatMessagesByRoomId(roomId: string) {
+  const result = await ChatMessageModel.findChatMessagesByRoomId(roomId);
+
+  return result;
+}
+
 async function sendChatMessage(data: SocketChatMessage) {
   const targetChatRoom = await ChatRoomService.findChatRoomById(data.roomId);
 
@@ -50,5 +56,6 @@ async function sendChatMessage(data: SocketChatMessage) {
 export default {
   createChatMessage,
   findChatMessageById,
+  findChatMessagesByRoomId,
   sendChatMessage,
 };

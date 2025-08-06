@@ -75,9 +75,17 @@ async function updateUserRoomId(userId: string, roomId: string) {
 }
 
 async function updateUserStatus(userId: string, status: UserStatus) {
-  const result = await UserModel.updateUserStatus(userId, status);
+  const user = await findUserById(userId);
 
-  return result;
+  if (!user) {
+    return;
+  }
+
+  await UserModel.updateUserStatus(userId, status);
+
+  return {
+    roomId: user.room_id.toString(),
+  };
 }
 
 export default {

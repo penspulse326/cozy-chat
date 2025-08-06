@@ -43,7 +43,24 @@ async function findChatMessageById(_id: string): Promise<ChatMessage | null> {
   }
 }
 
+async function findChatMessagesByRoomId(
+  roomId: string
+): Promise<ChatMessage[] | null> {
+  const chatMessages = db.collection<ChatMessage>('chat_messages');
+
+  try {
+    const result = await chatMessages.find({ room_id: roomId }).toArray();
+    console.log(`找到 ChatMessages: ${roomId}: ${JSON.stringify(result)}`);
+
+    return result;
+  } catch (error) {
+    console.error(`查詢 ChatMessages 失敗: ${roomId}`, error);
+    return null;
+  }
+}
+
 export default {
   createChatMessage,
   findChatMessageById,
+  findChatMessagesByRoomId,
 };
