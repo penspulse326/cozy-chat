@@ -9,7 +9,7 @@ import { db } from '@/config/db';
 async function createChatMessage(
   data: CreateChatMessagePayload
 ): Promise<InsertOneResult<CreateChatMessagePayload> | null> {
-  const chatMessages = db.collection<CreateChatMessagePayload>('chat_messages');
+  const chatMessages = db.collection<ChatMessage>('chat_messages');
 
   try {
     const validatedChatMessage = CreateChatMessageSchema.parse(data);

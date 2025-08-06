@@ -8,8 +8,8 @@ import { db } from '@/config/db';
 
 async function createChatRoom(
   data: CreateChatRoomPayload
-): Promise<InsertOneResult<CreateChatRoomPayload> | null> {
-  const chatRooms = db.collection<CreateChatRoomPayload>('chat_rooms');
+): Promise<InsertOneResult | null> {
+  const chatRooms = db.collection<ChatRoom>('chat_rooms');
 
   try {
     const validatedChatRoom = CreateChatRoomSchema.parse(data);

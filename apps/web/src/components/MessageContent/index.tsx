@@ -1,11 +1,11 @@
 import { Flex, Stack, Text, alpha } from '@mantine/core';
-import { Device } from '@packages/lib';
+import { DeviceMap } from '@packages/lib';
 import styles from './styles.module.css';
 
 export type MessageContentData = {
   id: string;
   user_id: string;
-  device: keyof typeof Device;
+  device: keyof typeof DeviceMap;
   message: string;
   created_at: string;
 };
@@ -30,7 +30,7 @@ export default function MessageContent({ data, isUser }: MessageContentProps) {
       <Stack
         className={`${styles.infoStack} ${isUser ? styles.infoStackRight : styles.infoStackLeft}`}
       >
-        <Text size="xs">{Device[device]}</Text>
+        <Text size="xs">{DeviceMap[device]}</Text>
         <Text size="xs">{created_at}</Text>
       </Stack>
     </Flex>

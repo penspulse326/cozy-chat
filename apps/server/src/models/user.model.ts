@@ -1,9 +1,4 @@
-import type {
-  CreateUserPayload,
-  UpdateUserStatusPayload,
-  User,
-  UserStatus,
-} from '@packages/lib';
+import type { CreateUserPayload, User, UserStatus } from '@packages/lib';
 import type { InsertOneResult } from 'mongodb';
 
 import { CreateUserSchema } from '@packages/lib';
@@ -13,8 +8,8 @@ import { db } from '@/config/db';
 
 async function createUser(
   data: CreateUserPayload
-): Promise<InsertOneResult<CreateUserPayload> | null> {
-  const users = db.collection<CreateUserPayload>('users');
+): Promise<InsertOneResult | null> {
+  const users = db.collection<User>('users');
 
   try {
     const validatedUser = CreateUserSchema.parse(data);
@@ -61,7 +56,7 @@ async function findUsersByRoomId(roomId: string): Promise<null | User[]> {
 async function updateUserRoomId(
   userId: string,
   roomId: string
-): Promise<null | UpdateResult<User>> {
+): Promise<null | UpdateResult> {
   const users = db.collection<User>('users');
 
   try {
@@ -80,7 +75,7 @@ async function updateUserRoomId(
 async function updateUserStatus(
   userId: string,
   status: UserStatus
-): Promise<null | UpdateResult<UpdateUserStatusPayload>> {
+): Promise<null | UpdateResult> {
   const users = db.collection<User>('users');
 
   try {
