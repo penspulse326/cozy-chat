@@ -5,9 +5,9 @@ import { CHAT_EVENT, MATCH_EVENT, UserStatusSchema } from '@packages/lib';
 
 import type { WaitingUser } from '@/types';
 
-import ChatMessageService from '@/services/chat-message.service';
-import ChatRoomService from '@/services/chat-room.service';
-import UserService from '@/services/user.service';
+import chatMessageService from '@/services/chat-message.service';
+import chatRoomService from '@/services/chat-room.service';
+import userService from '@/services/user.service';
 
 export function createSocketServer(io: Server) {
   const waitingUsers: WaitingUser[] = [];
@@ -86,7 +86,7 @@ export function createSocketServer(io: Server) {
     newUser: WaitingUser,
     peerUser: WaitingUser
   ) {
-    const matchResult = await UserService.createMatchedUsers(newUser, peerUser);
+    const matchResult = await userService.createMatchedUsers(newUser, peerUser);
 
     if (!matchResult) {
       return;
@@ -108,7 +108,7 @@ export function createSocketServer(io: Server) {
   }
 
   async function handleMatchLeave(userId: string) {
-    const result = await UserService.updateUserStatus(
+    const result = await userService.updateUserStatus(
       userId,
       UserStatusSchema.enum.LEFT
     );
@@ -137,7 +137,7 @@ export function createSocketServer(io: Server) {
   }
 
   async function handleChatSend(data: SocketChatMessage) {
-    const newChatMessage = await ChatMessageService.sendChatMessage(data);
+    const newChatMessage = await chatMessageService.sendChatMessage(data);
 
     if (!newChatMessage) {
       return;
@@ -147,7 +147,7 @@ export function createSocketServer(io: Server) {
   }
 
   async function handleCheckUser(socketId: string, roomId: string) {
-    const targetRoom = await ChatRoomService.findChatRoomById(roomId);
+    const targetRoom = await chatRoomService.findChatRoomById(roomId);
 
     if (!targetRoom) {
       io.to(socketId).emit(MATCH_EVENT.RECONNECT_FAIL);
@@ -158,7 +158,7 @@ export function createSocketServer(io: Server) {
 
     await handleChatLoad(roomId);
 
-    const isLeft = await UserService.checkUserStatus(roomId);
+    const isLeft = await userService.checkUserStatus(roomId);
 
     if (isLeft) {
       io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.LEAVE);
@@ -167,7 +167,7 @@ export function createSocketServer(io: Server) {
 
   async function handleChatLoad(roomId: string) {
     const chatMessages =
-      await ChatMessageService.findChatMessagesByRoomId(roomId);
+      await chatMessageService.findChatMessagesByRoomId(roomId);
 
     if (!chatMessages) {
       return;

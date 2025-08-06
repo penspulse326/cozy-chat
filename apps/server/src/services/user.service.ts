@@ -4,9 +4,9 @@ import { UserStatusSchema } from '@packages/lib';
 
 import type { WaitingUser } from '@/types';
 
-import UserModel from '@/models/user.model';
+import userModel from '@/models/user.model';
 
-import ChatRoomService from './chat-room.service';
+import chatRoomService from './chat-room.service';
 
 async function checkUserStatus(roomId: string) {
   const users = await findUsersByRoomId(roomId);
@@ -26,7 +26,7 @@ async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
     return null;
   }
 
-  const newChatRoom = await ChatRoomService.createChatRoom([
+  const newChatRoom = await chatRoomService.createChatRoom([
     createdNewUser.insertedId.toString(),
     createdPeerUser.insertedId.toString(),
   ]);
@@ -67,25 +67,25 @@ async function createUser(user: WaitingUser) {
     status: UserStatusSchema.enum.ACTIVE,
   };
 
-  const result = await UserModel.createUser(payload);
+  const result = await userModel.createUser(payload);
 
   return result;
 }
 
 async function findUserById(userId: string) {
-  const result = await UserModel.findUserById(userId);
+  const result = await userModel.findUserById(userId);
 
   return result;
 }
 
 async function findUsersByRoomId(roomId: string) {
-  const result = await UserModel.findUsersByRoomId(roomId);
+  const result = await userModel.findUsersByRoomId(roomId);
 
   return result;
 }
 
 async function updateUserRoomId(userId: string, roomId: string) {
-  const result = await UserModel.updateUserRoomId(userId, roomId);
+  const result = await userModel.updateUserRoomId(userId, roomId);
 
   return result;
 }
@@ -97,7 +97,7 @@ async function updateUserStatus(userId: string, status: UserStatus) {
     return;
   }
 
-  await UserModel.updateUserStatus(userId, status);
+  await userModel.updateUserStatus(userId, status);
 
   return {
     roomId: user.room_id.toString(),
