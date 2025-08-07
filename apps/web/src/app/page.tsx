@@ -34,10 +34,6 @@ export default function Home() {
     });
   }
 
-  function handleLeaveChat() {
-    setMatchStatus('standby');
-  }
-
   function handleSendMessage(message: string) {
     setMessages([
       ...messages,
@@ -118,7 +114,6 @@ export default function Home() {
                 userId="123"
                 messages={messages}
                 matchingStatus={matchStatus}
-                onLeaveChat={handleLeaveChat}
               />
             )}
           </Stack>
@@ -127,7 +122,7 @@ export default function Home() {
 
       <MessageInput
         matchingStatus={matchStatus}
-        onLeaveChat={handleLeaveChat}
+        onLeaveChat={() => setMatchStatus('quit')}
         onSendMessage={handleSendMessage}
       />
     </AppShell>

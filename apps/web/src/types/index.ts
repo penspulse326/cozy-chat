@@ -3,7 +3,9 @@ export type MatchStatus =
   | 'waiting'
   | 'matched'
   | 'error'
-  | 'cancel';
+  | 'cancel'
+  | 'leave'
+  | 'quit';
 
 export type MatchSuccessData = {
   roomId: string;

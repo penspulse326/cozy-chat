@@ -2,14 +2,13 @@ import { Stack, Text, alpha } from '@mantine/core';
 import MessageContent from '../MessageContent';
 import styles from './styles.module.css';
 
-import { MatchingStatus } from '@/types';
+import { MatchStatus } from '@/types';
 import type { MessageContentData } from '../MessageContent';
 
 interface ChatBoxProps {
   userId: string;
   messages: MessageContentData[];
-  matchingStatus: MatchingStatus;
-  onLeaveChat: () => void;
+  matchingStatus: MatchStatus;
 }
 
 export default function ChatBox({

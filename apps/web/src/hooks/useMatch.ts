@@ -7,7 +7,7 @@ function useMatch() {
   const socketRef = useRef<Socket | null>(null);
   const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
 
-  function initSocketClient() {
+  function initClient() {
     socketRef.current = io('http://localhost:8080');
 
     socketRef.current.on('connect', () => {
@@ -19,25 +19,66 @@ function useMatch() {
     });
   }
 
+  function onStandby() {
+    clearLocalData();
+    socketRef.current?.disconnect();
+    socketRef.current = null;
+  }
+
   function handleMatchStart() {
     socketRef.current?.emit(MATCH_EVENT.START, 'PC');
   }
 
+  function onCancel() {
+    socketRef.current?.emit(MATCH_EVENT.CANCEL);
+    setMatchStatus('standby');
+  }
+
+  function onQuit() {
+    const roomId = localStorage.getItem('roomId');
+    const userId = localStorage.getItem('userId');
+
+    if (!roomId || !userId) {
+      onCancel();
+      return;
+    }
+  }
+
   function handleMatchSuccess(data: MatchSuccessData) {
-    localStorage.setItem('roomId', data.roomId);
-    localStorage.setItem('userId', data.userId);
+    setLocalData(data);
     setMatchStatus('matched');
   }
 
   function onMatchStatusChange() {
     switch (matchStatus) {
+      case 'standby':
+        onStandby();
+        break;
+
       case 'waiting':
-        initSocketClient();
+        initClient();
+        break;
+
+      case 'cancel':
+        onCancel();
+        break;
+      case 'quit':
+        onQuit();
         break;
 
       default:
         break;
     }
+  }
+
+  function setLocalData(data: MatchSuccessData) {
+    localStorage.setItem('roomId', data.roomId);
+    localStorage.setItem('userId', data.userId);
+  }
+
+  function clearLocalData() {
+    localStorage.removeItem('roomId');
+    localStorage.removeItem('userId');
   }
 
   useEffect(() => {

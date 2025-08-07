@@ -103,6 +103,7 @@ export function createSocketServer(io: Server) {
     const hasRemoved = removeWaitingUser(socketId);
 
     if (hasRemoved) {
+      console.log('waitingUsers', waitingUsers);
       io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.CANCEL);
     }
   }
