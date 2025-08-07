@@ -4,7 +4,7 @@ import Blobs from '@/components/Blobs';
 import ChatBox from '@/components/ChatBox';
 import { MessageContentData } from '@/components/MessageContent';
 import MessageInput from '@/components/MessageInput';
-import { MatchingStatus } from '@/types';
+import useMatch from '@/hooks/useMatch';
 import {
   AppShell,
   Burger,
@@ -23,70 +23,15 @@ export default function Home() {
   const [opened, { toggle }] = useDisclosure();
   const viewport = useRef<HTMLDivElement>(null);
 
-  const [matchingStatus, setMatchingStatus] =
-    useState<MatchingStatus>('standby');
+  const { matchingStatus, setMatchingStatus } = useMatch();
 
-  const [messages, setMessages] = useState<MessageContentData[]>([
-    {
-      id: '1',
-      user_id: '123',
-      device: 'PC',
-      message: '你好，我是小明，很開心認識你！',
-      created_at: '2025-01-01 12:00:00',
-    },
-    {
-      id: '2',
-      user_id: '456',
-      device: 'APP',
-      message: '你好，我是小美！',
-      created_at: '2025-01-01 12:01:00',
-    },
-    {
-      id: '3',
-      user_id: '123',
-      device: 'PC',
-      message: '怎麼還沒睡！',
-      created_at: '2025-01-01 12:01:30',
-    },
-    {
-      id: '4',
-      user_id: '123',
-      device: 'PC',
-      message: '在幹嘛？',
-      created_at: '2025-01-01 12:02:00',
-    },
-    {
-      id: '5',
-      user_id: '456',
-      device: 'APP',
-      message: '我在看花枝遊戲！',
-      created_at: '2025-01-01 12:02:30',
-    },
-    {
-      id: '6',
-      user_id: '123',
-      device: 'PC',
-      message: '我也在看！',
-      created_at: '2025-01-01 12:03:00',
-    },
-  ]);
+  const [messages, setMessages] = useState<MessageContentData[]>([]);
 
   function handleScrollToBottom() {
     viewport.current?.scrollTo({
       top: viewport.current.scrollHeight,
       behavior: 'smooth',
     });
-  }
-
-  async function handleStartChat() {
-    setMatchingStatus('waiting');
-
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        setMatchingStatus('matched');
-        resolve(true);
-      }, 1000)
-    );
   }
 
   function handleLeaveChat() {
@@ -158,7 +103,10 @@ export default function Home() {
                 放輕鬆，隨便聊
               </Title>
               {matchingStatus === 'standby' && (
-                <Button onClick={handleStartChat} className={styles.button}>
+                <Button
+                  onClick={() => setMatchingStatus('waiting')}
+                  className={styles.button}
+                >
                   開始聊天
                 </Button>
               )}

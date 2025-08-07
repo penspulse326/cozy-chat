@@ -21,7 +21,15 @@ app.get('/', (_, res) => {
 async function bootstrap() {
   try {
     await connectToDB();
-    createSocketServer(new Server(server));
+    createSocketServer(
+      new Server(server, {
+        cors: {
+          credentials: true,
+          methods: ['GET', 'POST'],
+          origin: 'http://localhost:3000',
+        },
+      })
+    );
 
     server.listen(port, () => {
       console.log(`Server 啟動成功: *:${port}`);
