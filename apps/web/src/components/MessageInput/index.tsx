@@ -1,10 +1,10 @@
-import { MatchingStatus } from '@/types';
+import { MatchStatus } from '@/types';
 import { Button, Flex, Input } from '@mantine/core';
 import { useState } from 'react';
 import styles from './styles.module.css';
 
 interface MessageInputProps {
-  matchingStatus: MatchingStatus;
+  matchingStatus: MatchStatus;
   onSendMessage: (message: string) => void;
   onLeaveChat: () => void;
 }
