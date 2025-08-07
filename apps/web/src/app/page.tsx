@@ -23,7 +23,7 @@ export default function Home() {
   const [opened, { toggle }] = useDisclosure();
   const viewport = useRef<HTMLDivElement>(null);
 
-  const { matchingStatus, setMatchingStatus } = useMatch();
+  const { matchStatus, setMatchStatus } = useMatch();
 
   const [messages, setMessages] = useState<MessageContentData[]>([]);
 
@@ -35,7 +35,7 @@ export default function Home() {
   }
 
   function handleLeaveChat() {
-    setMatchingStatus('standby');
+    setMatchStatus('standby');
   }
 
   function handleSendMessage(message: string) {
@@ -54,7 +54,7 @@ export default function Home() {
 
   useEffect(() => {
     handleScrollToBottom();
-  }, [matchingStatus, messages]);
+  }, [matchStatus, messages]);
 
   return (
     <AppShell
@@ -91,6 +91,7 @@ export default function Home() {
           viewportRef={viewport}
         >
           <Blobs />
+
           <Stack mx="auto" maw={480} className={styles.outerStack}>
             <Stack className={styles.innerStack}>
               <Image
@@ -102,9 +103,9 @@ export default function Home() {
               <Title order={2} c="navy-steel.9" className={styles.title}>
                 放輕鬆，隨便聊
               </Title>
-              {matchingStatus === 'standby' && (
+              {matchStatus === 'standby' && (
                 <Button
-                  onClick={() => setMatchingStatus('waiting')}
+                  onClick={() => setMatchStatus('waiting')}
                   className={styles.button}
                 >
                   開始聊天
@@ -112,11 +113,11 @@ export default function Home() {
               )}
             </Stack>
 
-            {matchingStatus !== 'standby' && (
+            {matchStatus !== 'standby' && (
               <ChatBox
                 userId="123"
                 messages={messages}
-                matchingStatus={matchingStatus}
+                matchingStatus={matchStatus}
                 onLeaveChat={handleLeaveChat}
               />
             )}
@@ -125,7 +126,7 @@ export default function Home() {
       </AppShell.Main>
 
       <MessageInput
-        matchingStatus={matchingStatus}
+        matchingStatus={matchStatus}
         onLeaveChat={handleLeaveChat}
         onSendMessage={handleSendMessage}
       />

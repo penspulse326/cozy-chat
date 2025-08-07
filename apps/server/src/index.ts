@@ -19,14 +19,20 @@ app.get('/', (_, res) => {
 });
 
 async function bootstrap() {
+  const url =
+    process.env.ENV === 'production'
+      ? 'https://cozychat.com'
+      : 'http://localhost:3000';
+
   try {
     await connectToDB();
+
     createSocketServer(
       new Server(server, {
         cors: {
           credentials: true,
           methods: ['GET', 'POST'],
-          origin: 'http://localhost:3000',
+          origin: url,
         },
       })
     );

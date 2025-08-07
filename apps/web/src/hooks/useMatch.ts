@@ -1,15 +1,26 @@
 import { MATCH_EVENT } from '@packages/lib';
 import { useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
-import { MatchingStatus } from '../types';
+import { Socket, io } from 'socket.io-client';
+import { MatchStatus } from '../types';
 
 function useMatch() {
   const socketRef = useRef<Socket | null>(null);
-  const [matchingStatus, setMatchingStatus] =
-    useState<MatchingStatus>('standby');
+  const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
 
-  function matchSwitch() {
-    switch (matchingStatus) {
+  function connect() {
+    socketRef.current = io('http://localhost:8080');
+
+    socketRef.current.on('connect', () => {
+      handleMatchStart();
+    });
+  }
+
+  function handleMatchStart() {
+    socketRef.current?.emit(MATCH_EVENT.START, 'PC');
+  }
+
+  function onMatchStatusChange() {
+    switch (matchStatus) {
       case 'waiting':
         connect();
         break;
@@ -19,28 +30,11 @@ function useMatch() {
     }
   }
 
-  function connect() {
-    socketRef.current = io('http://localhost:8080');
-
-    socketRef.current.on('connect', () => {
-      handleMatchStart();
-    });
-
-    socketRef.current.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
-      setMatchingStatus('error');
-    });
-  }
-
-  function handleMatchStart() {
-    socketRef.current?.emit(MATCH_EVENT.START, 'PC');
-  }
-
   useEffect(() => {
-    matchSwitch();
-  }, [matchingStatus]);
+    onMatchStatusChange();
+  }, [matchStatus]);
 
-  return { matchingStatus, setMatchingStatus };
+  return { matchStatus, setMatchStatus };
 }
 
 export default useMatch;

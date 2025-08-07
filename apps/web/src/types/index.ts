@@ -1,1 +1,1 @@
-export type MatchingStatus = 'standby' | 'waiting' | 'matched' | 'error';
+export type MatchStatus = 'standby' | 'waiting' | 'matched' | 'error';
