@@ -122,7 +122,7 @@ export default function Home() {
 
       <MessageInput
         matchingStatus={matchStatus}
-        onLeaveChat={() => setMatchStatus('quit')}
+        onLeave={() => setMatchStatus('quit')}
         onSendMessage={handleSendMessage}
       />
     </AppShell>

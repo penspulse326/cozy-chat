@@ -6,13 +6,13 @@ import styles from './styles.module.css';
 interface MessageInputProps {
   matchingStatus: MatchStatus;
   onSendMessage: (message: string) => void;
-  onLeaveChat: () => void;
+  onLeave: () => void;
 }
 
 export default function MessageInput({
   matchingStatus,
   onSendMessage,
-  onLeaveChat,
+  onLeave,
 }: MessageInputProps) {
   const [message, setMessage] = useState('');
 
@@ -37,7 +37,7 @@ export default function MessageInput({
     <Flex className={styles.wrapper}>
       <Button
         variant="subtle"
-        onClick={onLeaveChat}
+        onClick={onLeave}
         classNames={{ root: styles.leaveButtonRoot }}
       >
         離開

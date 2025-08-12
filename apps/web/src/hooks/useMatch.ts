@@ -17,6 +17,10 @@ function useMatch() {
     socketRef.current.on(MATCH_EVENT.SUCCESS, (data: MatchSuccessData) => {
       handleMatchSuccess(data);
     });
+
+    socketRef.current.on(MATCH_EVENT.LEAVE, () => {
+      setMatchStatus('leave');
+    });
   }
 
   function onStandby() {
@@ -29,8 +33,18 @@ function useMatch() {
     socketRef.current?.emit(MATCH_EVENT.START, 'PC');
   }
 
+  function handleMatchSuccess(data: MatchSuccessData) {
+    setLocalData(data);
+    setMatchStatus('matched');
+  }
+
   function onCancel() {
     socketRef.current?.emit(MATCH_EVENT.CANCEL);
+    setMatchStatus('standby');
+  }
+
+  function onLeave(userId: string) {
+    socketRef.current?.emit(MATCH_EVENT.LEAVE, userId);
     setMatchStatus('standby');
   }
 
@@ -42,11 +56,8 @@ function useMatch() {
       onCancel();
       return;
     }
-  }
 
-  function handleMatchSuccess(data: MatchSuccessData) {
-    setLocalData(data);
-    setMatchStatus('matched');
+    onLeave(userId);
   }
 
   function onMatchStatusChange() {
@@ -54,13 +65,8 @@ function useMatch() {
       case 'standby':
         onStandby();
         break;
-
       case 'waiting':
         initClient();
-        break;
-
-      case 'cancel':
-        onCancel();
         break;
       case 'quit':
         onQuit();

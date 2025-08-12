@@ -40,6 +40,7 @@ export default function ChatBox({
             </Stack>
           </>
         )}
+        {matchingStatus === 'leave' && <Text>對方已離開</Text>}
       </Stack>
     </>
   );

@@ -36,8 +36,8 @@ export function createSocketServer(io: Server) {
     });
 
     socket.on('disconnect', () => {
-      console.log('用戶斷開連線:', socket.id);
       removeWaitingUser(socket.id);
+      console.log('使用者斷開連線:', socket.id);
     });
   });
 
