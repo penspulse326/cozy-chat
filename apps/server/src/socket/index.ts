@@ -118,7 +118,7 @@ export function createSocketServer(io: Server) {
       return;
     }
 
-    handleNotifyMatchLeave(result.roomId);
+    notifyMatchLeave(result.roomId);
   }
 
   async function handleNotifyMatchSuccess(
@@ -133,7 +133,7 @@ export function createSocketServer(io: Server) {
     });
   }
 
-  function handleNotifyMatchLeave(roomId: string) {
+  function notifyMatchLeave(roomId: string) {
     io.to(roomId).emit(MATCH_EVENT.LEAVE);
   }
 

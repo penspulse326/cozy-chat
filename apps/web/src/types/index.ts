@@ -3,8 +3,7 @@ export type MatchStatus =
   | 'waiting'
   | 'matched'
   | 'error'
-  | 'cancel'
-  | 'leave'
+  | 'left'
   | 'quit';
 
 export type MatchSuccessData = {

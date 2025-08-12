@@ -1,4 +1,5 @@
-import { MATCH_EVENT } from '@packages/lib';
+import { MessageContentData } from '@/components/MessageContent';
+import { CHAT_EVENT, MATCH_EVENT } from '@packages/lib';
 import { useEffect, useRef, useState } from 'react';
 import { Socket, io } from 'socket.io-client';
 import { MatchStatus, MatchSuccessData } from '../types';
@@ -6,6 +7,7 @@ import { MatchStatus, MatchSuccessData } from '../types';
 function useMatch() {
   const socketRef = useRef<Socket | null>(null);
   const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
+  const [messages, setMessages] = useState<MessageContentData[]>([]);
 
   function initClient() {
     socketRef.current = io('http://localhost:8080');
@@ -19,7 +21,11 @@ function useMatch() {
     });
 
     socketRef.current.on(MATCH_EVENT.LEAVE, () => {
-      setMatchStatus('leave');
+      setMatchStatus('left');
+    });
+
+    socketRef.current.on(CHAT_EVENT.RECEIVE, (data: MessageContentData) => {
+      setMessages((prev) => [...prev, data]);
     });
   }
 
@@ -60,6 +66,14 @@ function useMatch() {
     onLeave(userId);
   }
 
+  function onChatSend(content: string) {
+    socketRef.current?.emit(CHAT_EVENT.SEND, {
+      roomId: localStorage.getItem('roomId'),
+      userId: localStorage.getItem('userId'),
+      content,
+    });
+  }
+
   function onMatchStatusChange() {
     switch (matchStatus) {
       case 'standby':
@@ -91,7 +105,7 @@ function useMatch() {
     onMatchStatusChange();
   }, [matchStatus]);
 
-  return { matchStatus, setMatchStatus };
+  return { matchStatus, setMatchStatus, onChatSend, messages };
 }
 
 export default useMatch;

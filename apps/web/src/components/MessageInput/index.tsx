@@ -5,13 +5,13 @@ import styles from './styles.module.css';
 
 interface MessageInputProps {
   matchingStatus: MatchStatus;
-  onSendMessage: (message: string) => void;
+  onChatSend: (message: string) => void;
   onLeave: () => void;
 }
 
 export default function MessageInput({
   matchingStatus,
-  onSendMessage,
+  onChatSend,
   onLeave,
 }: MessageInputProps) {
   const [message, setMessage] = useState('');
@@ -21,7 +21,7 @@ export default function MessageInput({
       return;
     }
 
-    onSendMessage(message);
+    onChatSend(message);
     setMessage('');
   }
 
@@ -59,7 +59,7 @@ export default function MessageInput({
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
             handleSendMessage();
           }
         }}

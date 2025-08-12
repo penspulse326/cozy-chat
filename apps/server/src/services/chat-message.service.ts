@@ -1,6 +1,7 @@
 import type { SocketChatMessage } from '@packages/lib';
 
 import chatMessageModel from '@/models/chat-message.model';
+import userModel from '@/models/user.model';
 
 async function createChatMessage(data: SocketChatMessage) {
   const currentTime = new Date();
@@ -43,7 +44,15 @@ async function sendChatMessage(data: SocketChatMessage) {
     return null;
   }
 
-  return newChatMessage;
+  const user = await userModel.findUserById(data.userId);
+
+  if (!user) {
+    return null;
+  }
+
+  const device = user.device;
+
+  return { ...newChatMessage, device };
 }
 
 export default {

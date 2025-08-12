@@ -6,7 +6,7 @@ import { MatchStatus } from '@/types';
 import type { MessageContentData } from '../MessageContent';
 
 interface ChatBoxProps {
-  userId: string;
+  userId: string | null;
   messages: MessageContentData[];
   matchingStatus: MatchStatus;
 }
@@ -40,7 +40,7 @@ export default function ChatBox({
             </Stack>
           </>
         )}
-        {matchingStatus === 'leave' && <Text>對方已離開</Text>}
+        {matchingStatus === 'left' && <Text>對方已離開</Text>}
       </Stack>
     </>
   );

@@ -6,7 +6,7 @@ export type MessageContentData = {
   id: string;
   user_id: string;
   device: keyof typeof DeviceMap;
-  message: string;
+  content: string;
   created_at: string;
 };
 
@@ -16,7 +16,7 @@ interface MessageContentProps {
 }
 
 export default function MessageContent({ data, isUser }: MessageContentProps) {
-  const { device, message, created_at } = data;
+  const { device, content, created_at } = data;
   const justify = isUser ? styles.wrapperEnd : styles.wrapperStart;
 
   return (
@@ -25,7 +25,7 @@ export default function MessageContent({ data, isUser }: MessageContentProps) {
         className={styles.messageBox}
         bg={alpha('var(--mantine-color-soft-lime-0)', 0.5)}
       >
-        <Text className={styles.messageText}>{message}</Text>
+        <Text className={styles.messageText}>{content}</Text>
       </Flex>
       <Stack
         className={`${styles.infoStack} ${isUser ? styles.infoStackRight : styles.infoStackLeft}`}
