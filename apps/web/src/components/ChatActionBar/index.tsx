@@ -43,31 +43,31 @@ export default function ChatActionBar({
         離開
       </Button>
       <Input
-        disabled={matchStatus !== 'matched'}
-        rightSection={
-          <Input.ClearButton
-            onClick={handleClearMessage}
-            disabled={message.trim() === ''}
-          />
-        }
-        rightSectionPointerEvents="auto"
-        rightSectionWidth="auto"
-        classNames={{
-          wrapper: styles.inputWrapper,
-          input: styles.inputInput,
-        }}
         value={message}
+        disabled={matchStatus !== 'matched'}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
             handleSendMessage();
           }
         }}
+        rightSectionPointerEvents="auto"
+        rightSectionWidth="auto"
+        rightSection={
+          <Input.ClearButton
+            onClick={handleClearMessage}
+            disabled={message.trim() === ''}
+          />
+        }
+        classNames={{
+          wrapper: styles.inputWrapper,
+          input: styles.inputInput,
+        }}
       />
       <Button
         disabled={matchStatus !== 'matched'}
-        classNames={{ root: styles.sendButtonRoot }}
         onClick={handleSendMessage}
+        classNames={{ root: styles.sendButtonRoot }}
       >
         送出
       </Button>

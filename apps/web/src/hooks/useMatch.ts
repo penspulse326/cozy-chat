@@ -20,36 +20,44 @@ export default function useMatch() {
   });
 
   function initClient() {
-    socketRef.current = io('http://localhost:8080');
+    socketRef.current = io('http://localhost:8080', {
+      query: {
+        roomId,
+      },
+    });
 
     socketRef.current.on('connect', () => {
-      emitMatchStart();
+      if (!roomId) {
+        emitMatchStart();
+      } else {
+        setMatchStatus('matched');
+      }
     });
 
-    socketRef.current.on(MATCH_EVENT.SUCCESS, (data: MatchSuccessData) => {
-      handleMatchSuccess(data);
+    mountClientEvent(socketRef.current);
+  }
+
+  function mountClientEvent(client: Socket) {
+    client.on(MATCH_EVENT.SUCCESS, (data: MatchSuccessData) => {
+      onMatchSuccess(data);
     });
 
-    socketRef.current.on(MATCH_EVENT.LEAVE, () => {
+    client.on(MATCH_EVENT.LEAVE, () => {
       setMatchStatus('left');
     });
 
-    socketRef.current.on(CHAT_EVENT.SEND, (data: ChatMessage) => {
+    client.on(CHAT_EVENT.SEND, (data: ChatMessage) => {
       setMessages((prev) => [...prev, data]);
+    });
+
+    client.on(CHAT_EVENT.LOAD, (data: ChatMessage[]) => {
+      setMessages(data);
     });
   }
 
   function handleStandby() {
-    removeUserId();
-    removeRoomId();
     socketRef.current?.disconnect();
     socketRef.current = null;
-  }
-
-  function handleMatchSuccess(data: MatchSuccessData) {
-    setRoomId(data.roomId);
-    setUserId(data.userId);
-    setMatchStatus('matched');
   }
 
   function handleQuit() {
@@ -59,6 +67,12 @@ export default function useMatch() {
     }
 
     emitMatchLeave(userId);
+  }
+
+  function onMatchSuccess(data: MatchSuccessData) {
+    setRoomId(data.roomId);
+    setUserId(data.userId);
+    setMatchStatus('matched');
   }
 
   function emitMatchStart() {
@@ -72,6 +86,9 @@ export default function useMatch() {
 
   function emitMatchLeave(userId: string) {
     socketRef.current?.emit(MATCH_EVENT.LEAVE, userId);
+    removeUserId();
+    removeRoomId();
+    setMessages([]);
     setMatchStatus('standby');
   }
 
@@ -84,11 +101,20 @@ export default function useMatch() {
   }
 
   useEffect(() => {
+    if (roomId && matchStatus === 'standby') {
+      setMatchStatus('reloading');
+    }
+  }, [roomId]);
+
+  useEffect(() => {
     switch (matchStatus) {
       case 'standby':
         handleStandby();
         break;
       case 'waiting':
+        initClient();
+        break;
+      case 'reloading':
         initClient();
         break;
       case 'quit':
