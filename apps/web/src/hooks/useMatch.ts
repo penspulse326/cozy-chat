@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Socket, io } from 'socket.io-client';
 import { MatchStatus, MatchSuccessData } from '../types';
 
-function useMatch() {
+export default function useMatch() {
   const socketRef = useRef<Socket | null>(null);
   const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
   const [messages, setMessages] = useState<MessageContentData[]>([]);
@@ -13,7 +13,7 @@ function useMatch() {
     socketRef.current = io('http://localhost:8080');
 
     socketRef.current.on('connect', () => {
-      handleMatchStart();
+      emitMatchStart();
     });
 
     socketRef.current.on(MATCH_EVENT.SUCCESS, (data: MatchSuccessData) => {
@@ -29,14 +29,10 @@ function useMatch() {
     });
   }
 
-  function onStandby() {
+  function handleStandby() {
     clearLocalData();
     socketRef.current?.disconnect();
     socketRef.current = null;
-  }
-
-  function handleMatchStart() {
-    socketRef.current?.emit(MATCH_EVENT.START, 'PC');
   }
 
   function handleMatchSuccess(data: MatchSuccessData) {
@@ -44,29 +40,35 @@ function useMatch() {
     setMatchStatus('matched');
   }
 
-  function onCancel() {
-    socketRef.current?.emit(MATCH_EVENT.CANCEL);
-    setMatchStatus('standby');
-  }
-
-  function onLeave(userId: string) {
-    socketRef.current?.emit(MATCH_EVENT.LEAVE, userId);
-    setMatchStatus('standby');
-  }
-
-  function onQuit() {
+  function handleQuit() {
     const roomId = localStorage.getItem('roomId');
     const userId = localStorage.getItem('userId');
 
     if (!roomId || !userId) {
-      onCancel();
+      emitMatchCancel();
       return;
     }
 
-    onLeave(userId);
+    emitMatchLeave(userId);
   }
 
-  function onChatSend(content: string) {
+  function emitMatchStart() {
+    socketRef.current?.emit(MATCH_EVENT.START, 'PC');
+  }
+
+  function emitMatchCancel() {
+    socketRef.current?.emit(MATCH_EVENT.CANCEL);
+    setMatchStatus('standby');
+  }
+
+  function emitMatchLeave(userId: string) {
+    socketRef.current?.emit(MATCH_EVENT.LEAVE, userId);
+    setMatchStatus('standby');
+  }
+
+
+
+  function emitChatSend(content: string) {
     socketRef.current?.emit(CHAT_EVENT.SEND, {
       roomId: localStorage.getItem('roomId'),
       userId: localStorage.getItem('userId'),
@@ -74,22 +76,6 @@ function useMatch() {
     });
   }
 
-  function onMatchStatusChange() {
-    switch (matchStatus) {
-      case 'standby':
-        onStandby();
-        break;
-      case 'waiting':
-        initClient();
-        break;
-      case 'quit':
-        onQuit();
-        break;
-
-      default:
-        break;
-    }
-  }
 
   function setLocalData(data: MatchSuccessData) {
     localStorage.setItem('roomId', data.roomId);
@@ -102,10 +88,21 @@ function useMatch() {
   }
 
   useEffect(() => {
-    onMatchStatusChange();
+    switch (matchStatus) {
+      case 'standby':
+        handleStandby();
+        break;
+      case 'waiting':
+        initClient();
+        break;
+      case 'quit':
+        handleQuit();
+        break;
+
+      default:
+        break;
+    }
   }, [matchStatus]);
 
-  return { matchStatus, setMatchStatus, onChatSend, messages };
+  return { matchStatus, setMatchStatus, emitChatSend, messages };
 }
-
-export default useMatch;
