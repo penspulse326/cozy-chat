@@ -1,6 +1,5 @@
 export enum CHAT_EVENT {
   LOAD = 'chat:load',
-  RECEIVE = 'chat:receive',
   SEND = 'chat:send',
 }
 

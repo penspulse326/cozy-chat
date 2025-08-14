@@ -1,17 +1,9 @@
 import { Flex, Stack, Text, alpha } from '@mantine/core';
-import { DeviceMap } from '@packages/lib';
+import { ChatMessage, DeviceMap } from '@packages/lib';
 import styles from './styles.module.css';
 
-export type MessageContentData = {
-  id: string;
-  user_id: string;
-  device: keyof typeof DeviceMap;
-  content: string;
-  created_at: string;
-};
-
 interface MessageContentProps {
-  data: MessageContentData;
+  data: ChatMessage;
   isUser: boolean;
 }
 
@@ -31,7 +23,13 @@ export default function MessageContent({ data, isUser }: MessageContentProps) {
         className={`${styles.infoStack} ${isUser ? styles.infoStackRight : styles.infoStackLeft}`}
       >
         <Text size="xs">{DeviceMap[device]}</Text>
-        <Text size="xs">{created_at}</Text>
+        <Text size="xs">
+          {new Date(created_at).toLocaleDateString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          })}
+        </Text>
       </Stack>
     </Flex>
   );

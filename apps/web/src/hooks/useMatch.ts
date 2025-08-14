@@ -1,5 +1,5 @@
-import { MessageContentData } from '@/components/MessageContent';
-import { CHAT_EVENT, MATCH_EVENT } from '@packages/lib';
+import { useLocalStorage } from '@mantine/hooks';
+import { CHAT_EVENT, ChatMessage, MATCH_EVENT } from '@packages/lib';
 import { useEffect, useRef, useState } from 'react';
 import { Socket, io } from 'socket.io-client';
 import { MatchStatus, MatchSuccessData } from '../types';
@@ -7,7 +7,17 @@ import { MatchStatus, MatchSuccessData } from '../types';
 export default function useMatch() {
   const socketRef = useRef<Socket | null>(null);
   const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
-  const [messages, setMessages] = useState<MessageContentData[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const [userId, setUserId, removeUserId] = useLocalStorage<string | null>({
+    key: 'userId',
+    defaultValue: null,
+  });
+
+  const [roomId, setRoomId, removeRoomId] = useLocalStorage<string | null>({
+    key: 'roomId',
+    defaultValue: null,
+  });
 
   function initClient() {
     socketRef.current = io('http://localhost:8080');
@@ -24,26 +34,25 @@ export default function useMatch() {
       setMatchStatus('left');
     });
 
-    socketRef.current.on(CHAT_EVENT.RECEIVE, (data: MessageContentData) => {
+    socketRef.current.on(CHAT_EVENT.SEND, (data: ChatMessage) => {
       setMessages((prev) => [...prev, data]);
     });
   }
 
   function handleStandby() {
-    clearLocalData();
+    removeUserId();
+    removeRoomId();
     socketRef.current?.disconnect();
     socketRef.current = null;
   }
 
   function handleMatchSuccess(data: MatchSuccessData) {
-    setLocalData(data);
+    setRoomId(data.roomId);
+    setUserId(data.userId);
     setMatchStatus('matched');
   }
 
   function handleQuit() {
-    const roomId = localStorage.getItem('roomId');
-    const userId = localStorage.getItem('userId');
-
     if (!roomId || !userId) {
       emitMatchCancel();
       return;
@@ -66,25 +75,12 @@ export default function useMatch() {
     setMatchStatus('standby');
   }
 
-
-
   function emitChatSend(content: string) {
     socketRef.current?.emit(CHAT_EVENT.SEND, {
-      roomId: localStorage.getItem('roomId'),
-      userId: localStorage.getItem('userId'),
+      roomId,
+      userId,
       content,
     });
-  }
-
-
-  function setLocalData(data: MatchSuccessData) {
-    localStorage.setItem('roomId', data.roomId);
-    localStorage.setItem('userId', data.userId);
-  }
-
-  function clearLocalData() {
-    localStorage.removeItem('roomId');
-    localStorage.removeItem('userId');
   }
 
   useEffect(() => {

@@ -144,7 +144,7 @@ export function createSocketServer(io: Server) {
       return;
     }
 
-    io.to(data.roomId).emit(CHAT_EVENT.RECEIVE, newChatMessage);
+    io.to(data.roomId).emit(CHAT_EVENT.SEND, newChatMessage);
   }
 
   async function handleCheckUser(socketId: string, roomId: string) {

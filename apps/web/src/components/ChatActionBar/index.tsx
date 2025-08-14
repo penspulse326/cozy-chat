@@ -3,17 +3,17 @@ import { Button, Flex, Input } from '@mantine/core';
 import { useState } from 'react';
 import styles from './styles.module.css';
 
-interface MessageInputProps {
-  matchingStatus: MatchStatus;
-  onChatSend: (message: string) => void;
+interface ChatActionBarProps {
+  matchStatus: MatchStatus;
+  onSend: (message: string) => void;
   onLeave: () => void;
 }
 
-export default function MessageInput({
-  matchingStatus,
-  onChatSend,
+export default function ChatActionBar({
+  matchStatus,
+  onSend,
   onLeave,
-}: MessageInputProps) {
+}: ChatActionBarProps) {
   const [message, setMessage] = useState('');
 
   function handleSendMessage() {
@@ -21,7 +21,7 @@ export default function MessageInput({
       return;
     }
 
-    onChatSend(message);
+    onSend(message);
     setMessage('');
   }
 
@@ -29,7 +29,7 @@ export default function MessageInput({
     setMessage('');
   }
 
-  if (matchingStatus === 'standby') {
+  if (matchStatus === 'standby') {
     return null;
   }
 
@@ -43,7 +43,7 @@ export default function MessageInput({
         離開
       </Button>
       <Input
-        disabled={matchingStatus !== 'matched'}
+        disabled={matchStatus !== 'matched'}
         rightSection={
           <Input.ClearButton
             onClick={handleClearMessage}
@@ -65,7 +65,7 @@ export default function MessageInput({
         }}
       />
       <Button
-        disabled={matchingStatus !== 'matched'}
+        disabled={matchStatus !== 'matched'}
         classNames={{ root: styles.sendButtonRoot }}
         onClick={handleSendMessage}
       >

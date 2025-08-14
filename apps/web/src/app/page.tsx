@@ -1,8 +1,8 @@
 'use client';
 
 import Blobs from '@/components/Blobs';
+import ChatActionBar from '@/components/ChatActionBar';
 import ChatBox from '@/components/ChatBox';
-import MessageInput from '@/components/MessageInput';
 import useMatch from '@/hooks/useMatch';
 import {
   AppShell,
@@ -13,13 +13,17 @@ import {
   Stack,
   Title,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useLocalStorage } from '@mantine/hooks';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import styles from './styles.module.css';
 
 export default function Home() {
-  const userId = localStorage.getItem('userId');
+  const [userId] = useLocalStorage<string | null>({
+    key: 'userId',
+    defaultValue: null,
+  });
+
   const [opened, { toggle }] = useDisclosure();
   const viewport = useRef<HTMLDivElement>(null);
 
@@ -80,7 +84,7 @@ export default function Home() {
                 width={256}
                 height={256}
               />
-              <Title order={2} c="navy-steel.9" className={styles.title}>
+              <Title order={2} className={styles.title}>
                 放輕鬆，隨便聊
               </Title>
               {matchStatus === 'standby' && (
@@ -97,17 +101,17 @@ export default function Home() {
               <ChatBox
                 userId={userId}
                 messages={messages}
-                matchingStatus={matchStatus}
+                matchStatus={matchStatus}
               />
             )}
           </Stack>
         </ScrollArea>
       </AppShell.Main>
 
-      <MessageInput
-        matchingStatus={matchStatus}
+      <ChatActionBar
+        matchStatus={matchStatus}
         onLeave={() => setMatchStatus('quit')}
-        onChatSend={emitChatSend}
+        onSend={emitChatSend}
       />
     </AppShell>
   );
