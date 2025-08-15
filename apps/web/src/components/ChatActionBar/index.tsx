@@ -1,19 +1,19 @@
-import { MatchingStatus } from '@/types';
+import { MatchStatus } from '@/types';
 import { Button, Flex, Input } from '@mantine/core';
 import { useState } from 'react';
 import styles from './styles.module.css';
 
-interface MessageInputProps {
-  matchingStatus: MatchingStatus;
-  onSendMessage: (message: string) => void;
-  onLeaveChat: () => void;
+interface ChatActionBarProps {
+  matchStatus: MatchStatus;
+  onSend: (message: string) => void;
+  onLeave: () => void;
 }
 
-export default function MessageInput({
-  matchingStatus,
-  onSendMessage,
-  onLeaveChat,
-}: MessageInputProps) {
+export default function ChatActionBar({
+  matchStatus,
+  onSend,
+  onLeave,
+}: ChatActionBarProps) {
   const [message, setMessage] = useState('');
 
   function handleSendMessage() {
@@ -21,7 +21,7 @@ export default function MessageInput({
       return;
     }
 
-    onSendMessage(message);
+    onSend(message);
     setMessage('');
   }
 
@@ -29,7 +29,7 @@ export default function MessageInput({
     setMessage('');
   }
 
-  if (matchingStatus === 'standby') {
+  if (matchStatus === 'standby') {
     return null;
   }
 
@@ -37,37 +37,37 @@ export default function MessageInput({
     <Flex className={styles.wrapper}>
       <Button
         variant="subtle"
-        onClick={onLeaveChat}
+        onClick={onLeave}
         classNames={{ root: styles.leaveButtonRoot }}
       >
         離開
       </Button>
       <Input
-        disabled={matchingStatus !== 'matched'}
+        value={message}
+        disabled={matchStatus !== 'matched'}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+            handleSendMessage();
+          }
+        }}
+        rightSectionPointerEvents="auto"
+        rightSectionWidth="auto"
         rightSection={
           <Input.ClearButton
             onClick={handleClearMessage}
             disabled={message.trim() === ''}
           />
         }
-        rightSectionPointerEvents="auto"
-        rightSectionWidth="auto"
         classNames={{
           wrapper: styles.inputWrapper,
           input: styles.inputInput,
         }}
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            handleSendMessage();
-          }
-        }}
       />
       <Button
-        disabled={matchingStatus !== 'matched'}
-        classNames={{ root: styles.sendButtonRoot }}
+        disabled={matchStatus !== 'matched'}
         onClick={handleSendMessage}
+        classNames={{ root: styles.sendButtonRoot }}
       >
         送出
       </Button>

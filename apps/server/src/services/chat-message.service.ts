@@ -1,12 +1,14 @@
-import type { SocketChatMessage } from '@packages/lib';
+import type { Device, SocketChatMessage } from '@packages/lib';
 
 import chatMessageModel from '@/models/chat-message.model';
+import userModel from '@/models/user.model';
 
-async function createChatMessage(data: SocketChatMessage) {
+async function createChatMessage(data: SocketChatMessage, device: Device) {
   const currentTime = new Date();
   const payload = {
     content: data.content,
     created_at: currentTime,
+    device,
     room_id: data.roomId,
     user_id: data.userId,
   };
@@ -29,7 +31,13 @@ async function findChatMessagesByRoomId(roomId: string) {
 }
 
 async function sendChatMessage(data: SocketChatMessage) {
-  const result = await createChatMessage(data);
+  const user = await userModel.findUserById(data.userId);
+
+  if (!user) {
+    return null;
+  }
+
+  const result = await createChatMessage(data, user.device);
 
   if (!result) {
     return null;

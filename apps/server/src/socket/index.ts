@@ -36,8 +36,8 @@ export function createSocketServer(io: Server) {
     });
 
     socket.on('disconnect', () => {
-      console.log('用戶斷開連線:', socket.id);
       removeWaitingUser(socket.id);
+      console.log('使用者斷開連線:', socket.id);
     });
   });
 
@@ -103,6 +103,7 @@ export function createSocketServer(io: Server) {
     const hasRemoved = removeWaitingUser(socketId);
 
     if (hasRemoved) {
+      console.log('waitingUsers', waitingUsers);
       io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.CANCEL);
     }
   }
@@ -117,7 +118,7 @@ export function createSocketServer(io: Server) {
       return;
     }
 
-    handleNotifyMatchLeave(result.roomId);
+    notifyMatchLeave(result.roomId);
   }
 
   async function handleNotifyMatchSuccess(
@@ -132,7 +133,7 @@ export function createSocketServer(io: Server) {
     });
   }
 
-  function handleNotifyMatchLeave(roomId: string) {
+  function notifyMatchLeave(roomId: string) {
     io.to(roomId).emit(MATCH_EVENT.LEAVE);
   }
 
@@ -143,7 +144,7 @@ export function createSocketServer(io: Server) {
       return;
     }
 
-    io.to(data.roomId).emit(CHAT_EVENT.RECEIVE, newChatMessage);
+    io.to(data.roomId).emit(CHAT_EVENT.SEND, newChatMessage);
   }
 
   async function handleCheckUser(socketId: string, roomId: string) {

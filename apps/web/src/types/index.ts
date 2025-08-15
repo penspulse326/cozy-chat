@@ -1,1 +1,13 @@
-export type MatchingStatus = 'standby' | 'waiting' | 'matched';
+export type MatchStatus =
+  | 'standby'
+  | 'waiting'
+  | 'matched'
+  | 'error'
+  | 'left'
+  | 'quit'
+  | 'reloading';
+
+export type MatchSuccessData = {
+  roomId: string;
+  userId: string;
+};

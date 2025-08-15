@@ -1,10 +1,9 @@
 'use client';
 
 import Blobs from '@/components/Blobs';
+import ChatActionBar from '@/components/ChatActionBar';
 import ChatBox from '@/components/ChatBox';
-import { MessageContentData } from '@/components/MessageContent';
-import MessageInput from '@/components/MessageInput';
-import { MatchingStatus } from '@/types';
+import useMatch from '@/hooks/useMatch';
 import {
   AppShell,
   Burger,
@@ -14,62 +13,21 @@ import {
   Stack,
   Title,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useLocalStorage } from '@mantine/hooks';
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import styles from './styles.module.css';
 
 export default function Home() {
+  const [userId] = useLocalStorage<string | null>({
+    key: 'userId',
+    defaultValue: null,
+  });
+
   const [opened, { toggle }] = useDisclosure();
   const viewport = useRef<HTMLDivElement>(null);
 
-  const [matchingStatus, setMatchingStatus] =
-    useState<MatchingStatus>('standby');
-
-  const [messages, setMessages] = useState<MessageContentData[]>([
-    {
-      id: '1',
-      user_id: '123',
-      device: 'PC',
-      message: '你好，我是小明，很開心認識你！',
-      created_at: '2025-01-01 12:00:00',
-    },
-    {
-      id: '2',
-      user_id: '456',
-      device: 'APP',
-      message: '你好，我是小美！',
-      created_at: '2025-01-01 12:01:00',
-    },
-    {
-      id: '3',
-      user_id: '123',
-      device: 'PC',
-      message: '怎麼還沒睡！',
-      created_at: '2025-01-01 12:01:30',
-    },
-    {
-      id: '4',
-      user_id: '123',
-      device: 'PC',
-      message: '在幹嘛？',
-      created_at: '2025-01-01 12:02:00',
-    },
-    {
-      id: '5',
-      user_id: '456',
-      device: 'APP',
-      message: '我在看花枝遊戲！',
-      created_at: '2025-01-01 12:02:30',
-    },
-    {
-      id: '6',
-      user_id: '123',
-      device: 'PC',
-      message: '我也在看！',
-      created_at: '2025-01-01 12:03:00',
-    },
-  ]);
+  const { matchStatus, setMatchStatus, messages, emitChatSend } = useMatch();
 
   function handleScrollToBottom() {
     viewport.current?.scrollTo({
@@ -78,38 +36,9 @@ export default function Home() {
     });
   }
 
-  async function handleStartChat() {
-    setMatchingStatus('waiting');
-
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        setMatchingStatus('matched');
-        resolve(true);
-      }, 1000)
-    );
-  }
-
-  function handleLeaveChat() {
-    setMatchingStatus('standby');
-  }
-
-  function handleSendMessage(message: string) {
-    setMessages([
-      ...messages,
-      {
-        id: (messages.length + 1).toString(),
-        user_id: '123',
-        device: 'PC',
-        message,
-        created_at: new Date().toISOString(),
-      },
-    ]);
-    handleScrollToBottom();
-  }
-
   useEffect(() => {
     handleScrollToBottom();
-  }, [matchingStatus, messages]);
+  }, [matchStatus, messages]);
 
   return (
     <AppShell
@@ -146,6 +75,7 @@ export default function Home() {
           viewportRef={viewport}
         >
           <Blobs />
+
           <Stack mx="auto" maw={480} className={styles.outerStack}>
             <Stack className={styles.innerStack}>
               <Image
@@ -154,32 +84,34 @@ export default function Home() {
                 width={256}
                 height={256}
               />
-              <Title order={2} c="navy-steel.9" className={styles.title}>
+              <Title order={2} className={styles.title}>
                 放輕鬆，隨便聊
               </Title>
-              {matchingStatus === 'standby' && (
-                <Button onClick={handleStartChat} className={styles.button}>
+              {matchStatus === 'standby' && (
+                <Button
+                  onClick={() => setMatchStatus('waiting')}
+                  className={styles.button}
+                >
                   開始聊天
                 </Button>
               )}
             </Stack>
 
-            {matchingStatus !== 'standby' && (
+            {matchStatus !== 'standby' && (
               <ChatBox
-                userId="123"
+                userId={userId}
                 messages={messages}
-                matchingStatus={matchingStatus}
-                onLeaveChat={handleLeaveChat}
+                matchStatus={matchStatus}
               />
             )}
           </Stack>
         </ScrollArea>
       </AppShell.Main>
 
-      <MessageInput
-        matchingStatus={matchingStatus}
-        onLeaveChat={handleLeaveChat}
-        onSendMessage={handleSendMessage}
+      <ChatActionBar
+        matchStatus={matchStatus}
+        onLeave={() => setMatchStatus('quit')}
+        onSend={emitChatSend}
       />
     </AppShell>
   );

@@ -2,20 +2,19 @@ import { Stack, Text, alpha } from '@mantine/core';
 import MessageContent from '../MessageContent';
 import styles from './styles.module.css';
 
-import { MatchingStatus } from '@/types';
-import type { MessageContentData } from '../MessageContent';
+import { MatchStatus } from '@/types';
+import { ChatMessage } from '@packages/lib';
 
 interface ChatBoxProps {
-  userId: string;
-  messages: MessageContentData[];
-  matchingStatus: MatchingStatus;
-  onLeaveChat: () => void;
+  userId: string | null;
+  messages: ChatMessage[];
+  matchStatus: MatchStatus;
 }
 
 export default function ChatBox({
   userId,
   messages,
-  matchingStatus,
+  matchStatus,
 }: ChatBoxProps) {
   return (
     <>
@@ -23,7 +22,7 @@ export default function ChatBox({
         className={styles.chatBoxWrapper}
         bg={alpha('var(--mantine-color-moss-green-2)', 0.4)}
       >
-        {matchingStatus === 'waiting' ? (
+        {matchStatus === 'waiting' ? (
           <Text>配對中...</Text>
         ) : (
           <>
@@ -31,9 +30,9 @@ export default function ChatBox({
             <Text className={styles.chatBoxTextMb}>開始聊天吧！</Text>
 
             <Stack className={styles.messagesContainer}>
-              {messages.map((message: MessageContentData) => (
+              {messages.map((message: ChatMessage) => (
                 <MessageContent
-                  key={message.id}
+                  key={message._id}
                   data={message}
                   isUser={message.user_id === userId}
                 />
@@ -41,6 +40,7 @@ export default function ChatBox({
             </Stack>
           </>
         )}
+        {matchStatus === 'left' && <Text>對方已離開</Text>}
       </Stack>
     </>
   );
