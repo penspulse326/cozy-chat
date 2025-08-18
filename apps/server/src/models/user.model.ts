@@ -56,6 +56,30 @@ async function findUsersByRoomId(roomId: string): Promise<null | UserData[]> {
   }
 }
 
+async function updateManyUserRoomId(
+  userIds: string[],
+  roomId: string
+): Promise<null | { acknowledged: boolean; modifiedCount: number }> {
+  const users = db.collection<UserData>('users');
+
+  try {
+    const objectIds = userIds.map((id) => new ObjectId(id));
+    const result = await users.updateMany(
+      { _id: { $in: objectIds } },
+      { $set: { room_id: roomId } }
+    );
+    console.log('批量更新 User RoomId 成功');
+
+    return {
+      acknowledged: result.acknowledged,
+      modifiedCount: result.modifiedCount
+    };
+  } catch (error: unknown) {
+    console.error('批量更新 User RoomId 失敗', error);
+    return null;
+  }
+}
+
 async function updateUserRoomId(
   userId: string,
   roomId: string
@@ -99,6 +123,7 @@ export default {
   createUser,
   findUserById,
   findUsersByRoomId,
+  updateManyUserRoomId,
   updateUserRoomId,
   updateUserStatus,
 };

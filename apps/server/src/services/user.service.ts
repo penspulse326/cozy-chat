@@ -19,38 +19,42 @@ async function checkUserStatus(roomId: string) {
 }
 
 async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
-  const createdNewUser = await createUser(newUser);
-  const createdPeerUser = await createUser(peerUser);
+  // 1. 創建兩個用戶
+  const newUserId = await createUserAndGetId(newUser);
+  const peerUserId = await createUserAndGetId(peerUser);
 
-  if (!createdNewUser || !createdPeerUser) {
+  if (!newUserId || !peerUserId) {
     return null;
   }
 
-  const newChatRoom = await chatRoomService.createChatRoom([
-    createdNewUser.insertedId.toString(),
-    createdPeerUser.insertedId.toString(),
-  ]);
-
+  // 2. 創建聊天室
+  const newChatRoom = await chatRoomService.createChatRoom([newUserId, peerUserId]);
   const roomId = newChatRoom?.insertedId.toString();
 
   if (!roomId) {
     return null;
   }
 
+  // 3. 批量更新用戶的roomId
+  const userIds = [newUserId, peerUserId];
+  const updateResult = await userModel.updateManyUserRoomId(userIds, roomId);
+
+  if (!updateResult || !updateResult.acknowledged || updateResult.modifiedCount !== 2) {
+    // 如果更新失敗，返回null
+    return null;
+  }
+
+  // 4. 返回結果
   const matchedUsers = [
     {
       ...newUser,
-      userId: createdNewUser.insertedId.toString(),
+      userId: newUserId,
     },
     {
       ...peerUser,
-      userId: createdPeerUser.insertedId.toString(),
+      userId: peerUserId,
     },
   ];
-
-  await Promise.all(
-    matchedUsers.map((user) => updateUserRoomId(user.userId, roomId))
-  );
 
   return {
     matchedUsers,
@@ -70,6 +74,12 @@ async function createUser(user: WaitingUser) {
   const result = await userModel.createUser(payload);
 
   return result;
+}
+
+// 創建單個用戶並返回ID
+async function createUserAndGetId(user: WaitingUser): Promise<null | string> {
+  const result = await createUser(user);
+  return result ? result.insertedId.toString() : null;
 }
 
 async function findUserById(userId: string) {
@@ -94,7 +104,7 @@ async function updateUserStatus(userId: string, status: UserStatus) {
   const user = await findUserById(userId);
 
   if (!user || !user.room_id) {
-    return;
+    return null;
   }
 
   await userModel.updateUserStatus(userId, status);
@@ -108,6 +118,7 @@ export default {
   checkUserStatus,
   createMatchedUsers,
   createUser,
+  createUserAndGetId,
   findUserById,
   findUsersByRoomId,
   updateUserRoomId,

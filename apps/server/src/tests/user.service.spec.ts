@@ -10,6 +10,7 @@ vi.mock('@/models/user.model.js', () => ({
     createUser: vi.fn(),
     findUserById: vi.fn(),
     findUsersByRoomId: vi.fn(),
+    updateManyUserRoomId: vi.fn(),
     updateUserRoomId: vi.fn(),
     updateUserStatus: vi.fn(),
   },
@@ -227,20 +228,20 @@ describe('User Service', () => {
       expect(userModel.updateUserStatus).toHaveBeenCalledTimes(1);
     });
 
-    it('should return undefined when user does not exist', async () => {
+    it('should return null when user does not exist', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as const;
 
       vi.mocked(userModel.findUserById).mockResolvedValue(null);
 
       const result = await userService.updateUserStatus(mockUserId, mockStatus);
-      expect(result).toBeUndefined();
+      expect(result).toBeNull();
       expect(userModel.findUserById).toHaveBeenCalledWith(mockUserId);
       expect(userModel.updateUserStatus).not.toHaveBeenCalled();
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
     });
 
-    it('should return undefined when user has no room_id', async () => {
+    it('should return null when user has no room_id', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as const;
       const mockUser = {
@@ -254,7 +255,7 @@ describe('User Service', () => {
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
 
       const result = await userService.updateUserStatus(mockUserId, mockStatus);
-      expect(result).toBeUndefined();
+      expect(result).toBeNull();
       expect(userModel.findUserById).toHaveBeenCalledWith(mockUserId);
       expect(userModel.updateUserStatus).not.toHaveBeenCalled();
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
@@ -362,12 +363,9 @@ describe('User Service', () => {
         insertedId: mockRoomId,
       };
 
-      const mockUpdateResult = {
+      const mockUpdateManyResult = {
         acknowledged: true,
-        matchedCount: 1,
-        modifiedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null,
+        modifiedCount: 2,
       };
 
       // 重置 mock 以確保之前的測試不會影響這個測試
@@ -378,7 +376,7 @@ describe('User Service', () => {
         .mockResolvedValueOnce(mockPeerUserResult);
 
       vi.mocked(chatRoomService.createChatRoom).mockResolvedValue(mockChatRoomResult);
-      vi.mocked(userModel.updateUserRoomId).mockResolvedValue(mockUpdateResult);
+      vi.mocked(userModel.updateManyUserRoomId).mockResolvedValue(mockUpdateManyResult);
 
       const result = await userService.createMatchedUsers(mockNewUser, mockPeerUser);
 
@@ -401,7 +399,11 @@ describe('User Service', () => {
         mockNewUserId.toString(),
         mockPeerUserId.toString(),
       ]);
-      expect(userModel.updateUserRoomId).toHaveBeenCalledTimes(2);
+      expect(userModel.updateManyUserRoomId).toHaveBeenCalledWith(
+        [mockNewUserId.toString(), mockPeerUserId.toString()],
+        mockRoomId.toString()
+      );
+      expect(userModel.updateManyUserRoomId).toHaveBeenCalledTimes(1);
     });
 
     it('should return null when first createUser fails', async () => {
