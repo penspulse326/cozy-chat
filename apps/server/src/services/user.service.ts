@@ -19,7 +19,7 @@ async function checkUserStatus(roomId: string) {
 }
 
 async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
-  // 1. 創建兩個用戶
+  // 1. 建立兩個 user 
   const newUserId = await createUserAndGetId(newUser);
   const peerUserId = await createUserAndGetId(peerUser);
 
@@ -27,7 +27,7 @@ async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
     return null;
   }
 
-  // 2. 創建聊天室
+  // 2. 建立聊天室
   const newChatRoom = await chatRoomService.createChatRoom([newUserId, peerUserId]);
   const roomId = newChatRoom?.insertedId.toString();
 
@@ -35,7 +35,7 @@ async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
     return null;
   }
 
-  // 3. 批量更新用戶的roomId
+  // 3. 批量更新 user 的roomId
   const userIds = [newUserId, peerUserId];
   const updateResult = await userModel.updateManyUserRoomId(userIds, roomId);
 
@@ -76,7 +76,7 @@ async function createUser(user: WaitingUser) {
   return result;
 }
 
-// 創建單個用戶並返回ID
+// 建立單個 user 並返回ID
 async function createUserAndGetId(user: WaitingUser): Promise<null | string> {
   const result = await createUser(user);
   return result ? result.insertedId.toString() : null;

@@ -368,9 +368,7 @@ describe('User Service', () => {
         modifiedCount: 2,
       };
 
-      // 重置 mock 以確保之前的測試不會影響這個測試
       vi.mocked(userModel.createUser).mockReset();
-      // Mock createUser 兩次調用返回不同結果
       vi.mocked(userModel.createUser)
         .mockResolvedValueOnce(mockNewUserResult)
         .mockResolvedValueOnce(mockPeerUserResult);
