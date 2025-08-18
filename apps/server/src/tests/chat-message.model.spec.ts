@@ -1,3 +1,6 @@
+import type { Device } from '@packages/lib';
+
+import { CreateChatMessageSchema } from '@packages/lib';
 import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -7,6 +10,13 @@ import chatMessageModel from '@/models/chat-message.model';
 vi.mock('@/config/db', () => ({
   db: {
     collection: vi.fn(),
+  },
+}));
+
+vi.mock('@packages/lib', () => ({
+  CreateChatMessageSchema: {
+    // 模擬驗證函數
+    parse: vi.fn().mockImplementation((data: unknown) => data),
   },
 }));
 
@@ -33,7 +43,7 @@ describe('Chat Message Model', () => {
       const mockChatMessage = {
         content: 'Hello world',
         created_at: new Date(),
-        device: 'APP',
+        device: 'APP' as Device,
         room_id: '507f1f77bcf86cd799439022',
         user_id: '507f1f77bcf86cd799439011',
       };
@@ -55,15 +65,23 @@ describe('Chat Message Model', () => {
     // 驗證失敗時返回 null
     it('should return null when validation fails', async () => {
       // 使用無效的聊天訊息數據進行測試
-      const mockInvalidChatMessage = {
-        created_at: new Date(),
-        device: 'APP',
-        // 缺少必要的 content, room_id, user_id 欄位
-      };
-
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-      const result = await chatMessageModel.createChatMessage(mockInvalidChatMessage as any);
+      // 模擬 CreateChatMessageSchema.parse 驗證失敗
+      const invalidData = {
+        content: '',
+        created_at: new Date(),
+        device: 'APP' as Device,
+        room_id: '',
+        user_id: ''
+      };
+
+      // 模擬驗證失敗
+      vi.spyOn(CreateChatMessageSchema, 'parse').mockImplementationOnce(() => {
+        throw new Error('Validation Error');
+      });
+
+      const result = await chatMessageModel.createChatMessage(invalidData);
 
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
@@ -75,7 +93,7 @@ describe('Chat Message Model', () => {
       const mockChatMessage = {
         content: 'Hello world',
         created_at: new Date(),
-        device: 'APP',
+        device: 'APP' as Device,
         room_id: '507f1f77bcf86cd799439022',
         user_id: '507f1f77bcf86cd799439011',
       };
@@ -99,7 +117,7 @@ describe('Chat Message Model', () => {
         _id: new ObjectId(mockMessageId),
         content: 'Hello world',
         created_at: new Date(),
-        device: 'APP',
+        device: 'APP' as Device,
         room_id: '507f1f77bcf86cd799439022',
         user_id: '507f1f77bcf86cd799439011',
       };
@@ -156,7 +174,7 @@ describe('Chat Message Model', () => {
           _id: new ObjectId('507f1f77bcf86cd799439033'),
           content: 'Hello world',
           created_at: new Date(),
-          device: 'APP',
+          device: 'APP' as Device,
           room_id: mockRoomId,
           user_id: '507f1f77bcf86cd799439011',
         },
@@ -164,7 +182,7 @@ describe('Chat Message Model', () => {
           _id: new ObjectId('507f1f77bcf86cd799439034'),
           content: 'How are you?',
           created_at: new Date(),
-          device: 'PC',
+          device: 'PC' as Device,
           room_id: mockRoomId,
           user_id: '507f1f77bcf86cd799439012',
         },

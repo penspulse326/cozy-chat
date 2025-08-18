@@ -1,10 +1,10 @@
 import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import chatRoomModel from '@/models/chat-room.model.js';
-import chatRoomService from '@/services/chat-room.service.js';
+import chatRoomModel from '@/models/chat-room.model';
+import chatRoomService from '@/services/chat-room.service';
 
-vi.mock('@/models/chat-room.model.js', () => ({
+vi.mock('@/models/chat-room.model', () => ({
   default: {
     createChatRoom: vi.fn(),
     findChatRoomById: vi.fn(),

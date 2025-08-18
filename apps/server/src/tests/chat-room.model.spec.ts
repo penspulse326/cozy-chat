@@ -1,3 +1,4 @@
+import { CreateChatRoomSchema } from '@packages/lib';
 import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -46,14 +47,19 @@ describe('Chat Room Model', () => {
     // 驗證失敗時返回 null
     it('should return null when validation fails', async () => {
       // 使用無效的聊天室數據進行測試
+      // 直接模擬 CreateChatRoomSchema.parse 拋出錯誤
+      vi.spyOn(CreateChatRoomSchema, 'parse').mockImplementationOnce(() => {
+        throw new Error('Validation error');
+      });
+
       const mockInvalidChatRoom = {
         created_at: new Date(),
-        // 缺少必要的 users 欄位
+        users: ['507f1f77bcf86cd799439011'],
       };
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-      const result = await chatRoomModel.createChatRoom(mockInvalidChatRoom as any);
+      const result = await chatRoomModel.createChatRoom(mockInvalidChatRoom);
 
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();

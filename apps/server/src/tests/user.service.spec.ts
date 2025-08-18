@@ -1,11 +1,11 @@
 import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import userModel from '@/models/user.model.js';
-import chatRoomService from '@/services/chat-room.service.js';
-import userService from '@/services/user.service.js';
+import userModel from '@/models/user.model';
+import chatRoomService from '@/services/chat-room.service';
+import userService from '@/services/user.service';
 
-vi.mock('@/models/user.model.js', () => ({
+vi.mock('@/models/user.model', () => ({
   default: {
     createUser: vi.fn(),
     findUserById: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock('@/models/user.model.js', () => ({
   },
 }));
 
-vi.mock('@/services/chat-room.service.js', () => ({
+vi.mock('@/services/chat-room.service.ts', () => ({
   default: {
     createChatRoom: vi.fn(),
   },

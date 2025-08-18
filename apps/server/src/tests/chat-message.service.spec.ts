@@ -1,11 +1,13 @@
+import type { Device, UserStatus } from '@packages/lib';
+
 import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import chatMessageModel from '@/models/chat-message.model.js';
-import userModel from '@/models/user.model.js';
-import chatMessageService from '@/services/chat-message.service.js';
+import chatMessageModel from '@/models/chat-message.model';
+import userModel from '@/models/user.model';
+import chatMessageService from '@/services/chat-message.service';
 
-vi.mock('@/models/chat-message.model.js', () => ({
+vi.mock('@/models/chat-message.model', () => ({
   default: {
     createChatMessage: vi.fn(),
     findChatMessageById: vi.fn(),
@@ -13,7 +15,7 @@ vi.mock('@/models/chat-message.model.js', () => ({
   },
 }));
 
-vi.mock('@/models/user.model.js', () => ({
+vi.mock('@/models/user.model', () => ({
   default: {
     findUserById: vi.fn(),
   },
@@ -100,7 +102,7 @@ describe('Chat Message Service', () => {
         _id: new ObjectId(mockMessageId),
         content: 'Hello world',
         created_at: new Date(),
-        device: 'APP',
+        device: 'APP' as Device,
         room_id: '507f1f77bcf86cd799439022',
         user_id: '507f1f77bcf86cd799439011',
       };
@@ -146,7 +148,7 @@ describe('Chat Message Service', () => {
           _id: new ObjectId('507f1f77bcf86cd799439033'),
           content: 'Hello world',
           created_at: new Date(),
-          device: 'APP',
+          device: 'APP' as Device,
           room_id: mockRoomId,
           user_id: '507f1f77bcf86cd799439011',
         },
@@ -154,7 +156,7 @@ describe('Chat Message Service', () => {
           _id: new ObjectId('507f1f77bcf86cd799439034'),
           content: 'How are you?',
           created_at: new Date(),
-          device: 'PC',
+          device: 'PC' as Device,
           room_id: mockRoomId,
           user_id: '507f1f77bcf86cd799439012',
         },
@@ -204,10 +206,10 @@ describe('Chat Message Service', () => {
       const mockUser = {
         _id: new ObjectId(mockMessage.userId),
         created_at: new Date(),
-        device: 'APP',
+        device: 'APP' as Device,
         last_active_at: new Date(),
         room_id: mockMessage.roomId,
-        status: 'ACTIVE',
+        status: 'ACTIVE' as UserStatus,
       };
 
       const mockInsertedId = new ObjectId('507f1f77bcf86cd799439033');
@@ -265,10 +267,10 @@ describe('Chat Message Service', () => {
       const mockUser = {
         _id: new ObjectId(mockMessage.userId),
         created_at: new Date(),
-        device: 'APP',
+        device: 'APP' as Device,
         last_active_at: new Date(),
         room_id: mockMessage.roomId,
-        status: 'ACTIVE',
+        status: 'ACTIVE' as UserStatus,
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
@@ -292,10 +294,10 @@ describe('Chat Message Service', () => {
       const mockUser = {
         _id: new ObjectId(mockMessage.userId),
         created_at: new Date(),
-        device: 'APP',
+        device: 'APP' as Device,
         last_active_at: new Date(),
         room_id: mockMessage.roomId,
-        status: 'ACTIVE',
+        status: 'ACTIVE' as UserStatus,
       };
 
       const mockInsertedId = new ObjectId('507f1f77bcf86cd799439033');
