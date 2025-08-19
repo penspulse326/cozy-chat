@@ -27,12 +27,13 @@ describe('User Model', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(db.collection).mockReturnValue(mockCollection as unknown as ReturnType<typeof db.collection>);
+    vi.mocked(db.collection).mockReturnValue(
+      mockCollection as unknown as ReturnType<typeof db.collection>
+    );
     mockCollection.find.mockReturnValue(mockFindCursor);
   });
 
   describe('createUser', () => {
-    // 成功建立 user 並返回結果
     it('should successfully create user and return result', async () => {
       const mockUser = {
         created_at: new Date(),
@@ -55,9 +56,7 @@ describe('User Model', () => {
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockUser);
     });
 
-    // 驗證失敗時返回 null
     it('should return null when validation fails', async () => {
-      // 使用正確的類型，但故意使用無效值進行測試
       const mockInvalidUser = {
         created_at: new Date(),
         device: 'INVALID_DEVICE' as unknown as Device,
@@ -65,7 +64,9 @@ describe('User Model', () => {
         status: 'ACTIVE' as UserStatus,
       };
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
 
       const result = await userModel.createUser(mockInvalidUser);
 
@@ -74,7 +75,6 @@ describe('User Model', () => {
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
       const mockUser = {
         created_at: new Date(),
@@ -84,7 +84,9 @@ describe('User Model', () => {
       };
 
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
 
       const result = await userModel.createUser(mockUser);
 
@@ -95,7 +97,6 @@ describe('User Model', () => {
   });
 
   describe('findUserById', () => {
-    // 成功查詢 user 並返回結果
     it('should successfully find user and return result', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockUser = {
@@ -117,7 +118,6 @@ describe('User Model', () => {
       });
     });
 
-    // user 不存在時返回 null
     it('should return null when user does not exist', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
 
@@ -131,12 +131,13 @@ describe('User Model', () => {
       });
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
 
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
 
       const result = await userModel.findUserById(mockUserId);
 
@@ -146,7 +147,6 @@ describe('User Model', () => {
   });
 
   describe('findUsersByRoomId', () => {
-    // 成功查詢房間內的 user 並返回結果
     it('should successfully find users in room and return results', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUsers = [
@@ -178,12 +178,13 @@ describe('User Model', () => {
       expect(mockFindCursor.toArray).toHaveBeenCalled();
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
 
       const result = await userModel.findUsersByRoomId(mockRoomId);
 
@@ -193,9 +194,11 @@ describe('User Model', () => {
   });
 
   describe('updateManyUserRoomId', () => {
-    // 成功批量更新 user 房間 ID 並返回結果
     it('should successfully update multiple users room IDs and return result', async () => {
-      const mockUserIds = ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'];
+      const mockUserIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUpdateResult = {
         acknowledged: true,
@@ -204,7 +207,10 @@ describe('User Model', () => {
 
       mockCollection.updateMany.mockResolvedValue(mockUpdateResult);
 
-      const result = await userModel.updateManyUserRoomId(mockUserIds, mockRoomId);
+      const result = await userModel.updateManyUserRoomId(
+        mockUserIds,
+        mockRoomId
+      );
 
       expect(result).toEqual({
         acknowledged: mockUpdateResult.acknowledged,
@@ -217,15 +223,22 @@ describe('User Model', () => {
       );
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
-      const mockUserIds = ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'];
+      const mockUserIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       mockCollection.updateMany.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
 
-      const result = await userModel.updateManyUserRoomId(mockUserIds, mockRoomId);
+      const result = await userModel.updateManyUserRoomId(
+        mockUserIds,
+        mockRoomId
+      );
 
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
@@ -233,7 +246,6 @@ describe('User Model', () => {
   });
 
   describe('updateUserRoomId', () => {
-    // 成功更新 user 房間 ID 並返回結果
     it('should successfully update user room ID and return result', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
@@ -257,13 +269,14 @@ describe('User Model', () => {
       );
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       mockCollection.updateOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
 
       const result = await userModel.updateUserRoomId(mockUserId, mockRoomId);
 
@@ -273,7 +286,6 @@ describe('User Model', () => {
   });
 
   describe('updateUserStatus', () => {
-    // 成功更新 user 狀態並返回結果
     it('should successfully update user status and return result', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as UserStatus;
@@ -297,13 +309,14 @@ describe('User Model', () => {
       );
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as UserStatus;
 
       mockCollection.updateOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
 
       const result = await userModel.updateUserStatus(mockUserId, mockStatus);
 

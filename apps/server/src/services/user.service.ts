@@ -9,39 +9,40 @@ import userModel from '@/models/user.model';
 import chatRoomService from './chat-room.service';
 
 async function checkUserStatus(roomId: string) {
-  const users = await findUsersByRoomId(roomId);
-
-  if (!users) {
+  try {
+    const users = await findUsersByRoomId(roomId);
+    // findUsersByRoomId 已經處理了 null 的情況
+    return users.some((user) => user.status === UserStatusSchema.enum.LEFT);
+  } catch (_error) {
+    // 如果找不到聊天室的使用者，則返回 false
     return false;
   }
-
-  return users.some((user) => user.status === UserStatusSchema.enum.LEFT);
 }
 
 async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
-  // 1. 建立兩個 user 
+  // 1. 建立兩個 user
   const newUserId = await createUserAndGetId(newUser);
   const peerUserId = await createUserAndGetId(peerUser);
-
-  if (!newUserId || !peerUserId) {
-    return null;
-  }
+  // createUserAndGetId 已經處理了錯誤情況
 
   // 2. 建立聊天室
-  const newChatRoom = await chatRoomService.createChatRoom([newUserId, peerUserId]);
-  const roomId = newChatRoom?.insertedId.toString();
-
-  if (!roomId) {
-    return null;
-  }
+  const newChatRoom = await chatRoomService.createChatRoom([
+    newUserId,
+    peerUserId,
+  ]);
+  // chatRoomService.createChatRoom 已經處理了錯誤情況
+  const roomId = newChatRoom.insertedId.toString();
 
   // 3. 批量更新 user 的roomId
   const userIds = [newUserId, peerUserId];
   const updateResult = await userModel.updateManyUserRoomId(userIds, roomId);
 
-  if (!updateResult || !updateResult.acknowledged || updateResult.modifiedCount !== 2) {
-    // 如果更新失敗，返回null
-    return null;
+  if (
+    !updateResult ||
+    !updateResult.acknowledged ||
+    updateResult.modifiedCount !== 2
+  ) {
+    throw new Error(`批量更新使用者聊天室失敗: ${userIds.join(', ')}`);
   }
 
   // 4. 返回結果
@@ -72,42 +73,55 @@ async function createUser(user: WaitingUser) {
   };
 
   const result = await userModel.createUser(payload);
-
+  if (result === null) {
+    throw new Error('建立使用者失敗');
+  }
   return result;
 }
 
 // 建立單個 user 並返回ID
-async function createUserAndGetId(user: WaitingUser): Promise<null | string> {
+async function createUserAndGetId(user: WaitingUser): Promise<string> {
   const result = await createUser(user);
-  return result ? result.insertedId.toString() : null;
+  // createUser 已經處理了 null 的情況
+  return result.insertedId.toString();
 }
 
 async function findUserById(userId: string) {
   const result = await userModel.findUserById(userId);
-
+  if (result === null) {
+    throw new Error(`找不到使用者: ${userId}`);
+  }
   return result;
 }
 
 async function findUsersByRoomId(roomId: string) {
   const result = await userModel.findUsersByRoomId(roomId);
-
+  if (result === null) {
+    throw new Error(`找不到聊天室的使用者: ${roomId}`);
+  }
   return result;
 }
 
 async function updateUserRoomId(userId: string, roomId: string) {
   const result = await userModel.updateUserRoomId(userId, roomId);
-
+  if (result === null) {
+    throw new Error(`更新使用者聊天室失敗: ${userId}`);
+  }
   return result;
 }
 
 async function updateUserStatus(userId: string, status: UserStatus) {
   const user = await findUserById(userId);
+  // findUserById 已經處理了 null 的情況
 
-  if (!user || !user.room_id) {
-    return null;
+  if (!user.room_id) {
+    throw new Error(`使用者沒有聊天室: ${userId}`);
   }
 
-  await userModel.updateUserStatus(userId, status);
+  const result = await userModel.updateUserStatus(userId, status);
+  if (result === null) {
+    throw new Error(`更新使用者狀態失敗: ${userId}`);
+  }
 
   return {
     roomId: user.room_id.toString(),

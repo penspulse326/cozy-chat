@@ -28,7 +28,6 @@ describe('Chat Message Service', () => {
 
   describe('createChatMessage', () => {
     it('should create chat message with correct payload', async () => {
-      // Arrange
       const mockMessage = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -39,15 +38,19 @@ describe('Chat Message Service', () => {
         acknowledged: true,
         insertedId: new ObjectId('507f1f77bcf86cd799439033'),
       };
-      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(mockInsertResult);
+      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
+        mockInsertResult
+      );
 
-      // Act
-      const result = await chatMessageService.createChatMessage(mockMessage, mockDevice);
+      const result = await chatMessageService.createChatMessage(
+        mockMessage,
+        mockDevice
+      );
 
-      // Assert
       expect(result).toBe(mockInsertResult);
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
-      const calledWith = vi.mocked(chatMessageModel.createChatMessage).mock.calls[0][0];
+      const calledWith = vi.mocked(chatMessageModel.createChatMessage).mock
+        .calls[0][0];
       expect(calledWith).toEqual(
         expect.objectContaining({
           content: mockMessage.content,
@@ -59,8 +62,7 @@ describe('Chat Message Service', () => {
       );
     });
 
-    it('should return null when model returns null', async () => {
-      // Arrange
+    it('should throw error when model returns null', async () => {
       const mockMessage = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -69,16 +71,14 @@ describe('Chat Message Service', () => {
       const mockDevice = 'APP';
       vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(null);
 
-      // Act
-      const result = await chatMessageService.createChatMessage(mockMessage, mockDevice);
+      await expect(
+        chatMessageService.createChatMessage(mockMessage, mockDevice)
+      ).rejects.toThrow('建立聊天訊息失敗');
 
-      // Assert
-      expect(result).toBeNull();
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error if model throws error', async () => {
-      // Arrange
       const mockMessage = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -89,10 +89,9 @@ describe('Chat Message Service', () => {
         new Error('Create chat message failed')
       );
 
-      // Act & Assert
-      await expect(chatMessageService.createChatMessage(mockMessage, mockDevice)).rejects.toThrow(
-        'Create chat message failed'
-      );
+      await expect(
+        chatMessageService.createChatMessage(mockMessage, mockDevice)
+      ).rejects.toThrow('Create chat message failed');
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
     });
   });
@@ -109,22 +108,30 @@ describe('Chat Message Service', () => {
         user_id: '507f1f77bcf86cd799439011',
       };
 
-      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(mockChatMessage);
+      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(
+        mockChatMessage
+      );
 
-      const result = await chatMessageService.findChatMessageById(mockMessageId);
+      const result =
+        await chatMessageService.findChatMessageById(mockMessageId);
       expect(result).toBe(mockChatMessage);
-      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(mockMessageId);
+      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(
+        mockMessageId
+      );
       expect(chatMessageModel.findChatMessageById).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null when chat message not found', async () => {
+    it('should throw error when chat message not found', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
 
       vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(null);
 
-      const result = await chatMessageService.findChatMessageById(mockMessageId);
-      expect(result).toBeNull();
-      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(mockMessageId);
+      await expect(
+        chatMessageService.findChatMessageById(mockMessageId)
+      ).rejects.toThrow(`找不到聊天訊息: ${mockMessageId}`);
+      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(
+        mockMessageId
+      );
       expect(chatMessageModel.findChatMessageById).toHaveBeenCalledTimes(1);
     });
 
@@ -135,9 +142,9 @@ describe('Chat Message Service', () => {
         new Error('Find chat message failed')
       );
 
-      await expect(chatMessageService.findChatMessageById(mockMessageId)).rejects.toThrow(
-        'Find chat message failed'
-      );
+      await expect(
+        chatMessageService.findChatMessageById(mockMessageId)
+      ).rejects.toThrow('Find chat message failed');
       expect(chatMessageModel.findChatMessageById).toHaveBeenCalledTimes(1);
     });
   });
@@ -164,23 +171,37 @@ describe('Chat Message Service', () => {
         },
       ];
 
-      vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockResolvedValue(mockChatMessages);
+      vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockResolvedValue(
+        mockChatMessages
+      );
 
-      const result = await chatMessageService.findChatMessagesByRoomId(mockRoomId);
+      const result =
+        await chatMessageService.findChatMessagesByRoomId(mockRoomId);
       expect(result).toBe(mockChatMessages);
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledWith(mockRoomId);
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledTimes(1);
+      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledWith(
+        mockRoomId
+      );
+      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledTimes(
+        1
+      );
     });
 
-    it('should return null when chat messages not found', async () => {
+    it('should throw error when chat messages not found', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
-      vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockResolvedValue(null);
+      vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockResolvedValue(
+        null
+      );
 
-      const result = await chatMessageService.findChatMessagesByRoomId(mockRoomId);
-      expect(result).toBeNull();
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledWith(mockRoomId);
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledTimes(1);
+      await expect(
+        chatMessageService.findChatMessagesByRoomId(mockRoomId)
+      ).rejects.toThrow(`找不到聊天室訊息: ${mockRoomId}`);
+      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledWith(
+        mockRoomId
+      );
+      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledTimes(
+        1
+      );
     });
 
     it('should throw error if model throws error', async () => {
@@ -190,10 +211,12 @@ describe('Chat Message Service', () => {
         new Error('Find chat messages failed')
       );
 
-      await expect(chatMessageService.findChatMessagesByRoomId(mockRoomId)).rejects.toThrow(
-        'Find chat messages failed'
+      await expect(
+        chatMessageService.findChatMessagesByRoomId(mockRoomId)
+      ).rejects.toThrow('Find chat messages failed');
+      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledTimes(
+        1
       );
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -231,18 +254,24 @@ describe('Chat Message Service', () => {
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
-      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(mockInsertResult);
-      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(mockChatMessage);
+      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
+        mockInsertResult
+      );
+      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(
+        mockChatMessage
+      );
 
       const result = await chatMessageService.sendChatMessage(mockMessage);
 
       expect(result).toBe(mockChatMessage);
       expect(userModel.findUserById).toHaveBeenCalledWith(mockMessage.userId);
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
-      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(mockInsertedId.toString());
+      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(
+        mockInsertedId.toString()
+      );
     });
 
-    it('should return null when user not found', async () => {
+    it('should throw error when user not found', async () => {
       const mockMessage = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -251,15 +280,15 @@ describe('Chat Message Service', () => {
 
       vi.mocked(userModel.findUserById).mockResolvedValue(null);
 
-      const result = await chatMessageService.sendChatMessage(mockMessage);
-
-      expect(result).toBeNull();
+      await expect(
+        chatMessageService.sendChatMessage(mockMessage)
+      ).rejects.toThrow(`找不到使用者: ${mockMessage.userId}`);
       expect(userModel.findUserById).toHaveBeenCalledWith(mockMessage.userId);
       expect(chatMessageModel.createChatMessage).not.toHaveBeenCalled();
       expect(chatMessageModel.findChatMessageById).not.toHaveBeenCalled();
     });
 
-    it('should return null when createChatMessage returns null', async () => {
+    it('should throw error when createChatMessage returns null', async () => {
       const mockMessage = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -278,15 +307,15 @@ describe('Chat Message Service', () => {
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
       vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(null);
 
-      const result = await chatMessageService.sendChatMessage(mockMessage);
-
-      expect(result).toBeNull();
+      await expect(
+        chatMessageService.sendChatMessage(mockMessage)
+      ).rejects.toThrow('建立聊天訊息失敗');
       expect(userModel.findUserById).toHaveBeenCalledWith(mockMessage.userId);
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
       expect(chatMessageModel.findChatMessageById).not.toHaveBeenCalled();
     });
 
-    it('should return null when findChatMessageById returns null', async () => {
+    it('should throw error when findChatMessageById returns null', async () => {
       const mockMessage = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -310,15 +339,19 @@ describe('Chat Message Service', () => {
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
-      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(mockInsertResult);
+      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
+        mockInsertResult
+      );
       vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(null);
 
-      const result = await chatMessageService.sendChatMessage(mockMessage);
-
-      expect(result).toBeNull();
+      await expect(
+        chatMessageService.sendChatMessage(mockMessage)
+      ).rejects.toThrow(`找不到聊天訊息: ${mockInsertedId.toString()}`);
       expect(userModel.findUserById).toHaveBeenCalledWith(mockMessage.userId);
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
-      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(mockInsertedId.toString());
+      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(
+        mockInsertedId.toString()
+      );
     });
   });
 });

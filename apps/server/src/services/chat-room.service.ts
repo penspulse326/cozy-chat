@@ -8,13 +8,17 @@ async function createChatRoom(userIds: string[]) {
   };
 
   const result = await chatRoomModel.createChatRoom(payload);
-
+  if (result === null) {
+    throw new Error('建立聊天室失敗');
+  }
   return result;
 }
 
 async function findChatRoomById(id: string) {
   const result = await chatRoomModel.findChatRoomById(id);
-
+  if (result === null) {
+    throw new Error(`找不到聊天室: ${id}`);
+  }
   return result;
 }
 

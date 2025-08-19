@@ -18,7 +18,7 @@ vi.mock('@/models/user.model', () => ({
   },
 }));
 
-vi.mock('@/services/chat-room.service.ts', () => ({
+vi.mock('@/services/chat-room.service', () => ({
   default: {
     createChatRoom: vi.fn(),
   },
@@ -31,7 +31,6 @@ describe('User Service', () => {
 
   describe('createUser', () => {
     it('should create user with correct payload', async () => {
-      // Arrange
       const mockWaitingUser = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -42,10 +41,8 @@ describe('User Service', () => {
       };
       vi.mocked(userModel.createUser).mockResolvedValue(mockInsertResult);
 
-      // Act
       const result = await userService.createUser(mockWaitingUser);
 
-      // Assert
       expect(result).toBe(mockInsertResult);
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
       const calledWith = vi.mocked(userModel.createUser).mock.calls[0][0];
@@ -59,24 +56,20 @@ describe('User Service', () => {
       );
     });
 
-    it('should return null when model throws error', async () => {
-      // Arrange
+    it('should throw error when model returns null', async () => {
       const mockWaitingUser = {
-        device: 'MB' as Device, // 故意使用無效值
+        device: 'PS5' as Device,
         socketId: 'socket123',
       };
       vi.mocked(userModel.createUser).mockResolvedValue(null);
 
-      // Act
-      const result = await userService.createUser(mockWaitingUser);
-
-      // Assert
-      expect(result).toBeNull();
+      await expect(userService.createUser(mockWaitingUser)).rejects.toThrow(
+        '建立使用者失敗'
+      );
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error if model throws error', async () => {
-      // Arrange
       const mockWaitingUser = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -85,7 +78,6 @@ describe('User Service', () => {
         new Error('Create user failed')
       );
 
-      // Act & Assert
       await expect(userService.createUser(mockWaitingUser)).rejects.toThrow(
         'Create user failed'
       );
@@ -113,13 +105,14 @@ describe('User Service', () => {
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null when user not found', async () => {
+    it('should throw error when user not found', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
 
       vi.mocked(userModel.findUserById).mockResolvedValue(null);
 
-      const result = await userService.findUserById(mockUserId);
-      expect(result).toBeNull();
+      await expect(userService.findUserById(mockUserId)).rejects.toThrow(
+        `找不到使用者: ${mockUserId}`
+      );
       expect(userModel.findUserById).toHaveBeenCalledWith(mockUserId);
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
     });
@@ -155,13 +148,14 @@ describe('User Service', () => {
       expect(userModel.findUsersByRoomId).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null when users not found', async () => {
+    it('should throw error when users not found', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       vi.mocked(userModel.findUsersByRoomId).mockResolvedValue(null);
 
-      const result = await userService.findUsersByRoomId(mockRoomId);
-      expect(result).toBeNull();
+      await expect(userService.findUsersByRoomId(mockRoomId)).rejects.toThrow(
+        `找不到聊天室的使用者: ${mockRoomId}`
+      );
       expect(userModel.findUsersByRoomId).toHaveBeenCalledWith(mockRoomId);
       expect(userModel.findUsersByRoomId).toHaveBeenCalledTimes(1);
     });
@@ -183,19 +177,26 @@ describe('User Service', () => {
 
       const result = await userService.updateUserRoomId(mockUserId, mockRoomId);
       expect(result).toBe(mockUpdateResult);
-      expect(userModel.updateUserRoomId).toHaveBeenCalledWith(mockUserId, mockRoomId);
+      expect(userModel.updateUserRoomId).toHaveBeenCalledWith(
+        mockUserId,
+        mockRoomId
+      );
       expect(userModel.updateUserRoomId).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null when update fails', async () => {
+    it('should throw error when update fails', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       vi.mocked(userModel.updateUserRoomId).mockResolvedValue(null);
 
-      const result = await userService.updateUserRoomId(mockUserId, mockRoomId);
-      expect(result).toBeNull();
-      expect(userModel.updateUserRoomId).toHaveBeenCalledWith(mockUserId, mockRoomId);
+      await expect(
+        userService.updateUserRoomId(mockUserId, mockRoomId)
+      ).rejects.toThrow(`更新使用者聊天室失敗: ${mockUserId}`);
+      expect(userModel.updateUserRoomId).toHaveBeenCalledWith(
+        mockUserId,
+        mockRoomId
+      );
       expect(userModel.updateUserRoomId).toHaveBeenCalledTimes(1);
     });
   });
@@ -227,25 +228,29 @@ describe('User Service', () => {
       const result = await userService.updateUserStatus(mockUserId, mockStatus);
       expect(result).toEqual({ roomId: mockRoomId });
       expect(userModel.findUserById).toHaveBeenCalledWith(mockUserId);
-      expect(userModel.updateUserStatus).toHaveBeenCalledWith(mockUserId, mockStatus);
+      expect(userModel.updateUserStatus).toHaveBeenCalledWith(
+        mockUserId,
+        mockStatus
+      );
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
       expect(userModel.updateUserStatus).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null when user does not exist', async () => {
+    it('should throw error when user does not exist', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as const;
 
       vi.mocked(userModel.findUserById).mockResolvedValue(null);
 
-      const result = await userService.updateUserStatus(mockUserId, mockStatus);
-      expect(result).toBeNull();
+      await expect(
+        userService.updateUserStatus(mockUserId, mockStatus)
+      ).rejects.toThrow(`找不到使用者: ${mockUserId}`);
       expect(userModel.findUserById).toHaveBeenCalledWith(mockUserId);
       expect(userModel.updateUserStatus).not.toHaveBeenCalled();
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null when user has no room_id', async () => {
+    it('should throw error when user has no room_id', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as const;
       const mockUser = {
@@ -258,8 +263,9 @@ describe('User Service', () => {
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
 
-      const result = await userService.updateUserStatus(mockUserId, mockStatus);
-      expect(result).toBeNull();
+      await expect(
+        userService.updateUserStatus(mockUserId, mockStatus)
+      ).rejects.toThrow(`使用者沒有聊天室: ${mockUserId}`);
       expect(userModel.findUserById).toHaveBeenCalledWith(mockUserId);
       expect(userModel.updateUserStatus).not.toHaveBeenCalled();
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
@@ -377,10 +383,17 @@ describe('User Service', () => {
         .mockResolvedValueOnce(mockNewUserResult)
         .mockResolvedValueOnce(mockPeerUserResult);
 
-      vi.mocked(chatRoomService.createChatRoom).mockResolvedValue(mockChatRoomResult);
-      vi.mocked(userModel.updateManyUserRoomId).mockResolvedValue(mockUpdateManyResult);
+      vi.mocked(chatRoomService.createChatRoom).mockResolvedValue(
+        mockChatRoomResult
+      );
+      vi.mocked(userModel.updateManyUserRoomId).mockResolvedValue(
+        mockUpdateManyResult
+      );
 
-      const result = await userService.createMatchedUsers(mockNewUser, mockPeerUser);
+      const result = await userService.createMatchedUsers(
+        mockNewUser,
+        mockPeerUser
+      );
 
       expect(result).toEqual({
         matchedUsers: [
@@ -408,7 +421,7 @@ describe('User Service', () => {
       expect(userModel.updateManyUserRoomId).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null when first createUser fails', async () => {
+    it('should throw error when first createUser fails', async () => {
       const mockNewUser = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -418,21 +431,19 @@ describe('User Service', () => {
         socketId: 'socket456',
       };
 
-      // 重置 mock 以確保之前的測試不會影響這個測試
       vi.mocked(userModel.createUser).mockReset();
-      // 設置第一次調用返回 null
       vi.mocked(userModel.createUser).mockResolvedValueOnce(null);
 
-      const result = await userService.createMatchedUsers(mockNewUser, mockPeerUser);
+      await expect(
+        userService.createMatchedUsers(mockNewUser, mockPeerUser)
+      ).rejects.toThrow('建立使用者失敗');
 
-      expect(result).toBeNull();
-      // 即使第一次調用返回 null，createMatchedUsers 仍然會嘗試調用第二次 createUser
-      expect(userModel.createUser).toHaveBeenCalledTimes(2);
+      expect(userModel.createUser).toHaveBeenCalledTimes(1);
       expect(chatRoomService.createChatRoom).not.toHaveBeenCalled();
       expect(userModel.updateUserRoomId).not.toHaveBeenCalled();
     });
 
-    it('should return null when second createUser fails', async () => {
+    it('should throw error when second createUser fails', async () => {
       const mockNewUser = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -449,21 +460,21 @@ describe('User Service', () => {
         insertedId: mockNewUserId,
       };
 
-      // 重置 mock 以確保之前的測試不會影響這個測試
       vi.mocked(userModel.createUser).mockReset();
       vi.mocked(userModel.createUser)
         .mockResolvedValueOnce(mockNewUserResult)
         .mockResolvedValueOnce(null);
 
-      const result = await userService.createMatchedUsers(mockNewUser, mockPeerUser);
+      await expect(
+        userService.createMatchedUsers(mockNewUser, mockPeerUser)
+      ).rejects.toThrow('建立使用者失敗');
 
-      expect(result).toBeNull();
       expect(userModel.createUser).toHaveBeenCalledTimes(2);
       expect(chatRoomService.createChatRoom).not.toHaveBeenCalled();
       expect(userModel.updateUserRoomId).not.toHaveBeenCalled();
     });
 
-    it('should return null when createChatRoom fails', async () => {
+    it('should throw error when createChatRoom fails', async () => {
       const mockNewUser = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -486,17 +497,19 @@ describe('User Service', () => {
         insertedId: mockPeerUserId,
       };
 
-      // 重置 mock 以確保之前的測試不會影響這個測試
       vi.mocked(userModel.createUser).mockReset();
       vi.mocked(userModel.createUser)
         .mockResolvedValueOnce(mockNewUserResult)
         .mockResolvedValueOnce(mockPeerUserResult);
 
-      vi.mocked(chatRoomService.createChatRoom).mockResolvedValue(null);
+      vi.mocked(chatRoomService.createChatRoom).mockRejectedValue(
+        new Error('建立聊天室失敗')
+      );
 
-      const result = await userService.createMatchedUsers(mockNewUser, mockPeerUser);
+      await expect(
+        userService.createMatchedUsers(mockNewUser, mockPeerUser)
+      ).rejects.toThrow('建立聊天室失敗');
 
-      expect(result).toBeNull();
       expect(userModel.createUser).toHaveBeenCalledTimes(2);
       expect(chatRoomService.createChatRoom).toHaveBeenCalledTimes(1);
       expect(userModel.updateUserRoomId).not.toHaveBeenCalled();

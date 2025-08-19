@@ -18,22 +18,25 @@ describe('Chat Room Service', () => {
 
   describe('createChatRoom', () => {
     it('should create chat room with correct payload', async () => {
-      // Arrange
-      const mockUserIds = ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'];
+      const mockUserIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
       const mockRoomId = new ObjectId('507f1f77bcf86cd799439022');
       const mockInsertResult = {
         acknowledged: true,
         insertedId: mockRoomId,
       };
-      vi.mocked(chatRoomModel.createChatRoom).mockResolvedValue(mockInsertResult);
+      vi.mocked(chatRoomModel.createChatRoom).mockResolvedValue(
+        mockInsertResult
+      );
 
-      // Act
       const result = await chatRoomService.createChatRoom(mockUserIds);
 
-      // Assert
       expect(result).toBe(mockInsertResult);
       expect(chatRoomModel.createChatRoom).toHaveBeenCalledTimes(1);
-      const calledWith = vi.mocked(chatRoomModel.createChatRoom).mock.calls[0][0];
+      const calledWith = vi.mocked(chatRoomModel.createChatRoom).mock
+        .calls[0][0];
       expect(calledWith).toEqual(
         expect.objectContaining({
           created_at: expect.any(Date),
@@ -42,27 +45,28 @@ describe('Chat Room Service', () => {
       );
     });
 
-    it('should return null when model returns null', async () => {
-      // Arrange
-      const mockUserIds = ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'];
+    it('should throw error when model returns null', async () => {
+      const mockUserIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
       vi.mocked(chatRoomModel.createChatRoom).mockResolvedValue(null);
 
-      // Act
-      const result = await chatRoomService.createChatRoom(mockUserIds);
-
-      // Assert
-      expect(result).toBeNull();
+      await expect(chatRoomService.createChatRoom(mockUserIds)).rejects.toThrow(
+        '建立聊天室失敗'
+      );
       expect(chatRoomModel.createChatRoom).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error if model throws error', async () => {
-      // Arrange
-      const mockUserIds = ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'];
+      const mockUserIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
       vi.mocked(chatRoomModel.createChatRoom).mockRejectedValue(
         new Error('Create chat room failed')
       );
 
-      // Act & Assert
       await expect(chatRoomService.createChatRoom(mockUserIds)).rejects.toThrow(
         'Create chat room failed'
       );
@@ -87,13 +91,14 @@ describe('Chat Room Service', () => {
       expect(chatRoomModel.findChatRoomById).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null when chat room not found', async () => {
+    it('should throw error when chat room not found', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       vi.mocked(chatRoomModel.findChatRoomById).mockResolvedValue(null);
 
-      const result = await chatRoomService.findChatRoomById(mockRoomId);
-      expect(result).toBeNull();
+      await expect(
+        chatRoomService.findChatRoomById(mockRoomId)
+      ).rejects.toThrow(`找不到聊天室: ${mockRoomId}`);
       expect(chatRoomModel.findChatRoomById).toHaveBeenCalledWith(mockRoomId);
       expect(chatRoomModel.findChatRoomById).toHaveBeenCalledTimes(1);
     });
@@ -105,9 +110,9 @@ describe('Chat Room Service', () => {
         new Error('Find chat room failed')
       );
 
-      await expect(chatRoomService.findChatRoomById(mockRoomId)).rejects.toThrow(
-        'Find chat room failed'
-      );
+      await expect(
+        chatRoomService.findChatRoomById(mockRoomId)
+      ).rejects.toThrow('Find chat room failed');
       expect(chatRoomModel.findChatRoomById).toHaveBeenCalledTimes(1);
     });
   });

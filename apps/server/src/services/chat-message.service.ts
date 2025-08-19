@@ -14,42 +14,41 @@ async function createChatMessage(data: SocketChatMessage, device: Device) {
   };
 
   const result = await chatMessageModel.createChatMessage(payload);
-
+  if (result === null) {
+    throw new Error('建立聊天訊息失敗');
+  }
   return result;
 }
 
 async function findChatMessageById(id: string) {
   const result = await chatMessageModel.findChatMessageById(id);
-
+  if (result === null) {
+    throw new Error(`找不到聊天訊息: ${id}`);
+  }
   return result;
 }
 
 async function findChatMessagesByRoomId(roomId: string) {
   const result = await chatMessageModel.findChatMessagesByRoomId(roomId);
-
+  if (result === null) {
+    throw new Error(`找不到聊天室訊息: ${roomId}`);
+  }
   return result;
 }
 
 async function sendChatMessage(data: SocketChatMessage) {
   const user = await userModel.findUserById(data.userId);
-
   if (!user) {
-    return null;
+    throw new Error(`找不到使用者: ${data.userId}`);
   }
 
   const result = await createChatMessage(data, user.device);
-
-  if (!result) {
-    return null;
-  }
+  // createChatMessage 已經處理了錯誤情況
 
   const newChatMessage = await findChatMessageById(
     result.insertedId.toString()
   );
-
-  if (!newChatMessage) {
-    return null;
-  }
+  // findChatMessageById 已經處理了錯誤情況
 
   return newChatMessage;
 }
