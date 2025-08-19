@@ -56,7 +56,7 @@ describe('Chat Message Model', () => {
     });
 
     it('should return null when validation fails', async () => {
-      const invalidData = {
+      const mockInvalidChatMessage = {
         content: 123 as unknown as string,
         created_at: new Date(),
         device: 'INVALID_DEVICE' as Device,
@@ -68,7 +68,9 @@ describe('Chat Message Model', () => {
         .spyOn(console, 'error')
         .mockImplementation(() => undefined);
 
-      const result = await chatMessageModel.createChatMessage(invalidData);
+      const result = await chatMessageModel.createChatMessage(
+        mockInvalidChatMessage
+      );
 
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();

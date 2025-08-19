@@ -31,7 +31,7 @@ describe('User Service', () => {
 
   describe('createUser', () => {
     it('should create user with correct payload', async () => {
-      const mockWaitingUser = {
+      const mockUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
       };
@@ -41,7 +41,7 @@ describe('User Service', () => {
       };
       vi.mocked(userModel.createUser).mockResolvedValue(mockInsertResult);
 
-      const result = await userService.createUser(mockWaitingUser);
+      const result = await userService.createUser(mockUserData);
 
       expect(result).toBe(mockInsertResult);
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
@@ -57,20 +57,20 @@ describe('User Service', () => {
     });
 
     it('should throw error when model returns null', async () => {
-      const mockWaitingUser = {
+      const mockUserData = {
         device: 'PS5' as Device,
         socketId: 'socket123',
       };
       vi.mocked(userModel.createUser).mockResolvedValue(null);
 
-      await expect(userService.createUser(mockWaitingUser)).rejects.toThrow(
+      await expect(userService.createUser(mockUserData)).rejects.toThrow(
         '建立使用者失敗'
       );
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error if model throws error', async () => {
-      const mockWaitingUser = {
+      const mockUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
       };
@@ -78,7 +78,7 @@ describe('User Service', () => {
         new Error('Create user failed')
       );
 
-      await expect(userService.createUser(mockWaitingUser)).rejects.toThrow(
+      await expect(userService.createUser(mockUserData)).rejects.toThrow(
         'Create user failed'
       );
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
@@ -345,11 +345,11 @@ describe('User Service', () => {
 
   describe('createMatchedUsers', () => {
     it('should create matched users and return users with roomId', async () => {
-      const mockNewUser = {
+      const mockNewUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
       };
-      const mockPeerUser = {
+      const mockPeerUserData = {
         device: 'PC' as Device,
         socketId: 'socket456',
       };
@@ -391,18 +391,18 @@ describe('User Service', () => {
       );
 
       const result = await userService.createMatchedUsers(
-        mockNewUser,
-        mockPeerUser
+        mockNewUserData,
+        mockPeerUserData
       );
 
       expect(result).toEqual({
         matchedUsers: [
           {
-            ...mockNewUser,
+            ...mockNewUserData,
             userId: mockNewUserId.toString(),
           },
           {
-            ...mockPeerUser,
+            ...mockPeerUserData,
             userId: mockPeerUserId.toString(),
           },
         ],
@@ -422,11 +422,11 @@ describe('User Service', () => {
     });
 
     it('should throw error when first createUser fails', async () => {
-      const mockNewUser = {
+      const mockNewUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
       };
-      const mockPeerUser = {
+      const mockPeerUserData = {
         device: 'PC' as Device,
         socketId: 'socket456',
       };
@@ -435,7 +435,7 @@ describe('User Service', () => {
       vi.mocked(userModel.createUser).mockResolvedValueOnce(null);
 
       await expect(
-        userService.createMatchedUsers(mockNewUser, mockPeerUser)
+        userService.createMatchedUsers(mockNewUserData, mockPeerUserData)
       ).rejects.toThrow('建立使用者失敗');
 
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
@@ -444,11 +444,11 @@ describe('User Service', () => {
     });
 
     it('should throw error when second createUser fails', async () => {
-      const mockNewUser = {
+      const mockNewUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
       };
-      const mockPeerUser = {
+      const mockPeerUserData = {
         device: 'PC' as Device,
         socketId: 'socket456',
       };
@@ -466,7 +466,7 @@ describe('User Service', () => {
         .mockResolvedValueOnce(null);
 
       await expect(
-        userService.createMatchedUsers(mockNewUser, mockPeerUser)
+        userService.createMatchedUsers(mockNewUserData, mockPeerUserData)
       ).rejects.toThrow('建立使用者失敗');
 
       expect(userModel.createUser).toHaveBeenCalledTimes(2);
@@ -475,11 +475,11 @@ describe('User Service', () => {
     });
 
     it('should throw error when createChatRoom fails', async () => {
-      const mockNewUser = {
+      const mockNewUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
       };
-      const mockPeerUser = {
+      const mockPeerUserData = {
         device: 'PC' as Device,
         socketId: 'socket456',
       };
@@ -507,7 +507,7 @@ describe('User Service', () => {
       );
 
       await expect(
-        userService.createMatchedUsers(mockNewUser, mockPeerUser)
+        userService.createMatchedUsers(mockNewUserData, mockPeerUserData)
       ).rejects.toThrow('建立聊天室失敗');
 
       expect(userModel.createUser).toHaveBeenCalledTimes(2);

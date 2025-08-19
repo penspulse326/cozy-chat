@@ -18,7 +18,7 @@ describe('Chat Room Service', () => {
 
   describe('createChatRoom', () => {
     it('should create chat room with correct payload', async () => {
-      const mockUserIds = [
+      const mockChatRoomUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
       ];
@@ -31,7 +31,7 @@ describe('Chat Room Service', () => {
         mockInsertResult
       );
 
-      const result = await chatRoomService.createChatRoom(mockUserIds);
+      const result = await chatRoomService.createChatRoom(mockChatRoomUserIds);
 
       expect(result).toBe(mockInsertResult);
       expect(chatRoomModel.createChatRoom).toHaveBeenCalledTimes(1);
@@ -40,26 +40,26 @@ describe('Chat Room Service', () => {
       expect(calledWith).toEqual(
         expect.objectContaining({
           created_at: expect.any(Date),
-          users: mockUserIds,
+          users: mockChatRoomUserIds,
         })
       );
     });
 
     it('should throw error when model returns null', async () => {
-      const mockUserIds = [
+      const mockChatRoomUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
       ];
       vi.mocked(chatRoomModel.createChatRoom).mockResolvedValue(null);
 
-      await expect(chatRoomService.createChatRoom(mockUserIds)).rejects.toThrow(
-        '建立聊天室失敗'
-      );
+      await expect(
+        chatRoomService.createChatRoom(mockChatRoomUserIds)
+      ).rejects.toThrow('建立聊天室失敗');
       expect(chatRoomModel.createChatRoom).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error if model throws error', async () => {
-      const mockUserIds = [
+      const mockChatRoomUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
       ];
@@ -67,9 +67,9 @@ describe('Chat Room Service', () => {
         new Error('Create chat room failed')
       );
 
-      await expect(chatRoomService.createChatRoom(mockUserIds)).rejects.toThrow(
-        'Create chat room failed'
-      );
+      await expect(
+        chatRoomService.createChatRoom(mockChatRoomUserIds)
+      ).rejects.toThrow('Create chat room failed');
       expect(chatRoomModel.createChatRoom).toHaveBeenCalledTimes(1);
     });
   });
