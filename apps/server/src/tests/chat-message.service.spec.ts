@@ -28,25 +28,25 @@ describe('Chat Message Service', () => {
 
   describe('createChatMessage', () => {
     it('should create chat message with correct payload', async () => {
+      // Arrange
       const mockMessage = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
         userId: '507f1f77bcf86cd799439011',
       };
-
       const mockDevice = 'APP';
-
       const mockInsertResult = {
         acknowledged: true,
         insertedId: new ObjectId('507f1f77bcf86cd799439033'),
       };
-
       vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(mockInsertResult);
 
+      // Act
       const result = await chatMessageService.createChatMessage(mockMessage, mockDevice);
+
+      // Assert
       expect(result).toBe(mockInsertResult);
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
-
       const calledWith = vi.mocked(chatMessageModel.createChatMessage).mock.calls[0][0];
       expect(calledWith).toEqual(
         expect.objectContaining({
@@ -60,34 +60,36 @@ describe('Chat Message Service', () => {
     });
 
     it('should return null when model returns null', async () => {
+      // Arrange
       const mockMessage = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
         userId: '507f1f77bcf86cd799439011',
       };
-
       const mockDevice = 'APP';
-
       vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(null);
 
+      // Act
       const result = await chatMessageService.createChatMessage(mockMessage, mockDevice);
+
+      // Assert
       expect(result).toBeNull();
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error if model throws error', async () => {
+      // Arrange
       const mockMessage = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
         userId: '507f1f77bcf86cd799439011',
       };
-
       const mockDevice = 'APP';
-
       vi.mocked(chatMessageModel.createChatMessage).mockRejectedValue(
         new Error('Create chat message failed')
       );
 
+      // Act & Assert
       await expect(chatMessageService.createChatMessage(mockMessage, mockDevice)).rejects.toThrow(
         'Create chat message failed'
       );

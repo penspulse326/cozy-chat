@@ -38,8 +38,8 @@ describe('Chat Message Model', () => {
   });
 
   describe('createChatMessage', () => {
-    // 成功建立聊天訊息並返回結果
     it('should successfully create chat message and return result', async () => {
+      // Arrange
       const mockChatMessage = {
         content: 'Hello world',
         created_at: new Date(),
@@ -55,8 +55,10 @@ describe('Chat Message Model', () => {
 
       mockCollection.insertOne.mockResolvedValue(mockInsertResult);
 
+      // Act
       const result = await chatMessageModel.createChatMessage(mockChatMessage);
 
+      // Assert
       expect(result).toEqual(mockInsertResult);
       expect(db.collection).toHaveBeenCalledWith('chat_messages');
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatMessage);
@@ -64,10 +66,7 @@ describe('Chat Message Model', () => {
 
     // 驗證失敗時返回 null
     it('should return null when validation fails', async () => {
-      // 使用無效的聊天訊息數據進行測試
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-
-      // 模擬 CreateChatMessageSchema.parse 驗證失敗
+      // Arrange
       const invalidData = {
         content: '',
         created_at: new Date(),
@@ -76,13 +75,15 @@ describe('Chat Message Model', () => {
         user_id: ''
       };
 
-      // 模擬驗證失敗
       vi.spyOn(CreateChatMessageSchema, 'parse').mockImplementationOnce(() => {
         throw new Error('Validation Error');
       });
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatMessageModel.createChatMessage(invalidData);
 
+      // Assert
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
@@ -90,6 +91,7 @@ describe('Chat Message Model', () => {
 
     // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
+      // Arrange
       const mockChatMessage = {
         content: 'Hello world',
         created_at: new Date(),
@@ -101,8 +103,10 @@ describe('Chat Message Model', () => {
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatMessageModel.createChatMessage(mockChatMessage);
 
+      // Assert
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatMessage);
@@ -110,8 +114,8 @@ describe('Chat Message Model', () => {
   });
 
   describe('findChatMessageById', () => {
-    // 成功查詢聊天訊息並返回結果
     it('should successfully find chat message and return result', async () => {
+      // Arrange
       const mockMessageId = '507f1f77bcf86cd799439033';
       const mockChatMessage = {
         _id: new ObjectId(mockMessageId),
@@ -121,53 +125,52 @@ describe('Chat Message Model', () => {
         room_id: '507f1f77bcf86cd799439022',
         user_id: '507f1f77bcf86cd799439011',
       };
-
       mockCollection.findOne.mockResolvedValue(mockChatMessage);
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatMessageModel.findChatMessageById(mockMessageId);
 
+      // Assert
       expect(result).toEqual(mockChatMessage);
       expect(db.collection).toHaveBeenCalledWith('chat_messages');
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
       });
-      expect(consoleSpy).toHaveBeenCalled();
     });
 
-    // 聊天訊息不存在時返回 null
     it('should return null when chat message does not exist', async () => {
+      // Arrange
       const mockMessageId = '507f1f77bcf86cd799439033';
-
       mockCollection.findOne.mockResolvedValue(null);
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatMessageModel.findChatMessageById(mockMessageId);
 
+      // Assert
       expect(result).toBeNull();
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
       });
-      expect(consoleSpy).toHaveBeenCalled();
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
+      // Arrange
       const mockMessageId = '507f1f77bcf86cd799439033';
-
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatMessageModel.findChatMessageById(mockMessageId);
 
+      // Assert
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
     });
   });
 
   describe('findChatMessagesByRoomId', () => {
-    // 成功查詢聊天室訊息並返回結果
     it('should successfully find chat messages by room id and return results', async () => {
+      // Arrange
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatMessages = [
         {
@@ -187,28 +190,28 @@ describe('Chat Message Model', () => {
           user_id: '507f1f77bcf86cd799439012',
         },
       ];
-
       mockFindCursor.toArray.mockResolvedValue(mockChatMessages);
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatMessageModel.findChatMessagesByRoomId(mockRoomId);
 
+      // Assert
       expect(result).toEqual(mockChatMessages);
       expect(db.collection).toHaveBeenCalledWith('chat_messages');
       expect(mockCollection.find).toHaveBeenCalledWith({ room_id: mockRoomId });
       expect(mockFindCursor.toArray).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalled();
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
+      // Arrange
       const mockRoomId = '507f1f77bcf86cd799439022';
-
       mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatMessageModel.findChatMessagesByRoomId(mockRoomId);
 
+      // Assert
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
     });

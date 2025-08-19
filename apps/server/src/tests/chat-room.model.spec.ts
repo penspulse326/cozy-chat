@@ -11,6 +11,12 @@ vi.mock('@/config/db', () => ({
   },
 }));
 
+vi.mock('@packages/lib', () => ({
+  CreateChatRoomSchema: {
+    parse: vi.fn().mockImplementation((data: unknown) => data),
+  },
+}));
+
 describe('Chat Room Model', () => {
   const mockCollection = {
     findOne: vi.fn(),
@@ -23,8 +29,8 @@ describe('Chat Room Model', () => {
   });
 
   describe('createChatRoom', () => {
-    // 成功建立聊天室並返回結果
     it('should successfully create chat room and return result', async () => {
+      // Arrange
       const mockChatRoom = {
         created_at: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
@@ -37,37 +43,38 @@ describe('Chat Room Model', () => {
 
       mockCollection.insertOne.mockResolvedValue(mockInsertResult);
 
+      // Act
       const result = await chatRoomModel.createChatRoom(mockChatRoom);
 
+      // Assert
       expect(result).toEqual(mockInsertResult);
       expect(db.collection).toHaveBeenCalledWith('chat_rooms');
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatRoom);
     });
 
-    // 驗證失敗時返回 null
     it('should return null when validation fails', async () => {
-      // 使用無效的聊天室數據進行測試
-      // 直接模擬 CreateChatRoomSchema.parse 拋出錯誤
-      vi.spyOn(CreateChatRoomSchema, 'parse').mockImplementationOnce(() => {
-        throw new Error('Validation error');
-      });
-
+      // Arrange
       const mockInvalidChatRoom = {
         created_at: new Date(),
         users: ['507f1f77bcf86cd799439011'],
       };
 
+      vi.mocked(CreateChatRoomSchema.parse).mockImplementationOnce(() => {
+        throw new Error('Validation error');
+      });
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatRoomModel.createChatRoom(mockInvalidChatRoom);
 
+      // Assert
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
+      // Arrange
       const mockChatRoom = {
         created_at: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
@@ -76,8 +83,10 @@ describe('Chat Room Model', () => {
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatRoomModel.createChatRoom(mockChatRoom);
 
+      // Assert
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatRoom);
@@ -85,19 +94,20 @@ describe('Chat Room Model', () => {
   });
 
   describe('findChatRoomById', () => {
-    // 成功查詢聊天室並返回結果
     it('should successfully find chat room and return result', async () => {
+      // Arrange
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatRoom = {
         _id: new ObjectId(mockRoomId),
         created_at: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
       };
-
       mockCollection.findOne.mockResolvedValue(mockChatRoom);
 
+      // Act
       const result = await chatRoomModel.findChatRoomById(mockRoomId);
 
+      // Assert
       expect(result).toEqual(mockChatRoom);
       expect(db.collection).toHaveBeenCalledWith('chat_rooms');
       expect(mockCollection.findOne).toHaveBeenCalledWith({
@@ -105,29 +115,31 @@ describe('Chat Room Model', () => {
       });
     });
 
-    // 聊天室不存在時返回 null
     it('should return null when chat room does not exist', async () => {
+      // Arrange
       const mockRoomId = '507f1f77bcf86cd799439022';
-
       mockCollection.findOne.mockResolvedValue(null);
 
+      // Act
       const result = await chatRoomModel.findChatRoomById(mockRoomId);
 
+      // Assert
       expect(result).toBeNull();
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
       });
     });
 
-    // 資料庫操作失敗時返回 null
     it('should return null when database operation fails', async () => {
+      // Arrange
       const mockRoomId = '507f1f77bcf86cd799439022';
-
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
+      // Act
       const result = await chatRoomModel.findChatRoomById(mockRoomId);
 
+      // Assert
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalled();
     });

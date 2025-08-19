@@ -1,3 +1,5 @@
+import type { Device, UserStatus } from '@packages/lib';
+
 import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -28,24 +30,24 @@ describe('User Service', () => {
   });
 
   describe('createUser', () => {
-    // case 1: 成功建立 user
     it('should create user with correct payload', async () => {
+      // Arrange
       const mockWaitingUser = {
-        device: 'APP' as const,
+        device: 'APP' as Device,
         socketId: 'socket123',
       };
-
       const mockInsertResult = {
         acknowledged: true,
-        insertedId: new ObjectId(), // 使用 ObjectId
+        insertedId: new ObjectId(),
       };
-
       vi.mocked(userModel.createUser).mockResolvedValue(mockInsertResult);
 
+      // Act
       const result = await userService.createUser(mockWaitingUser);
+
+      // Assert
       expect(result).toBe(mockInsertResult);
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
-
       const calledWith = vi.mocked(userModel.createUser).mock.calls[0][0];
       expect(calledWith).toEqual(
         expect.objectContaining({
@@ -57,31 +59,33 @@ describe('User Service', () => {
       );
     });
 
-    // case 2: 傳入錯誤的 device 值
     it('should return null when model throws error', async () => {
+      // Arrange
       const mockWaitingUser = {
-        device: 'MB' as const, // 故意使用無效值
+        device: 'MB' as Device, // 故意使用無效值
         socketId: 'socket123',
       };
-
       vi.mocked(userModel.createUser).mockResolvedValue(null);
 
+      // Act
       const result = await userService.createUser(mockWaitingUser);
+
+      // Assert
       expect(result).toBeNull();
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
     });
 
-    // case 3: 模擬 userModel.createUser 拋出錯誤
     it('should throw error if model throws error', async () => {
+      // Arrange
       const mockWaitingUser = {
-        device: 'APP' as const,
+        device: 'APP' as Device,
         socketId: 'socket123',
       };
-
       vi.mocked(userModel.createUser).mockRejectedValue(
         new Error('Create user failed')
       );
 
+      // Act & Assert
       await expect(userService.createUser(mockWaitingUser)).rejects.toThrow(
         'Create user failed'
       );
@@ -95,10 +99,10 @@ describe('User Service', () => {
       const mockUser = {
         _id: new ObjectId(mockUserId),
         created_at: new Date(),
-        device: 'APP' as const,
+        device: 'APP' as Device,
         last_active_at: new Date(),
         room_id: '507f1f77bcf86cd799439022',
-        status: 'ACTIVE' as const,
+        status: 'ACTIVE' as UserStatus,
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
@@ -128,18 +132,18 @@ describe('User Service', () => {
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
           created_at: new Date(),
-          device: 'APP' as const,
+          device: 'APP' as Device,
           last_active_at: new Date(),
           room_id: mockRoomId,
-          status: 'ACTIVE' as const,
+          status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
           created_at: new Date(),
-          device: 'PC' as const,
+          device: 'PC' as Device,
           last_active_at: new Date(),
           room_id: mockRoomId,
-          status: 'ACTIVE' as const,
+          status: 'ACTIVE' as UserStatus,
         },
       ];
 
@@ -204,10 +208,10 @@ describe('User Service', () => {
       const mockUser = {
         _id: new ObjectId(mockUserId),
         created_at: new Date(),
-        device: 'APP' as const,
+        device: 'APP' as Device,
         last_active_at: new Date(),
         room_id: mockRoomId,
-        status: 'ACTIVE' as const,
+        status: 'ACTIVE' as UserStatus,
       };
       const mockUpdateResult = {
         acknowledged: true,
@@ -247,9 +251,9 @@ describe('User Service', () => {
       const mockUser = {
         _id: new ObjectId(mockUserId),
         created_at: new Date(),
-        device: 'APP' as const,
+        device: 'APP' as Device,
         last_active_at: new Date(),
-        status: 'ACTIVE' as const,
+        status: 'ACTIVE' as UserStatus,
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
@@ -269,18 +273,18 @@ describe('User Service', () => {
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
           created_at: new Date(),
-          device: 'APP' as const,
+          device: 'APP' as Device,
           last_active_at: new Date(),
           room_id: mockRoomId,
-          status: 'ACTIVE' as const,
+          status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
           created_at: new Date(),
-          device: 'PC' as const,
+          device: 'PC' as Device,
           last_active_at: new Date(),
           room_id: mockRoomId,
-          status: 'LEFT' as const,
+          status: 'LEFT' as UserStatus,
         },
       ];
 
@@ -298,18 +302,18 @@ describe('User Service', () => {
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
           created_at: new Date(),
-          device: 'APP' as const,
+          device: 'APP' as Device,
           last_active_at: new Date(),
           room_id: mockRoomId,
-          status: 'ACTIVE' as const,
+          status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
           created_at: new Date(),
-          device: 'PC' as const,
+          device: 'PC' as Device,
           last_active_at: new Date(),
           room_id: mockRoomId,
-          status: 'ACTIVE' as const,
+          status: 'ACTIVE' as UserStatus,
         },
       ];
 
@@ -336,11 +340,11 @@ describe('User Service', () => {
   describe('createMatchedUsers', () => {
     it('should create matched users and return users with roomId', async () => {
       const mockNewUser = {
-        device: 'APP' as const,
+        device: 'APP' as Device,
         socketId: 'socket123',
       };
       const mockPeerUser = {
-        device: 'PC' as const,
+        device: 'PC' as Device,
         socketId: 'socket456',
       };
 
@@ -406,11 +410,11 @@ describe('User Service', () => {
 
     it('should return null when first createUser fails', async () => {
       const mockNewUser = {
-        device: 'APP' as const,
+        device: 'APP' as Device,
         socketId: 'socket123',
       };
       const mockPeerUser = {
-        device: 'PC' as const,
+        device: 'PC' as Device,
         socketId: 'socket456',
       };
 
@@ -430,11 +434,11 @@ describe('User Service', () => {
 
     it('should return null when second createUser fails', async () => {
       const mockNewUser = {
-        device: 'APP' as const,
+        device: 'APP' as Device,
         socketId: 'socket123',
       };
       const mockPeerUser = {
-        device: 'PC' as const,
+        device: 'PC' as Device,
         socketId: 'socket456',
       };
 
@@ -461,11 +465,11 @@ describe('User Service', () => {
 
     it('should return null when createChatRoom fails', async () => {
       const mockNewUser = {
-        device: 'APP' as const,
+        device: 'APP' as Device,
         socketId: 'socket123',
       };
       const mockPeerUser = {
-        device: 'PC' as const,
+        device: 'PC' as Device,
         socketId: 'socket456',
       };
 
