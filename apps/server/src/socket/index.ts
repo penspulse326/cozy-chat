@@ -88,10 +88,6 @@ export function createSocketServer(io: Server) {
   ) {
     const matchResult = await userService.createMatchedUsers(newUser, peerUser);
 
-    if (!matchResult) {
-      return;
-    }
-
     const { matchedUsers, roomId } = matchResult;
 
     await Promise.all(
@@ -113,10 +109,6 @@ export function createSocketServer(io: Server) {
       userId,
       UserStatusSchema.enum.LEFT
     );
-
-    if (!result) {
-      return;
-    }
 
     notifyMatchLeave(result.roomId);
   }
@@ -140,17 +132,14 @@ export function createSocketServer(io: Server) {
   async function handleChatSend(data: SocketChatMessage) {
     const newChatMessage = await chatMessageService.sendChatMessage(data);
 
-    if (!newChatMessage) {
-      return;
-    }
-
     io.to(data.roomId).emit(CHAT_EVENT.SEND, newChatMessage);
   }
 
   async function handleCheckUser(socketId: string, roomId: string) {
-    const targetRoom = await chatRoomService.findChatRoomById(roomId);
-
-    if (!targetRoom) {
+    try {
+      await chatRoomService.findChatRoomById(roomId);
+    } catch (error) {
+      console.error('handleCheckUser error', error);
       io.to(socketId).emit(MATCH_EVENT.RECONNECT_FAIL);
       return;
     }
@@ -169,10 +158,6 @@ export function createSocketServer(io: Server) {
   async function handleChatLoad(roomId: string) {
     const chatMessages =
       await chatMessageService.findChatMessagesByRoomId(roomId);
-
-    if (!chatMessages) {
-      return;
-    }
 
     io.to(roomId).emit(CHAT_EVENT.LOAD, chatMessages);
   }

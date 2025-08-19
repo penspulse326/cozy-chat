@@ -16,11 +16,21 @@ describe('Chat Room Model', () => {
     insertOne: vi.fn(),
   };
 
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(db.collection).mockReturnValue(
       mockCollection as unknown as ReturnType<typeof db.collection>
     );
+
+    consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('createChatRoom', () => {
@@ -51,14 +61,10 @@ describe('Chat Room Model', () => {
         users: 'not-an-array' as unknown as string[], // 應該是陣列，但這裡給一個字串
       };
 
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
-
       const result = await chatRoomModel.createChatRoom(mockInvalidChatRoom);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
@@ -69,14 +75,11 @@ describe('Chat Room Model', () => {
       };
 
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await chatRoomModel.createChatRoom(mockChatRoom);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatRoom);
     });
   });
@@ -115,14 +118,11 @@ describe('Chat Room Model', () => {
     it('should return null when database operation fails', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await chatRoomModel.findChatRoomById(mockRoomId);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
 });

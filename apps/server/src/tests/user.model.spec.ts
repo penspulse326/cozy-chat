@@ -25,12 +25,22 @@ describe('User Model', () => {
     toArray: vi.fn(),
   };
 
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(db.collection).mockReturnValue(
       mockCollection as unknown as ReturnType<typeof db.collection>
     );
     mockCollection.find.mockReturnValue(mockFindCursor);
+
+    consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('createUser', () => {
@@ -64,14 +74,10 @@ describe('User Model', () => {
         status: 'ACTIVE' as UserStatus,
       };
 
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
-
       const result = await userModel.createUser(mockInvalidUser);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
@@ -84,14 +90,11 @@ describe('User Model', () => {
       };
 
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await userModel.createUser(mockUser);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockUser);
     });
   });
@@ -135,14 +138,11 @@ describe('User Model', () => {
       const mockUserId = '507f1f77bcf86cd799439011';
 
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await userModel.findUserById(mockUserId);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
 
@@ -182,14 +182,11 @@ describe('User Model', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await userModel.findUsersByRoomId(mockRoomId);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
 
@@ -231,9 +228,6 @@ describe('User Model', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       mockCollection.updateMany.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await userModel.updateManyUserRoomId(
         mockUserIds,
@@ -241,7 +235,7 @@ describe('User Model', () => {
       );
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
 
@@ -274,14 +268,11 @@ describe('User Model', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       mockCollection.updateOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await userModel.updateUserRoomId(mockUserId, mockRoomId);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
 
@@ -314,14 +305,11 @@ describe('User Model', () => {
       const mockStatus = 'LEFT' as UserStatus;
 
       mockCollection.updateOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await userModel.updateUserStatus(mockUserId, mockStatus);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
 });

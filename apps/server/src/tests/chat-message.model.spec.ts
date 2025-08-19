@@ -23,12 +23,22 @@ describe('Chat Message Model', () => {
     toArray: vi.fn(),
   };
 
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(db.collection).mockReturnValue(
       mockCollection as unknown as ReturnType<typeof db.collection>
     );
     mockCollection.find.mockReturnValue(mockFindCursor);
+
+    consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('createChatMessage', () => {
@@ -64,16 +74,12 @@ describe('Chat Message Model', () => {
         user_id: '',
       };
 
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
-
       const result = await chatMessageModel.createChatMessage(
         mockInvalidChatMessage
       );
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
@@ -87,14 +93,11 @@ describe('Chat Message Model', () => {
       };
 
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await chatMessageModel.createChatMessage(mockChatMessage);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatMessage);
     });
   });
@@ -136,14 +139,11 @@ describe('Chat Message Model', () => {
     it('should return null when database operation fails', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result = await chatMessageModel.findChatMessageById(mockMessageId);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
 
@@ -182,15 +182,12 @@ describe('Chat Message Model', () => {
     it('should return null when database operation fails', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
 
       const result =
         await chatMessageModel.findChatMessagesByRoomId(mockRoomId);
 
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
 });
