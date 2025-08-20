@@ -1,0 +1,231 @@
+import type { Server, Socket } from 'socket.io';
+
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { ChatHandlers } from '@/socket/handlers/chat';
+import type { MatchHandlers } from '@/socket/handlers/match';
+import type { UserHandlers } from '@/socket/handlers/user';
+import type { SocketState } from '@/socket/state';
+
+import { createSocketServer } from '@/socket';
+import * as chatHandlersModule from '@/socket/handlers/chat';
+import * as matchHandlersModule from '@/socket/handlers/match';
+import * as userHandlersModule from '@/socket/handlers/user';
+import * as socketStateModule from '@/socket/state';
+
+vi.mock('@/socket/handlers/chat', () => ({
+  createChatHandlers: vi.fn(),
+}));
+
+vi.mock('@/socket/handlers/match', () => ({
+  createMatchHandlers: vi.fn(),
+}));
+
+vi.mock('@/socket/handlers/user', () => ({
+  createUserHandlers: vi.fn(),
+}));
+
+vi.mock('@/socket/state', () => ({
+  createSocketState: vi.fn(),
+}));
+
+describe('Socket Server', () => {
+  let mockIo: Partial<Server>;
+  let mockSocket: Partial<Socket>;
+  let mockState: Partial<SocketState>;
+  let mockChatHandlers: Partial<ChatHandlers>;
+  let mockMatchHandlers: Partial<MatchHandlers>;
+  let mockUserHandlers: Partial<UserHandlers>;
+
+  beforeEach(() => {
+    mockSocket = {
+      handshake: {
+        query: {},
+      },
+      id: 'socket1',
+      on: vi.fn(),
+    };
+
+    mockState = {
+      removeWaitingUser: vi.fn(),
+    };
+
+    mockChatHandlers = {
+      handleChatSend: vi.fn(),
+    };
+
+    mockMatchHandlers = {
+      handleMatchCancel: vi.fn(),
+      handleMatchLeave: vi.fn(),
+      handleMatchStart: vi.fn(),
+    };
+
+    mockUserHandlers = {
+      handleCheckUser: vi.fn(),
+    };
+
+    mockIo = {
+      on: vi.fn(),
+    };
+
+    vi.mocked(socketStateModule.createSocketState).mockReturnValue(
+      mockState as SocketState
+    );
+    vi.mocked(chatHandlersModule.createChatHandlers).mockReturnValue(
+      mockChatHandlers as ChatHandlers
+    );
+    vi.mocked(matchHandlersModule.createMatchHandlers).mockReturnValue(
+      mockMatchHandlers as MatchHandlers
+    );
+    vi.mocked(userHandlersModule.createUserHandlers).mockReturnValue(
+      mockUserHandlers as UserHandlers
+    );
+
+    vi.clearAllMocks();
+  });
+
+  it('應該創建 socket 伺服器並設置連接處理程序', () => {
+    createSocketServer(mockIo as unknown as Server);
+
+    expect(socketStateModule.createSocketState).toHaveBeenCalled();
+    expect(chatHandlersModule.createChatHandlers).toHaveBeenCalledWith(mockIo);
+    expect(matchHandlersModule.createMatchHandlers).toHaveBeenCalledWith(
+      mockIo,
+      mockState
+    );
+    expect(userHandlersModule.createUserHandlers).toHaveBeenCalledWith(
+      mockIo,
+      mockChatHandlers
+    );
+    expect(mockIo.on).toHaveBeenCalledWith('connection', expect.any(Function));
+  });
+
+  it('當有 roomId 時，應該檢查用戶', () => {
+    createSocketServer(mockIo as unknown as Server);
+
+    const connectionCallback = mockIo.on.mock.calls[0][1];
+    mockSocket.handshake.query.roomId = 'room123';
+
+    connectionCallback(mockSocket);
+
+    expect(mockUserHandlers.handleCheckUser).toHaveBeenCalledWith(
+      mockSocket.id,
+      'room123'
+    );
+  });
+
+  it('應該設置所有必要的事件監聽器', () => {
+    createSocketServer(mockIo as unknown as Server);
+
+    const connectionCallback = mockIo.on.mock.calls[0][1];
+    connectionCallback(mockSocket);
+
+    expect(mockSocket.on).toHaveBeenCalledWith(
+      'match:start',
+      expect.any(Function)
+    );
+    expect(mockSocket.on).toHaveBeenCalledWith(
+      'match:cancel',
+      expect.any(Function)
+    );
+    expect(mockSocket.on).toHaveBeenCalledWith(
+      'match:leave',
+      expect.any(Function)
+    );
+    expect(mockSocket.on).toHaveBeenCalledWith(
+      'chat:send',
+      expect.any(Function)
+    );
+    expect(mockSocket.on).toHaveBeenCalledWith(
+      'disconnect',
+      expect.any(Function)
+    );
+  });
+
+  it('當收到 match:start 事件時，應該調用 handleMatchStart', () => {
+    createSocketServer(mockIo as unknown as Server);
+
+    const connectionCallback = mockIo.on.mock.calls[0][1];
+    connectionCallback(mockSocket);
+
+    const matchStartCallback = mockSocket.on.mock.calls.find(
+      (call: any[]) => call[0] === 'match:start'
+    )[1];
+
+    const device = 'PC';
+    matchStartCallback(device);
+
+    expect(mockMatchHandlers.handleMatchStart).toHaveBeenCalledWith({
+      device,
+      socketId: mockSocket.id,
+    });
+  });
+
+  it('當收到 match:cancel 事件時，應該調用 handleMatchCancel', () => {
+    createSocketServer(mockIo as unknown as Server);
+
+    const connectionCallback = mockIo.on.mock.calls[0][1];
+    connectionCallback(mockSocket);
+
+    const matchCancelCallback = mockSocket.on.mock.calls.find(
+      (call: any[]) => call[0] === 'match:cancel'
+    )[1];
+
+    matchCancelCallback();
+
+    expect(mockMatchHandlers.handleMatchCancel).toHaveBeenCalledWith(
+      mockSocket.id
+    );
+  });
+
+  it('當收到 match:leave 事件時，應該調用 handleMatchLeave', () => {
+    createSocketServer(mockIo as unknown as Server);
+
+    const connectionCallback = mockIo.on.mock.calls[0][1];
+    connectionCallback(mockSocket);
+
+    const matchLeaveCallback = mockSocket.on.mock.calls.find(
+      (call: any[]) => call[0] === 'match:leave'
+    )[1];
+
+    const userId = 'user123';
+    matchLeaveCallback(userId);
+
+    expect(mockMatchHandlers.handleMatchLeave).toHaveBeenCalledWith(userId);
+  });
+
+  it('當收到 chat:send 事件時，應該調用 handleChatSend', () => {
+    createSocketServer(mockIo as unknown as Server);
+
+    const connectionCallback = mockIo.on.mock.calls[0][1];
+    connectionCallback(mockSocket);
+
+    const chatSendCallback = mockSocket.on.mock.calls.find(
+      (call: any[]) => call[0] === 'chat:send'
+    )[1];
+
+    const chatMessage = {
+      content: '你好',
+      roomId: 'room123',
+      userId: 'user456',
+    };
+    chatSendCallback(chatMessage);
+
+    expect(mockChatHandlers.handleChatSend).toHaveBeenCalledWith(chatMessage);
+  });
+
+  it('當斷開連接時，應該從等待池中移除用戶', () => {
+    createSocketServer(mockIo as unknown as Server);
+
+    const connectionCallback = mockIo.on.mock.calls[0][1];
+    connectionCallback(mockSocket);
+
+    const disconnectCallback = mockSocket.on.mock.calls.find(
+      (call: any[]) => call[0] === 'disconnect'
+    )[1];
+
+    disconnectCallback();
+
+    expect(mockState.removeWaitingUser).toHaveBeenCalledWith(mockSocket.id);
+  });
+});
