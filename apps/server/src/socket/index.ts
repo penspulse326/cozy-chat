@@ -6,12 +6,12 @@ import { CHAT_EVENT, MATCH_EVENT } from '@packages/lib';
 import { createChatHandlers } from './handlers/chat';
 import { createMatchHandlers } from './handlers/match';
 import { createUserHandlers } from './handlers/user';
-import { createSocketState } from './state';
+import { createWaitingPool } from './waiting-pool';
 
 export function createSocketServer(io: Server) {
-  const state = createSocketState();
+  const waitingPool = createWaitingPool();
   const chatHandlers = createChatHandlers(io);
-  const matchHandlers = createMatchHandlers(io, state);
+  const matchHandlers = createMatchHandlers(io, waitingPool);
   const userHandlers = createUserHandlers(io, chatHandlers);
 
   io.on('connection', (socket: Socket) => {
@@ -38,7 +38,7 @@ export function createSocketServer(io: Server) {
     });
 
     socket.on('disconnect', () => {
-      state.removeWaitingUser(socket.id);
+      waitingPool.removeWaitingUser(socket.id);
       console.log('使用者斷開連線:', socket.id);
     });
   });

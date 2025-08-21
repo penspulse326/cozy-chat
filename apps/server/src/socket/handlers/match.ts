@@ -6,21 +6,21 @@ import type { WaitingUser } from '@/types';
 
 import userService from '@/services/user.service';
 
-import type { SocketState } from '../state';
+import type { WaitingPool } from '../waiting-pool';
 
 export type MatchHandlers = ReturnType<typeof createMatchHandlers>;
 
-export function createMatchHandlers(io: Server, state: SocketState) {
+export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
   const handleMatchStart = async (newUser: WaitingUser) => {
-    const peerUser = state.getNextWaitingUser();
+    const peerUser = waitingPool.getNextWaitingUser();
 
     if (!peerUser) {
-      state.addWaitingUser(newUser);
+      waitingPool.addWaitingUser(newUser);
       console.log(`加入等待池: ${newUser.socketId}`);
 
       // 設定超時
       setTimeout(() => {
-        const hasRemoved = state.removeWaitingUser(newUser.socketId);
+        const hasRemoved = waitingPool.removeWaitingUser(newUser.socketId);
 
         if (hasRemoved) {
           io.of('/').sockets.get(newUser.socketId)?.emit(MATCH_EVENT.FAIL);
@@ -59,10 +59,10 @@ export function createMatchHandlers(io: Server, state: SocketState) {
   };
 
   const handleMatchCancel = (socketId: string) => {
-    const hasRemoved = state.removeWaitingUser(socketId);
+    const hasRemoved = waitingPool.removeWaitingUser(socketId);
 
     if (hasRemoved) {
-      console.log('waitingUsers', state.getWaitingUsers());
+      console.log('waitingUsers', waitingPool.getWaitingUsers());
       io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.CANCEL);
     }
   };

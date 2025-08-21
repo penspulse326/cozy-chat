@@ -5,13 +5,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChatHandlers } from '@/socket/handlers/chat';
 import type { MatchHandlers } from '@/socket/handlers/match';
 import type { UserHandlers } from '@/socket/handlers/user';
-import type { SocketState } from '@/socket/state';
+import type { WaitingPool } from '@/socket/waiting-pool';
 
 import { createSocketServer } from '@/socket';
 import * as chatHandlersModule from '@/socket/handlers/chat';
 import * as matchHandlersModule from '@/socket/handlers/match';
 import * as userHandlersModule from '@/socket/handlers/user';
-import * as socketStateModule from '@/socket/state';
+import * as waitingPoolModule from '@/socket/waiting-pool';
 
 vi.mock('@/socket/handlers/chat', () => ({
   createChatHandlers: vi.fn(),
@@ -25,8 +25,8 @@ vi.mock('@/socket/handlers/user', () => ({
   createUserHandlers: vi.fn(),
 }));
 
-vi.mock('@/socket/state', () => ({
-  createSocketState: vi.fn(),
+vi.mock('@/socket/waiting-pool', () => ({
+  createWaitingPool: vi.fn(),
 }));
 
 interface MockServer extends Partial<Server> {
@@ -36,7 +36,7 @@ interface MockServer extends Partial<Server> {
 describe('Socket Server', () => {
   let mockIo: MockServer;
   let mockSocket: Partial<Socket>;
-  let mockState: Partial<SocketState>;
+  let mockState: Partial<WaitingPool>;
   let mockChatHandlers: Partial<ChatHandlers>;
   let mockMatchHandlers: Partial<MatchHandlers>;
   let mockUserHandlers: Partial<UserHandlers>;
@@ -85,8 +85,8 @@ describe('Socket Server', () => {
       }),
     };
 
-    vi.mocked(socketStateModule.createSocketState).mockReturnValue(
-      mockState as SocketState
+    vi.mocked(waitingPoolModule.createWaitingPool).mockReturnValue(
+      mockState as WaitingPool
     );
     vi.mocked(chatHandlersModule.createChatHandlers).mockReturnValue(
       mockChatHandlers as ChatHandlers
@@ -104,7 +104,7 @@ describe('Socket Server', () => {
   it('應該建立 socket 伺服器並設置連接處理程序', () => {
     createSocketServer(mockIo as Server);
 
-    expect(socketStateModule.createSocketState).toHaveBeenCalled();
+    expect(waitingPoolModule.createWaitingPool).toHaveBeenCalled();
     expect(chatHandlersModule.createChatHandlers).toHaveBeenCalledWith(mockIo);
     expect(matchHandlersModule.createMatchHandlers).toHaveBeenCalledWith(
       mockIo,

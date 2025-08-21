@@ -3,11 +3,11 @@ import type { Server, Socket } from 'socket.io';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { SocketState } from '@/socket/state';
+import type { WaitingPool } from '@/socket/waiting-pool';
 
 import userService from '@/services/user.service';
 import { createMatchHandlers } from '@/socket/handlers/match';
-import { createSocketState } from '@/socket/state';
+import { createWaitingPool } from '@/socket/waiting-pool';
 
 vi.mock('@/services/user.service', () => ({
   default: {
@@ -20,7 +20,7 @@ describe('Match Handlers', () => {
   let mockIo: Partial<Server>;
   let mockSocket: Partial<Socket>;
   let mockSocketsMap: Map<string, Socket>;
-  let state: SocketState;
+  let waitingPool: WaitingPool;
 
   beforeEach(() => {
     mockSocket = {
@@ -42,7 +42,7 @@ describe('Match Handlers', () => {
       to: vi.fn().mockReturnThis(),
     };
 
-    state = createSocketState();
+    waitingPool = createWaitingPool();
     vi.clearAllMocks();
   });
 
@@ -50,28 +50,28 @@ describe('Match Handlers', () => {
     it('當沒有等待使用者時，應該將新使用者添加到等待池', async () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
-        state
+        waitingPool
       );
       const newUser = { device: 'PC' as Device, socketId: 'socket1' };
 
-      vi.spyOn(state, 'getNextWaitingUser').mockReturnValue(undefined);
-      vi.spyOn(state, 'addWaitingUser');
+      vi.spyOn(waitingPool, 'getNextWaitingUser').mockReturnValue(undefined);
+      vi.spyOn(waitingPool, 'addWaitingUser');
 
       await matchHandlers.handleMatchStart(newUser);
 
-      expect(state.getNextWaitingUser).toHaveBeenCalled();
-      expect(state.addWaitingUser).toHaveBeenCalledWith(newUser);
+      expect(waitingPool.getNextWaitingUser).toHaveBeenCalled();
+      expect(waitingPool.addWaitingUser).toHaveBeenCalledWith(newUser);
     });
 
     it('當有等待使用者時，應該匹配並通知兩個使用者', async () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
-        state
+        waitingPool
       );
       const newUser = { device: 'PC' as Device, socketId: 'socket1' };
       const peerUser = { device: 'APP' as Device, socketId: 'socket2' };
 
-      vi.spyOn(state, 'getNextWaitingUser').mockReturnValue(peerUser);
+      vi.spyOn(waitingPool, 'getNextWaitingUser').mockReturnValue(peerUser);
 
       const mockMatchedUsers = [
         { ...newUser, userId: 'user1' },
@@ -85,7 +85,7 @@ describe('Match Handlers', () => {
 
       await matchHandlers.handleMatchStart(newUser);
 
-      expect(state.getNextWaitingUser).toHaveBeenCalled();
+      expect(waitingPool.getNextWaitingUser).toHaveBeenCalled();
       expect(userService.createMatchedUsers).toHaveBeenCalledWith(
         newUser,
         peerUser
@@ -100,29 +100,29 @@ describe('Match Handlers', () => {
     it('當成功移除等待使用者時，應該發送取消事件', () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
-        state
+        waitingPool
       );
 
-      vi.spyOn(state, 'removeWaitingUser').mockReturnValue(true);
-      vi.spyOn(state, 'getWaitingUsers').mockReturnValue([]);
+      vi.spyOn(waitingPool, 'removeWaitingUser').mockReturnValue(true);
+      vi.spyOn(waitingPool, 'getWaitingUsers').mockReturnValue([]);
 
       matchHandlers.handleMatchCancel('socket1');
 
-      expect(state.removeWaitingUser).toHaveBeenCalledWith('socket1');
+      expect(waitingPool.removeWaitingUser).toHaveBeenCalledWith('socket1');
       expect(mockSocket.emit).toHaveBeenCalledWith('match:cancel');
     });
 
     it('當找不到等待使用者時，不應該發送任何事件', () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
-        state
+        waitingPool
       );
 
-      vi.spyOn(state, 'removeWaitingUser').mockReturnValue(false);
+      vi.spyOn(waitingPool, 'removeWaitingUser').mockReturnValue(false);
 
       matchHandlers.handleMatchCancel('nonexistent');
 
-      expect(state.removeWaitingUser).toHaveBeenCalledWith('nonexistent');
+      expect(waitingPool.removeWaitingUser).toHaveBeenCalledWith('nonexistent');
       expect(mockSocket.emit).not.toHaveBeenCalled();
     });
   });
@@ -131,7 +131,7 @@ describe('Match Handlers', () => {
     it('應該更新使用者狀態並通知房間內所有使用者', async () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
-        state
+        waitingPool
       );
       const userId = 'user123';
       const roomId = 'room123';
@@ -152,7 +152,7 @@ describe('Match Handlers', () => {
     it('應該向房間內所有使用者發送離開事件', () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
-        state
+        waitingPool
       );
       const roomId = 'room123';
 

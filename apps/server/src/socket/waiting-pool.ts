@@ -1,8 +1,8 @@
 import type { WaitingUser } from '@/types';
 
-export type SocketState = ReturnType<typeof createSocketState>;
+export type WaitingPool = ReturnType<typeof createWaitingPool>;
 
-export function createSocketState() {
+export function createWaitingPool() {
   const waitingUsers: WaitingUser[] = [];
 
   const addWaitingUser = (newUser: WaitingUser) => {
