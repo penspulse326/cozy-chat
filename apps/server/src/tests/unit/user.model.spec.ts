@@ -44,7 +44,7 @@ describe('User Model', () => {
   });
 
   describe('createUser', () => {
-    it('should successfully create user and return result', async () => {
+    it('應該成功建立使用者並返回結果', async () => {
       const mockUser = {
         created_at: new Date(),
         device: 'APP' as Device,
@@ -66,7 +66,7 @@ describe('User Model', () => {
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockUser);
     });
 
-    it('should return null when validation fails', async () => {
+    it('當驗證失敗時應返回 null', async () => {
       const mockInvalidUser = {
         created_at: new Date(),
         device: 'INVALID_DEVICE' as unknown as Device,
@@ -81,7 +81,7 @@ describe('User Model', () => {
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockUser = {
         created_at: new Date(),
         device: 'APP' as Device,
@@ -100,7 +100,7 @@ describe('User Model', () => {
   });
 
   describe('findUserById', () => {
-    it('should successfully find user and return result', async () => {
+    it('應該成功找到使用者並返回結果', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockUser = {
         _id: new ObjectId(mockUserId),
@@ -121,7 +121,7 @@ describe('User Model', () => {
       });
     });
 
-    it('should return null when user does not exist', async () => {
+    it('當使用者不存在時應返回 null', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
 
       mockCollection.findOne.mockResolvedValue(null);
@@ -134,7 +134,7 @@ describe('User Model', () => {
       });
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
 
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
@@ -147,7 +147,7 @@ describe('User Model', () => {
   });
 
   describe('findUsersByRoomId', () => {
-    it('should successfully find users in room and return results', async () => {
+    it('應該成功找到房間內的使用者並返回結果', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUsers = [
         {
@@ -178,7 +178,7 @@ describe('User Model', () => {
       expect(mockFindCursor.toArray).toHaveBeenCalled();
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
@@ -191,7 +191,7 @@ describe('User Model', () => {
   });
 
   describe('updateManyUserRoomId', () => {
-    it('should successfully update multiple users room IDs and return result', async () => {
+    it('應該成功更新多個使用者的房間 ID 並返回結果', async () => {
       const mockUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
@@ -220,7 +220,7 @@ describe('User Model', () => {
       );
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
@@ -240,7 +240,7 @@ describe('User Model', () => {
   });
 
   describe('updateUserRoomId', () => {
-    it('should successfully update user room ID and return result', async () => {
+    it('應該成功更新使用者的房間 ID 並返回結果', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUpdateResult = {
@@ -263,7 +263,7 @@ describe('User Model', () => {
       );
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
 
@@ -277,7 +277,7 @@ describe('User Model', () => {
   });
 
   describe('updateUserStatus', () => {
-    it('should successfully update user status and return result', async () => {
+    it('應該成功更新使用者狀態並返回結果', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as UserStatus;
       const mockUpdateResult = {
@@ -300,7 +300,7 @@ describe('User Model', () => {
       );
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as UserStatus;
 

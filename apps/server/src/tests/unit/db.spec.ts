@@ -61,7 +61,7 @@ describe('Database Configuration', () => {
   });
 
   describe('connectToDB', () => {
-    it('should connect to database with default values', async () => {
+    it('應該使用預設值連接到數據庫', async () => {
       delete process.env.MONGODB_URI;
       delete process.env.DB_NAME;
 
@@ -75,7 +75,7 @@ describe('Database Configuration', () => {
       expect(consoleLogSpy).toHaveBeenCalledWith('DB 連線成功');
     });
 
-    it('should connect to database with environment variables', async () => {
+    it('應該使用環境變數連接到數據庫', async () => {
       process.env.MONGODB_URI = 'mongodb://user:pass@testhost:27017';
       process.env.DB_NAME = 'testdb';
 
@@ -87,7 +87,7 @@ describe('Database Configuration', () => {
       expect(mockMongoClientInstance.db).toHaveBeenCalledWith('testdb');
     });
 
-    it('should throw error when connection fails', async () => {
+    it('當連接失敗時應拋出錯誤', async () => {
       const mockError = new Error('Connection failed');
       mockMongoClientInstance.connect.mockRejectedValueOnce(mockError);
 
@@ -97,7 +97,7 @@ describe('Database Configuration', () => {
   });
 
   describe('disconnectFromDB', () => {
-    it('should disconnect from database', async () => {
+    it('應該從數據庫斷開連接', async () => {
       await dbModule.connectToDB();
       await dbModule.disconnectFromDB();
 
@@ -107,7 +107,7 @@ describe('Database Configuration', () => {
   });
 
   describe('db export', () => {
-    it('should export db object', async () => {
+    it('應該導出 db 物件', async () => {
       await dbModule.connectToDB();
       expect(dbModule.db).toBeDefined();
     });

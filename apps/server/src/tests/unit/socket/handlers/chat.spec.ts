@@ -21,7 +21,7 @@ describe('Chat Handlers', () => {
   } as unknown as Server;
 
   describe('handleChatSend', () => {
-    it('應該發送聊天訊息並通知房間內所有用戶', async () => {
+    it('應該發送聊天訊息並通知房間內所有使用者', async () => {
       const chatHandlers = createChatHandlers(mockIo);
       const mockChatMessage: SocketChatMessage = {
         content: '你好',
@@ -52,7 +52,7 @@ describe('Chat Handlers', () => {
   });
 
   describe('handleChatLoad', () => {
-    it('應該載入聊天訊息並通知房間內所有用戶', async () => {
+    it('應該載入聊天訊息並通知房間內所有使用者', async () => {
       const chatHandlers = createChatHandlers(mockIo);
       const mockRoomId = 'room123';
       const mockChatMessages = [

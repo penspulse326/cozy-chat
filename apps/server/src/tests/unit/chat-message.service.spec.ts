@@ -27,7 +27,7 @@ describe('Chat Message Service', () => {
   });
 
   describe('createChatMessage', () => {
-    it('should create chat message with correct payload', async () => {
+    it('應該使用正確的載荷建立聊天訊息', async () => {
       const mockChatMessageData = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -62,7 +62,7 @@ describe('Chat Message Service', () => {
       );
     });
 
-    it('should throw error when model returns null', async () => {
+    it('當模型返回 null 時應拋出錯誤', async () => {
       const mockChatMessageData = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -78,7 +78,7 @@ describe('Chat Message Service', () => {
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error if model throws error', async () => {
+    it('如果模型拋出錯誤時應拋出錯誤', async () => {
       const mockChatMessageData = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -97,7 +97,7 @@ describe('Chat Message Service', () => {
   });
 
   describe('findChatMessageById', () => {
-    it('should return chat message when found', async () => {
+    it('當找到聊天訊息時應返回聊天訊息', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
       const mockChatMessage = {
         _id: new ObjectId(mockMessageId),
@@ -121,7 +121,7 @@ describe('Chat Message Service', () => {
       expect(chatMessageModel.findChatMessageById).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error when chat message not found', async () => {
+    it('當找不到聊天訊息時應拋出錯誤', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
 
       vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(null);
@@ -135,7 +135,7 @@ describe('Chat Message Service', () => {
       expect(chatMessageModel.findChatMessageById).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error if model throws error', async () => {
+    it('如果模型拋出錯誤時應拋出錯誤', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
 
       vi.mocked(chatMessageModel.findChatMessageById).mockRejectedValue(
@@ -150,7 +150,7 @@ describe('Chat Message Service', () => {
   });
 
   describe('findChatMessagesByRoomId', () => {
-    it('should return chat messages when found', async () => {
+    it('當找到聊天訊息時應返回聊天訊息', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatMessages = [
         {
@@ -186,7 +186,7 @@ describe('Chat Message Service', () => {
       );
     });
 
-    it('should throw error when chat messages not found', async () => {
+    it('當找不到聊天訊息時應拋出錯誤', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockResolvedValue(
@@ -204,7 +204,7 @@ describe('Chat Message Service', () => {
       );
     });
 
-    it('should throw error if model throws error', async () => {
+    it('如果模型拋出錯誤時應拋出錯誤', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockRejectedValue(
@@ -221,7 +221,7 @@ describe('Chat Message Service', () => {
   });
 
   describe('sendChatMessage', () => {
-    it('should send chat message successfully and return new message', async () => {
+    it('應該成功發送聊天訊息並返回新訊息', async () => {
       const mockChatMessageData = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -274,7 +274,7 @@ describe('Chat Message Service', () => {
       );
     });
 
-    it('should throw error when user not found', async () => {
+    it('當找不到使用者時應拋出錯誤', async () => {
       const mockChatMessageData = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -293,7 +293,7 @@ describe('Chat Message Service', () => {
       expect(chatMessageModel.findChatMessageById).not.toHaveBeenCalled();
     });
 
-    it('should throw error when createChatMessage returns null', async () => {
+    it('當 createChatMessage 返回 null 時應拋出錯誤', async () => {
       const mockChatMessageData = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',
@@ -322,7 +322,7 @@ describe('Chat Message Service', () => {
       expect(chatMessageModel.findChatMessageById).not.toHaveBeenCalled();
     });
 
-    it('should throw error when findChatMessageById returns null', async () => {
+    it('當 findChatMessageById 返回 null 時應拋出錯誤', async () => {
       const mockChatMessageData = {
         content: 'Hello world',
         roomId: '507f1f77bcf86cd799439022',

@@ -42,7 +42,7 @@ describe('Chat Message Model', () => {
   });
 
   describe('createChatMessage', () => {
-    it('should successfully create chat message and return result', async () => {
+    it('應該成功建立聊天訊息並返回結果', async () => {
       const mockChatMessage = {
         content: 'Hello world',
         created_at: new Date(),
@@ -65,7 +65,7 @@ describe('Chat Message Model', () => {
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatMessage);
     });
 
-    it('should return null when validation fails', async () => {
+    it('當驗證失敗時應返回 null', async () => {
       const mockInvalidChatMessage = {
         content: 123 as unknown as string,
         created_at: new Date(),
@@ -83,7 +83,7 @@ describe('Chat Message Model', () => {
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockChatMessage = {
         content: 'Hello world',
         created_at: new Date(),
@@ -103,7 +103,7 @@ describe('Chat Message Model', () => {
   });
 
   describe('findChatMessageById', () => {
-    it('should successfully find chat message and return result', async () => {
+    it('應該成功找到聊天訊息並返回結果', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
       const mockChatMessage = {
         _id: new ObjectId(mockMessageId),
@@ -124,7 +124,7 @@ describe('Chat Message Model', () => {
       });
     });
 
-    it('should return null when chat message does not exist', async () => {
+    it('當聊天訊息不存在時應返回 null', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
       mockCollection.findOne.mockResolvedValue(null);
 
@@ -136,7 +136,7 @@ describe('Chat Message Model', () => {
       });
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
 
@@ -148,7 +148,7 @@ describe('Chat Message Model', () => {
   });
 
   describe('findChatMessagesByRoomId', () => {
-    it('should successfully find chat messages by room id and return results', async () => {
+    it('應該成功通過房間 ID 找到聊天訊息並返回結果', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatMessages = [
         {
@@ -179,7 +179,7 @@ describe('Chat Message Model', () => {
       expect(mockFindCursor.toArray).toHaveBeenCalled();
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
 

@@ -34,7 +34,7 @@ describe('Chat Room Model', () => {
   });
 
   describe('createChatRoom', () => {
-    it('should successfully create chat room and return result', async () => {
+    it('應該成功建立聊天室並返回結果', async () => {
       const mockChatRoom = {
         created_at: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
@@ -54,11 +54,10 @@ describe('Chat Room Model', () => {
       expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatRoom);
     });
 
-    it('should return null when validation fails', async () => {
-      // 使用一個明顯無效的數據，這樣實際的 zod 驗證會失敗
+    it('當驗證失敗時應返回 null', async () => {
       const mockInvalidChatRoom = {
         created_at: new Date(),
-        users: 'not-an-array' as unknown as string[], // 應該是陣列，但這裡給一個字串
+        users: 'not-an-array' as unknown as string[],
       };
 
       const result = await chatRoomModel.createChatRoom(mockInvalidChatRoom);
@@ -68,7 +67,7 @@ describe('Chat Room Model', () => {
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockChatRoom = {
         created_at: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
@@ -85,7 +84,7 @@ describe('Chat Room Model', () => {
   });
 
   describe('findChatRoomById', () => {
-    it('should successfully find chat room and return result', async () => {
+    it('應該成功找到聊天室並返回結果', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatRoom = {
         _id: new ObjectId(mockRoomId),
@@ -103,7 +102,7 @@ describe('Chat Room Model', () => {
       });
     });
 
-    it('should return null when chat room does not exist', async () => {
+    it('當聊天室不存在時應返回 null', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       mockCollection.findOne.mockResolvedValue(null);
 
@@ -115,7 +114,7 @@ describe('Chat Room Model', () => {
       });
     });
 
-    it('should return null when database operation fails', async () => {
+    it('當數據庫操作失敗時應返回 null', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
 

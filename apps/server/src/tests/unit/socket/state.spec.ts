@@ -17,7 +17,7 @@ describe('Socket State', () => {
   });
 
   describe('addWaitingUser', () => {
-    it('應該添加等待用戶並返回該用戶', () => {
+    it('應該添加等待使用者並返回該使用者', () => {
       const state = createSocketState();
       const newUser = { device: 'PC' as Device, socketId: 'socket1' };
 
@@ -29,7 +29,7 @@ describe('Socket State', () => {
   });
 
   describe('removeWaitingUser', () => {
-    it('當找到用戶時應該移除等待用戶並返回 true', () => {
+    it('當找到使用者時應該移除等待使用者並返回 true', () => {
       const state = createSocketState();
       const user = { device: 'PC' as Device, socketId: 'socket1' };
       state.addWaitingUser(user);
@@ -40,7 +40,7 @@ describe('Socket State', () => {
       expect(state.getWaitingUsers()).not.toContainEqual(user);
     });
 
-    it('當找不到用戶時應該返回 false', () => {
+    it('當找不到使用者時應該返回 false', () => {
       const state = createSocketState();
 
       const result = state.removeWaitingUser('nonexistent');
@@ -50,7 +50,7 @@ describe('Socket State', () => {
   });
 
   describe('getNextWaitingUser', () => {
-    it('應該返回並移除第一個等待用戶', () => {
+    it('應該返回並移除第一個等待使用者', () => {
       const state = createSocketState();
       const user1 = { device: 'PC' as Device, socketId: 'socket1' };
       const user2 = { device: 'APP' as Device, socketId: 'socket2' };
@@ -64,7 +64,7 @@ describe('Socket State', () => {
       expect(state.getWaitingUsers()).toContainEqual(user2);
     });
 
-    it('當沒有等待用戶時應該返回 undefined', () => {
+    it('當沒有等待使用者時應該返回 undefined', () => {
       const state = createSocketState();
 
       const result = state.getNextWaitingUser();
@@ -74,7 +74,7 @@ describe('Socket State', () => {
   });
 
   describe('getWaitingUsers', () => {
-    it('應該返回所有等待用戶的副本', () => {
+    it('應該返回所有等待使用者的副本', () => {
       const state = createSocketState();
       const user1 = { device: 'PC' as Device, socketId: 'socket1' };
       const user2 = { device: 'APP' as Device, socketId: 'socket2' };

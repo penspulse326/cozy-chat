@@ -101,7 +101,7 @@ describe('User Handlers', () => {
       expect(mockChatHandlers.handleChatLoad).not.toHaveBeenCalled();
     });
 
-    it('當用戶已離開時，應該發送離開事件', async () => {
+    it('當使用者已離開時，應該發送離開事件', async () => {
       const userHandlers = createUserHandlers(
         mockIo as unknown as Server,
         mockChatHandlers as ChatHandlers

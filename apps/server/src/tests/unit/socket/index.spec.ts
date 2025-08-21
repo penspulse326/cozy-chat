@@ -29,7 +29,6 @@ vi.mock('@/socket/state', () => ({
   createSocketState: vi.fn(),
 }));
 
-// 擴展 Server 類型以包含我們需要的測試屬性
 interface MockServer extends Partial<Server> {
   connectionCallback?: (socket: Socket) => void;
 }
@@ -82,7 +81,7 @@ describe('Socket Server', () => {
         if (event === 'connection') {
           mockIo.connectionCallback = callback;
         }
-        return mockIo as unknown as Server;
+        return mockIo as Server;
       }),
     };
 
@@ -102,7 +101,7 @@ describe('Socket Server', () => {
     vi.clearAllMocks();
   });
 
-  it('應該創建 socket 伺服器並設置連接處理程序', () => {
+  it('應該建立 socket 伺服器並設置連接處理程序', () => {
     createSocketServer(mockIo as Server);
 
     expect(socketStateModule.createSocketState).toHaveBeenCalled();
@@ -118,12 +117,14 @@ describe('Socket Server', () => {
     expect(mockIo.on).toHaveBeenCalledWith('connection', expect.any(Function));
   });
 
-  it('當有 roomId 時，應該檢查用戶', () => {
+  it('當有 roomId 時，應該檢查使用者', () => {
     createSocketServer(mockIo as Server);
 
     // 確保 connectionCallback 已被設置
     expect(mockIo.connectionCallback).toBeDefined();
-    if (!mockIo.connectionCallback) return;
+    if (!mockIo.connectionCallback) {
+      return;
+    }
 
     if (mockSocket.handshake) {
       mockSocket.handshake.query.roomId = 'room123';
@@ -142,7 +143,9 @@ describe('Socket Server', () => {
     createSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
-    if (!mockIo.connectionCallback) return;
+    if (!mockIo.connectionCallback) {
+      return;
+    }
     mockIo.connectionCallback(mockSocket as Socket);
 
     expect(mockSocket.on).toHaveBeenCalledWith(
@@ -167,16 +170,20 @@ describe('Socket Server', () => {
     );
   });
 
-  it('當收到 match:start 事件時，應該調用 handleMatchStart', () => {
+  it('當收到 match:start 事件時，應該呼叫 handleMatchStart', () => {
     createSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
-    if (!mockIo.connectionCallback) return;
+    if (!mockIo.connectionCallback) {
+      return;
+    }
     mockIo.connectionCallback(mockSocket as Socket);
 
-    // 直接獲取並調用事件處理程序
+    // 直接獲取並呼叫事件處理程序
     const onMock = vi.mocked(mockSocket.on);
-    if (!onMock) return;
+    if (!onMock) {
+      return;
+    }
 
     const matchStartHandler = onMock.mock.calls.find(
       (call) => call[0] === 'match:start'
@@ -195,16 +202,20 @@ describe('Socket Server', () => {
     });
   });
 
-  it('當收到 match:cancel 事件時，應該調用 handleMatchCancel', () => {
+  it('當收到 match:cancel 事件時，應該呼叫 handleMatchCancel', () => {
     createSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
-    if (!mockIo.connectionCallback) return;
+    if (!mockIo.connectionCallback) {
+      return;
+    }
     mockIo.connectionCallback(mockSocket as Socket);
 
-    // 直接獲取並調用事件處理程序
+    // 直接獲取並呼叫事件處理程序
     const onMock = vi.mocked(mockSocket.on);
-    if (!onMock) return;
+    if (!onMock) {
+      return;
+    }
 
     const matchCancelHandler = onMock.mock.calls.find(
       (call) => call[0] === 'match:cancel'
@@ -221,16 +232,20 @@ describe('Socket Server', () => {
     );
   });
 
-  it('當收到 match:leave 事件時，應該調用 handleMatchLeave', () => {
+  it('當收到 match:leave 事件時，應該呼叫 handleMatchLeave', () => {
     createSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
-    if (!mockIo.connectionCallback) return;
+    if (!mockIo.connectionCallback) {
+      return;
+    }
     mockIo.connectionCallback(mockSocket as Socket);
 
-    // 直接獲取並調用事件處理程序
+    // 直接獲取並呼叫事件處理程序
     const onMock = vi.mocked(mockSocket.on);
-    if (!onMock) return;
+    if (!onMock) {
+      return;
+    }
 
     const matchLeaveHandler = onMock.mock.calls.find(
       (call) => call[0] === 'match:leave'
@@ -246,16 +261,20 @@ describe('Socket Server', () => {
     expect(mockMatchHandlers.handleMatchLeave).toHaveBeenCalledWith(userId);
   });
 
-  it('當收到 chat:send 事件時，應該調用 handleChatSend', () => {
+  it('當收到 chat:send 事件時，應該呼叫 handleChatSend', () => {
     createSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
-    if (!mockIo.connectionCallback) return;
+    if (!mockIo.connectionCallback) {
+      return;
+    }
     mockIo.connectionCallback(mockSocket as Socket);
 
-    // 直接獲取並調用事件處理程序
+    // 直接獲取並呼叫事件處理程序
     const onMock = vi.mocked(mockSocket.on);
-    if (!onMock) return;
+    if (!onMock) {
+      return;
+    }
 
     const chatSendHandler = onMock.mock.calls.find(
       (call) => call[0] === 'chat:send'
@@ -276,16 +295,20 @@ describe('Socket Server', () => {
     expect(mockChatHandlers.handleChatSend).toHaveBeenCalledWith(chatMessage);
   });
 
-  it('當斷開連接時，應該從等待池中移除用戶', () => {
+  it('當斷開連接時，應該從等待池中移除使用者', () => {
     createSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
-    if (!mockIo.connectionCallback) return;
+    if (!mockIo.connectionCallback) {
+      return;
+    }
     mockIo.connectionCallback(mockSocket as Socket);
 
-    // 直接獲取並調用事件處理程序
+    // 直接獲取並呼叫事件處理程序
     const onMock = vi.mocked(mockSocket.on);
-    if (!onMock) return;
+    if (!onMock) {
+      return;
+    }
 
     const disconnectHandler = onMock.mock.calls.find(
       (call) => call[0] === 'disconnect'

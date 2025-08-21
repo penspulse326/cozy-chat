@@ -30,7 +30,7 @@ describe('User Service', () => {
   });
 
   describe('createUser', () => {
-    it('should create user with correct payload', async () => {
+    it('應該使用正確的載荷建立使用者', async () => {
       const mockUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -56,7 +56,7 @@ describe('User Service', () => {
       );
     });
 
-    it('should throw error when model returns null', async () => {
+    it('當模型返回 null 時應拋出錯誤', async () => {
       const mockUserData = {
         device: 'PS5' as Device,
         socketId: 'socket123',
@@ -69,7 +69,7 @@ describe('User Service', () => {
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error if model throws error', async () => {
+    it('如果模型拋出錯誤時應拋出錯誤', async () => {
       const mockUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -86,7 +86,7 @@ describe('User Service', () => {
   });
 
   describe('findUserById', () => {
-    it('should return user when found', async () => {
+    it('當找到使用者時應返回使用者', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockUser = {
         _id: new ObjectId(mockUserId),
@@ -105,7 +105,7 @@ describe('User Service', () => {
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error when user not found', async () => {
+    it('當找不到使用者時應拋出錯誤', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
 
       vi.mocked(userModel.findUserById).mockResolvedValue(null);
@@ -119,7 +119,7 @@ describe('User Service', () => {
   });
 
   describe('findUsersByRoomId', () => {
-    it('should return users when found', async () => {
+    it('當找到使用者時應返回使用者', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUsers = [
         {
@@ -148,7 +148,7 @@ describe('User Service', () => {
       expect(userModel.findUsersByRoomId).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error when users not found', async () => {
+    it('當找不到使用者時應拋出錯誤', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       vi.mocked(userModel.findUsersByRoomId).mockResolvedValue(null);
@@ -162,7 +162,7 @@ describe('User Service', () => {
   });
 
   describe('updateUserRoomId', () => {
-    it('should update user room id successfully', async () => {
+    it('應該成功更新使用者房間 ID', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUpdateResult = {
@@ -184,7 +184,7 @@ describe('User Service', () => {
       expect(userModel.updateUserRoomId).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error when update fails', async () => {
+    it('當更新失敗時應拋出錯誤', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
 
@@ -202,7 +202,7 @@ describe('User Service', () => {
   });
 
   describe('updateUserStatus', () => {
-    it('should update user status and return roomId when user exists', async () => {
+    it('當使用者存在時應更新使用者狀態並返回房間 ID', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockStatus = 'LEFT' as const;
@@ -236,7 +236,7 @@ describe('User Service', () => {
       expect(userModel.updateUserStatus).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error when user does not exist', async () => {
+    it('當使用者不存在時應拋出錯誤', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as const;
 
@@ -250,7 +250,7 @@ describe('User Service', () => {
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error when user has no room_id', async () => {
+    it('當使用者沒有房間 ID 時應拋出錯誤', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as const;
       const mockUser = {
@@ -273,7 +273,7 @@ describe('User Service', () => {
   });
 
   describe('checkUserStatus', () => {
-    it('should return true when at least one user has LEFT status', async () => {
+    it('當至少有一個使用者狀態為 LEFT 時應返回 true', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUsers = [
         {
@@ -302,7 +302,7 @@ describe('User Service', () => {
       expect(userModel.findUsersByRoomId).toHaveBeenCalledTimes(1);
     });
 
-    it('should return false when no user has LEFT status', async () => {
+    it('當沒有使用者狀態為 LEFT 時應返回 false', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUsers = [
         {
@@ -331,7 +331,7 @@ describe('User Service', () => {
       expect(userModel.findUsersByRoomId).toHaveBeenCalledTimes(1);
     });
 
-    it('should return false when users not found', async () => {
+    it('當找不到使用者時應返回 false', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       vi.mocked(userModel.findUsersByRoomId).mockResolvedValue(null);
@@ -344,7 +344,7 @@ describe('User Service', () => {
   });
 
   describe('createMatchedUsers', () => {
-    it('should create matched users and return users with roomId', async () => {
+    it('應該建立匹配的使用者並返回帶有房間 ID 的使用者', async () => {
       const mockNewUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -421,7 +421,7 @@ describe('User Service', () => {
       expect(userModel.updateManyUserRoomId).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error when first createUser fails', async () => {
+    it('當第一個 createUser 失敗時應拋出錯誤', async () => {
       const mockNewUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -443,7 +443,7 @@ describe('User Service', () => {
       expect(userModel.updateUserRoomId).not.toHaveBeenCalled();
     });
 
-    it('should throw error when second createUser fails', async () => {
+    it('當第二個 createUser 失敗時應拋出錯誤', async () => {
       const mockNewUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',
@@ -474,7 +474,7 @@ describe('User Service', () => {
       expect(userModel.updateUserRoomId).not.toHaveBeenCalled();
     });
 
-    it('should throw error when createChatRoom fails', async () => {
+    it('當 createChatRoom 失敗時應拋出錯誤', async () => {
       const mockNewUserData = {
         device: 'APP' as Device,
         socketId: 'socket123',

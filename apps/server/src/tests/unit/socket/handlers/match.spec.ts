@@ -47,7 +47,7 @@ describe('Match Handlers', () => {
   });
 
   describe('handleMatchStart', () => {
-    it('當沒有等待用戶時，應該將新用戶添加到等待池', async () => {
+    it('當沒有等待使用者時，應該將新使用者添加到等待池', async () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
         state
@@ -63,7 +63,7 @@ describe('Match Handlers', () => {
       expect(state.addWaitingUser).toHaveBeenCalledWith(newUser);
     });
 
-    it('當有等待用戶時，應該匹配並通知兩個用戶', async () => {
+    it('當有等待使用者時，應該匹配並通知兩個使用者', async () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
         state
@@ -97,7 +97,7 @@ describe('Match Handlers', () => {
   });
 
   describe('handleMatchCancel', () => {
-    it('當成功移除等待用戶時，應該發送取消事件', () => {
+    it('當成功移除等待使用者時，應該發送取消事件', () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
         state
@@ -112,7 +112,7 @@ describe('Match Handlers', () => {
       expect(mockSocket.emit).toHaveBeenCalledWith('match:cancel');
     });
 
-    it('當找不到等待用戶時，不應該發送任何事件', () => {
+    it('當找不到等待使用者時，不應該發送任何事件', () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
         state
@@ -128,7 +128,7 @@ describe('Match Handlers', () => {
   });
 
   describe('handleMatchLeave', () => {
-    it('應該更新用戶狀態並通知房間內所有用戶', async () => {
+    it('應該更新使用者狀態並通知房間內所有使用者', async () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
         state
@@ -149,7 +149,7 @@ describe('Match Handlers', () => {
   });
 
   describe('notifyMatchLeave', () => {
-    it('應該向房間內所有用戶發送離開事件', () => {
+    it('應該向房間內所有使用者發送離開事件', () => {
       const matchHandlers = createMatchHandlers(
         mockIo as unknown as Server,
         state

@@ -17,7 +17,7 @@ describe('Chat Room Service', () => {
   });
 
   describe('createChatRoom', () => {
-    it('should create chat room with correct payload', async () => {
+    it('應該使用正確的載荷建立聊天室', async () => {
       const mockChatRoomUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
@@ -45,7 +45,7 @@ describe('Chat Room Service', () => {
       );
     });
 
-    it('should throw error when model returns null', async () => {
+    it('當模型返回 null 時應拋出錯誤', async () => {
       const mockChatRoomUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
@@ -58,7 +58,7 @@ describe('Chat Room Service', () => {
       expect(chatRoomModel.createChatRoom).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error if model throws error', async () => {
+    it('如果模型拋出錯誤時應拋出錯誤', async () => {
       const mockChatRoomUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
@@ -75,7 +75,7 @@ describe('Chat Room Service', () => {
   });
 
   describe('findChatRoomById', () => {
-    it('should return chat room when found', async () => {
+    it('當找到聊天室時應返回聊天室', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatRoom = {
         _id: new ObjectId(mockRoomId),
@@ -91,7 +91,7 @@ describe('Chat Room Service', () => {
       expect(chatRoomModel.findChatRoomById).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error when chat room not found', async () => {
+    it('當找不到聊天室時應拋出錯誤', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       vi.mocked(chatRoomModel.findChatRoomById).mockResolvedValue(null);
@@ -103,7 +103,7 @@ describe('Chat Room Service', () => {
       expect(chatRoomModel.findChatRoomById).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw error if model throws error', async () => {
+    it('如果模型拋出錯誤時應拋出錯誤', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       vi.mocked(chatRoomModel.findChatRoomById).mockRejectedValue(
