@@ -1,4 +1,6 @@
+import type { UserData } from '@/models/user.model';
 import type { UserStatus } from '@packages/lib';
+import type { InsertOneResult, OptionalId, UpdateResult } from 'mongodb';
 
 import { UserStatusSchema } from '@packages/lib';
 
@@ -8,7 +10,7 @@ import userModel from '@/models/user.model';
 
 import chatRoomService from './chat-room.service';
 
-async function checkUserStatus(roomId: string) {
+async function checkUserStatus(roomId: string): Promise<boolean> {
   try {
     const users = await findUsersByRoomId(roomId);
     // findUsersByRoomId 已經處理了 null 的情況
@@ -19,7 +21,10 @@ async function checkUserStatus(roomId: string) {
   }
 }
 
-async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
+async function createMatchedUsers(
+  newUser: WaitingUser,
+  peerUser: WaitingUser
+): Promise<{ matchedUsers: WaitingUser[]; roomId: string }> {
   // 1. 建立兩個 user
   const newUserId = await createUserAndGetId(newUser);
   const peerUserId = await createUserAndGetId(peerUser);
@@ -63,7 +68,9 @@ async function createMatchedUsers(newUser: WaitingUser, peerUser: WaitingUser) {
   };
 }
 
-async function createUser(user: WaitingUser) {
+async function createUser(
+  user: WaitingUser
+): Promise<InsertOneResult<OptionalId<UserData>>> {
   const currentTime = new Date();
   const payload = {
     created_at: currentTime,
@@ -86,7 +93,7 @@ async function createUserAndGetId(user: WaitingUser): Promise<string> {
   return result.insertedId.toString();
 }
 
-async function findUserById(userId: string) {
+async function findUserById(userId: string): Promise<UserData> {
   const result = await userModel.findUserById(userId);
   if (result === null) {
     throw new Error(`找不到使用者: ${userId}`);
@@ -94,7 +101,7 @@ async function findUserById(userId: string) {
   return result;
 }
 
-async function findUsersByRoomId(roomId: string) {
+async function findUsersByRoomId(roomId: string): Promise<UserData[]> {
   const result = await userModel.findUsersByRoomId(roomId);
   if (result === null) {
     throw new Error(`找不到聊天室的使用者: ${roomId}`);
@@ -102,7 +109,10 @@ async function findUsersByRoomId(roomId: string) {
   return result;
 }
 
-async function updateUserRoomId(userId: string, roomId: string) {
+async function updateUserRoomId(
+  userId: string,
+  roomId: string
+): Promise<UpdateResult> {
   const result = await userModel.updateUserRoomId(userId, roomId);
   if (result === null) {
     throw new Error(`更新使用者聊天室失敗: ${userId}`);
@@ -110,7 +120,10 @@ async function updateUserRoomId(userId: string, roomId: string) {
   return result;
 }
 
-async function updateUserStatus(userId: string, status: UserStatus) {
+async function updateUserStatus(
+  userId: string,
+  status: UserStatus
+): Promise<{ roomId: string }> {
   const user = await findUserById(userId);
   // findUserById 已經處理了 null 的情況
 

@@ -8,6 +8,8 @@ import { db } from '@/config/db';
 
 type ChatRoomData = Omit<ChatRoom, '_id'> & { _id: ObjectId };
 
+export type { ChatRoomData };
+
 async function createChatRoom(
   data: CreateChatRoomPayload
 ): Promise<InsertOneResult<ChatRoomData> | null> {

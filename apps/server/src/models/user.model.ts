@@ -8,6 +8,8 @@ import { db } from '@/config/db';
 
 type UserData = Omit<User, '_id'> & { _id: ObjectId };
 
+export type { UserData };
+
 async function createUser(
   data: CreateUserPayload
 ): Promise<InsertOneResult<UserData> | null> {

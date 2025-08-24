@@ -1,9 +1,15 @@
 import type { Device, SocketChatMessage } from '@packages/lib';
+import type { InsertOneResult, OptionalId } from 'mongodb';
+
+import type { ChatMessageData } from '@/models/chat-message.model';
 
 import chatMessageModel from '@/models/chat-message.model';
 import userModel from '@/models/user.model';
 
-async function createChatMessage(data: SocketChatMessage, device: Device) {
+async function createChatMessage(
+  data: SocketChatMessage,
+  device: Device
+): Promise<InsertOneResult<OptionalId<ChatMessageData>>> {
   const currentTime = new Date();
   const payload = {
     content: data.content,
@@ -20,7 +26,7 @@ async function createChatMessage(data: SocketChatMessage, device: Device) {
   return result;
 }
 
-async function findChatMessageById(id: string) {
+async function findChatMessageById(id: string): Promise<ChatMessageData> {
   const result = await chatMessageModel.findChatMessageById(id);
   if (result === null) {
     throw new Error(`找不到聊天訊息: ${id}`);
@@ -28,7 +34,9 @@ async function findChatMessageById(id: string) {
   return result;
 }
 
-async function findChatMessagesByRoomId(roomId: string) {
+async function findChatMessagesByRoomId(
+  roomId: string
+): Promise<ChatMessageData[]> {
   const result = await chatMessageModel.findChatMessagesByRoomId(roomId);
   if (result === null) {
     throw new Error(`找不到聊天室訊息: ${roomId}`);
@@ -36,7 +44,7 @@ async function findChatMessagesByRoomId(roomId: string) {
   return result;
 }
 
-async function sendChatMessage(data: SocketChatMessage) {
+async function sendChatMessage(data: SocketChatMessage): Promise<ChatMessageData> {
   const user = await userModel.findUserById(data.userId);
   if (!user) {
     throw new Error(`找不到使用者: ${data.userId}`);
