@@ -150,7 +150,7 @@ export default function Blobs() {
   }, []);
 
   return (
-    <div className={styles.blobs}>
+    <div className={styles.blobs} data-testid="blobs-container">
       {Array.from({ length: BLOB_COUNT }, (_, index) => (
         <Blob
           key={index}

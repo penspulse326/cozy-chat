@@ -1,6 +1,6 @@
 import { useLocalStorage } from '@mantine/hooks';
 import { CHAT_EVENT, ChatMessage, MATCH_EVENT } from '@packages/lib';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Socket, io } from 'socket.io-client';
 import { MatchStatus, MatchSuccessData } from '../types';
 
@@ -19,7 +19,41 @@ export default function useMatch() {
     defaultValue: null,
   });
 
-  function initClient() {
+  const onMatchSuccess = useCallback(
+    (data: MatchSuccessData) => {
+      setRoomId(data.roomId);
+      setUserId(data.userId);
+      setMatchStatus('matched');
+    },
+    [setRoomId, setUserId]
+  );
+
+  const mountClientEvent = useCallback(
+    (client: Socket) => {
+      client.on(MATCH_EVENT.SUCCESS, (data: MatchSuccessData) => {
+        onMatchSuccess(data);
+      });
+
+      client.on(MATCH_EVENT.LEAVE, () => {
+        setMatchStatus('left');
+      });
+
+      client.on(CHAT_EVENT.SEND, (data: ChatMessage) => {
+        setMessages((prev) => [...prev, data]);
+      });
+
+      client.on(CHAT_EVENT.LOAD, (data: ChatMessage[]) => {
+        setMessages(data);
+      });
+    },
+    [onMatchSuccess, setMessages]
+  );
+
+  const emitMatchStart = useCallback(() => {
+    socketRef.current?.emit(MATCH_EVENT.START, 'PC');
+  }, []);
+
+  const initClient = useCallback(() => {
     socketRef.current = io('http://localhost:8080', {
       query: {
         roomId,
@@ -35,62 +69,37 @@ export default function useMatch() {
     });
 
     mountClientEvent(socketRef.current);
-  }
+  }, [roomId, emitMatchStart, mountClientEvent]);
 
-  function mountClientEvent(client: Socket) {
-    client.on(MATCH_EVENT.SUCCESS, (data: MatchSuccessData) => {
-      onMatchSuccess(data);
-    });
-
-    client.on(MATCH_EVENT.LEAVE, () => {
-      setMatchStatus('left');
-    });
-
-    client.on(CHAT_EVENT.SEND, (data: ChatMessage) => {
-      setMessages((prev) => [...prev, data]);
-    });
-
-    client.on(CHAT_EVENT.LOAD, (data: ChatMessage[]) => {
-      setMessages(data);
-    });
-  }
-
-  function handleStandby() {
+  const handleStandby = useCallback(() => {
     socketRef.current?.disconnect();
     socketRef.current = null;
-  }
+  }, []);
 
-  function handleQuit() {
+  const emitMatchCancel = useCallback(() => {
+    socketRef.current?.emit(MATCH_EVENT.CANCEL);
+    setMatchStatus('standby');
+  }, []);
+
+  const emitMatchLeave = useCallback(
+    (userId: string) => {
+      socketRef.current?.emit(MATCH_EVENT.LEAVE, userId);
+      removeUserId();
+      removeRoomId();
+      setMessages([]);
+      setMatchStatus('standby');
+    },
+    [removeRoomId, removeUserId]
+  );
+
+  const handleQuit = useCallback(() => {
     if (!roomId || !userId) {
       emitMatchCancel();
       return;
     }
 
     emitMatchLeave(userId);
-  }
-
-  function onMatchSuccess(data: MatchSuccessData) {
-    setRoomId(data.roomId);
-    setUserId(data.userId);
-    setMatchStatus('matched');
-  }
-
-  function emitMatchStart() {
-    socketRef.current?.emit(MATCH_EVENT.START, 'PC');
-  }
-
-  function emitMatchCancel() {
-    socketRef.current?.emit(MATCH_EVENT.CANCEL);
-    setMatchStatus('standby');
-  }
-
-  function emitMatchLeave(userId: string) {
-    socketRef.current?.emit(MATCH_EVENT.LEAVE, userId);
-    removeUserId();
-    removeRoomId();
-    setMessages([]);
-    setMatchStatus('standby');
-  }
+  }, [emitMatchCancel, emitMatchLeave, roomId, userId]);
 
   function emitChatSend(content: string) {
     socketRef.current?.emit(CHAT_EVENT.SEND, {
@@ -104,7 +113,7 @@ export default function useMatch() {
     if (roomId && matchStatus === 'standby') {
       setMatchStatus('reloading');
     }
-  }, [roomId]);
+  }, [roomId, matchStatus]);
 
   useEffect(() => {
     switch (matchStatus) {
@@ -124,7 +133,7 @@ export default function useMatch() {
       default:
         break;
     }
-  }, [matchStatus]);
+  }, [matchStatus, handleStandby, initClient, handleQuit]);
 
   return { matchStatus, setMatchStatus, emitChatSend, messages };
 }

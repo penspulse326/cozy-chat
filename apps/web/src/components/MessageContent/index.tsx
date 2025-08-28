@@ -12,7 +12,11 @@ export default function MessageContent({ data, isUser }: MessageContentProps) {
   const justify = isUser ? styles.wrapperEnd : styles.wrapperStart;
 
   return (
-    <Flex className={`${styles.wrapper} ${justify}`}>
+    <Flex
+      role="article"
+      className={`${styles.wrapper} ${justify}`}
+      data-is-user={isUser}
+    >
       <Flex
         className={styles.messageBox}
         bg={alpha('var(--mantine-color-soft-lime-0)', 0.5)}

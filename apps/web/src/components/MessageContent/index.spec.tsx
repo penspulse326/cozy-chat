@@ -34,4 +34,23 @@ describe('MessageContent', () => {
     expect(screen.getByText('行動裝置')).toBeInTheDocument();
     expect(screen.getByText('2023/10/27')).toBeInTheDocument();
   });
+
+  it('當 device 型別不合法時，應能正常渲染而不顯示裝置資訊', () => {
+    const mockInvalidMessage = {
+      ...mockChatMessage,
+      _id: '3',
+      device: 'non-existent-device',
+    } as unknown as ChatMessage;
+
+    render(<MessageContent data={mockInvalidMessage} isUser={true} />);
+
+    // 訊息內容應該還在
+    expect(
+      screen.getByText('Hello, this is a test message!')
+    ).toBeInTheDocument();
+
+    // 預期找不到任何對應的裝置文字
+    expect(screen.queryByText('網站')).not.toBeInTheDocument();
+    expect(screen.queryByText('行動裝置')).not.toBeInTheDocument();
+  });
 });
