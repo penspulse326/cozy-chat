@@ -17,7 +17,7 @@ export function createSocketServer(io: Server) {
   io.on('connection', (socket: Socket) => {
     const roomId = socket.handshake.query.roomId;
 
-    if (typeof roomId === 'string') {
+    if (typeof roomId === 'string' && roomId !== '') {
       void userHandlers.handleCheckUser(socket.id, roomId);
     }
 

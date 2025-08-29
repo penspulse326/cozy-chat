@@ -1,9 +1,9 @@
-import type { UserData } from '@/models/user.model';
 import type { UserStatus } from '@packages/lib';
 import type { InsertOneResult, OptionalId, UpdateResult } from 'mongodb';
 
 import { UserStatusSchema } from '@packages/lib';
 
+import type { UserData } from '@/models/user.model';
 import type { WaitingUser } from '@/types';
 
 import userModel from '@/models/user.model';

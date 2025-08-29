@@ -1,5 +1,6 @@
-import type { ChatRoomData } from '@/models/chat-room.model';
 import type { InsertOneResult, OptionalId } from 'mongodb';
+
+import type { ChatRoomData } from '@/models/chat-room.model';
 
 import chatRoomModel from '@/models/chat-room.model';
 
