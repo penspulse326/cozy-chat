@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useRef, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useRef, useState, ReactNode, useCallback } from 'react';
 import { Socket, io } from 'socket.io-client';
 
 interface ISocketContext {
