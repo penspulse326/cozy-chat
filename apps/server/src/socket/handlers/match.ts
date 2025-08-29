@@ -2,13 +2,11 @@ import type { Server } from 'socket.io';
 
 import { MATCH_EVENT, UserStatusSchema } from '@packages/lib';
 
-import type { WaitingUser } from '@/types';
+import type { MatchedUser, WaitingUser } from '@/types';
 
 import userService from '@/services/user.service';
 
 import type { WaitingPool } from '../waiting-pool';
-
-export type MatchHandlers = ReturnType<typeof createMatchHandlers>;
 
 export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
   const handleMatchStart = async (newUser: WaitingUser) => {
@@ -47,7 +45,7 @@ export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
   };
 
   const handleNotifyMatchSuccess = async (
-    user: WaitingUser & { userId: string },
+    user: MatchedUser,
     roomId: string
   ) => {
     await io.of('/').sockets.get(user.socketId)?.join(roomId);

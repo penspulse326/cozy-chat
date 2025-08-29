@@ -4,7 +4,7 @@ import type { InsertOneResult, OptionalId, UpdateResult } from 'mongodb';
 import { UserStatusSchema } from '@packages/lib';
 
 import type { UserData } from '@/models/user.model';
-import type { WaitingUser } from '@/types';
+import type { MatchedUser, WaitingUser } from '@/types';
 
 import userModel from '@/models/user.model';
 
@@ -24,7 +24,10 @@ async function checkUserStatus(roomId: string): Promise<boolean> {
 async function createMatchedUsers(
   newUser: WaitingUser,
   peerUser: WaitingUser
-): Promise<{ matchedUsers: WaitingUser[]; roomId: string }> {
+): Promise<{
+  matchedUsers: MatchedUser[];
+  roomId: string;
+}> {
   // 1. 建立兩個 user
   const newUserId = await createUserAndGetId(newUser);
   const peerUserId = await createUserAndGetId(peerUser);

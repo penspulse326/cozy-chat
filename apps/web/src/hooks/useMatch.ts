@@ -1,23 +1,25 @@
 import { useLocalStorage } from '@mantine/hooks';
 import { CHAT_EVENT, ChatMessage, MATCH_EVENT } from '@packages/lib';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Socket, io } from 'socket.io-client';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSocketContext } from '../contexts/SocketContext';
 import { MatchStatus, MatchSuccessData } from '../types';
+import useSocketEvents from './useSocketEvents';
 
 export default function useMatch() {
-  const socketRef = useRef<Socket | null>(null);
   const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-  const [userId, setUserId, removeUserId] = useLocalStorage<string | null>({
+  const [userId, setUserId, removeUserId] = useLocalStorage<string>({
     key: 'userId',
-    defaultValue: null,
+    defaultValue: '',
   });
 
-  const [roomId, setRoomId, removeRoomId] = useLocalStorage<string | null>({
+  const [roomId, setRoomId, removeRoomId] = useLocalStorage<string>({
     key: 'roomId',
-    defaultValue: null,
+    defaultValue: '',
   });
+
+  const { socket, connect, disconnect } = useSocketContext();
 
   const onMatchSuccess = useCallback(
     (data: MatchSuccessData) => {
@@ -28,68 +30,56 @@ export default function useMatch() {
     [setRoomId, setUserId]
   );
 
-  const mountClientEvent = useCallback(
-    (client: Socket) => {
-      client.on(MATCH_EVENT.SUCCESS, (data: MatchSuccessData) => {
-        onMatchSuccess(data);
-      });
+  const onLeave = useCallback(() => {
+    setMatchStatus('left');
+  }, []);
 
-      client.on(MATCH_EVENT.LEAVE, () => {
-        setMatchStatus('left');
-      });
+  const onReceiveMessage = useCallback((data: ChatMessage) => {
+    setMessages((prev) => [...prev, data]);
+  }, []);
 
-      client.on(CHAT_EVENT.SEND, (data: ChatMessage) => {
-        setMessages((prev) => [...prev, data]);
-      });
+  const onLoadMessages = useCallback((data: ChatMessage[]) => {
+    setMessages(data);
+  }, []);
 
-      client.on(CHAT_EVENT.LOAD, (data: ChatMessage[]) => {
-        setMessages(data);
-      });
-    },
-    [onMatchSuccess, setMessages]
+  const onConnect = useCallback(() => {
+    if (!roomId) {
+      socket?.emit(MATCH_EVENT.START, 'PC');
+    } else {
+      setMatchStatus('matched');
+    }
+  }, [roomId, socket]);
+
+  const handlers = useMemo(
+    () => ({
+      connect: onConnect,
+      [MATCH_EVENT.SUCCESS]: onMatchSuccess,
+      [MATCH_EVENT.LEAVE]: onLeave,
+      [CHAT_EVENT.SEND]: onReceiveMessage,
+      [CHAT_EVENT.LOAD]: onLoadMessages,
+    }),
+    [onConnect, onLoadMessages, onLeave, onMatchSuccess, onReceiveMessage]
   );
 
-  const emitMatchStart = useCallback(() => {
-    socketRef.current?.emit(MATCH_EVENT.START, 'PC');
-  }, []);
-
-  const initClient = useCallback(() => {
-    socketRef.current = io('http://localhost:8080', {
-      query: {
-        roomId,
-      },
-    });
-
-    socketRef.current.on('connect', () => {
-      if (!roomId) {
-        emitMatchStart();
-      } else {
-        setMatchStatus('matched');
-      }
-    });
-
-    mountClientEvent(socketRef.current);
-  }, [roomId, emitMatchStart, mountClientEvent]);
-
-  const handleStandby = useCallback(() => {
-    socketRef.current?.disconnect();
-    socketRef.current = null;
-  }, []);
+  useSocketEvents(socket, handlers);
 
   const emitMatchCancel = useCallback(() => {
-    socketRef.current?.emit(MATCH_EVENT.CANCEL);
+    // No need to emit event if not connected
+    if (socket) {
+      socket.emit(MATCH_EVENT.CANCEL);
+    }
     setMatchStatus('standby');
-  }, []);
+  }, [socket]);
 
   const emitMatchLeave = useCallback(
     (userId: string) => {
-      socketRef.current?.emit(MATCH_EVENT.LEAVE, userId);
+      socket?.emit(MATCH_EVENT.LEAVE, userId);
       removeUserId();
       removeRoomId();
       setMessages([]);
       setMatchStatus('standby');
     },
-    [removeRoomId, removeUserId]
+    [socket, removeRoomId, removeUserId]
   );
 
   const handleQuit = useCallback(() => {
@@ -97,12 +87,11 @@ export default function useMatch() {
       emitMatchCancel();
       return;
     }
-
     emitMatchLeave(userId);
   }, [emitMatchCancel, emitMatchLeave, roomId, userId]);
 
   function emitChatSend(content: string) {
-    socketRef.current?.emit(CHAT_EVENT.SEND, {
+    socket?.emit(CHAT_EVENT.SEND, {
       roomId,
       userId,
       content,
@@ -116,24 +105,19 @@ export default function useMatch() {
   }, [roomId, matchStatus]);
 
   useEffect(() => {
-    switch (matchStatus) {
-      case 'standby':
-        handleStandby();
-        break;
-      case 'waiting':
-        initClient();
-        break;
-      case 'reloading':
-        initClient();
-        break;
-      case 'quit':
-        handleQuit();
-        break;
-
-      default:
-        break;
+    if (matchStatus === 'quit') {
+      handleQuit();
     }
-  }, [matchStatus, handleStandby, initClient, handleQuit]);
+  }, [matchStatus, handleQuit]);
+
+  // Effect to manage connection based on status
+  useEffect(() => {
+    if (matchStatus === 'waiting' || matchStatus === 'reloading') {
+      connect({ roomId });
+    } else if (matchStatus === 'standby') {
+      disconnect();
+    }
+  }, [matchStatus, roomId, connect, disconnect]);
 
   return { matchStatus, setMatchStatus, emitChatSend, messages };
 }
