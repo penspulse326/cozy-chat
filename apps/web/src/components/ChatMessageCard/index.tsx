@@ -7,7 +7,7 @@ interface MessageContentProps {
   isUser: boolean;
 }
 
-export default function MessageContent({ data, isUser }: MessageContentProps) {
+export default function ChatMessageCard({ data, isUser }: MessageContentProps) {
   const { device, content, created_at } = data;
   const justify = isUser ? styles.wrapperEnd : styles.wrapperStart;
 

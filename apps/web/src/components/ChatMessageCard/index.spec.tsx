@@ -2,9 +2,9 @@ import { render } from '@/tests';
 import { ChatMessage } from '@packages/lib';
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import MessageContent from './index';
+import ChatMessageCard from './index';
 
-describe('MessageContent', () => {
+describe('ChatMessageCard', () => {
   const mockChatMessage: ChatMessage = {
     _id: '1',
     room_id: 'room1',
@@ -15,7 +15,7 @@ describe('MessageContent', () => {
   };
 
   it('應該正確渲染訊息內容、裝置和時間 (作為用戶)', () => {
-    render(<MessageContent data={mockChatMessage} isUser={true} />);
+    render(<ChatMessageCard data={mockChatMessage} isUser={true} />);
 
     expect(
       screen.getByText('Hello, this is a test message!')
@@ -26,7 +26,7 @@ describe('MessageContent', () => {
 
   it('應該正確渲染訊息內容、裝置和時間 (作為對方)', () => {
     const mockOtherMessage = { ...mockChatMessage, sender_id: 'otherUser' };
-    render(<MessageContent data={mockOtherMessage} isUser={false} />);
+    render(<ChatMessageCard data={mockOtherMessage} isUser={false} />);
 
     expect(
       screen.getByText('Hello, this is a test message!')
@@ -42,7 +42,7 @@ describe('MessageContent', () => {
       device: 'non-existent-device',
     } as unknown as ChatMessage;
 
-    render(<MessageContent data={mockInvalidMessage} isUser={true} />);
+    render(<ChatMessageCard data={mockInvalidMessage} isUser={true} />);
 
     // 訊息內容應該還在
     expect(

@@ -1,5 +1,5 @@
 import { Stack, Text, alpha } from '@mantine/core';
-import MessageContent from '../MessageContent';
+import ChatMessageCard from '../ChatMessageCard';
 import styles from './styles.module.css';
 
 import { MatchStatus } from '@/types';
@@ -31,7 +31,7 @@ export default function ChatBox({
 
             <Stack className={styles.messagesContainer}>
               {messages.map((message: ChatMessage) => (
-                <MessageContent
+                <ChatMessageCard
                   key={message._id}
                   data={message}
                   isUser={message.user_id === userId}
