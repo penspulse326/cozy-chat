@@ -13,16 +13,16 @@ import type {
   UserStatusSchema,
 } from '../schemas';
 
-export type ChatMessage = z.infer<typeof ChatMessageSchema>;
-export type ChatRoom = z.infer<typeof ChatRoomSchema>;
-export type CreateChatMessagePayload = z.infer<typeof CreateChatMessageSchema>;
-export type CreateChatRoomPayload = z.infer<typeof CreateChatRoomSchema>;
-export type CreateUserPayload = z.infer<typeof CreateUserSchema>;
+export type ChatMessageDTO = z.infer<typeof ChatMessageSchema>;
+export type ChatRoomDTO = z.infer<typeof ChatRoomSchema>;
+export type CreateChatMessageDTO = z.infer<typeof CreateChatMessageSchema>;
+export type CreateChatRoomDTO = z.infer<typeof CreateChatRoomSchema>;
+export type CreateUserDTO = z.infer<typeof CreateUserSchema>;
 export type Device = z.infer<typeof DeviceSchema>;
-export type UpdateUserLastActiveAtPayload = z.infer<
+export type UpdateUserLastActiveAtDTO = z.infer<
   typeof UpdateUserLastActiveAtSchema
 >;
-export type UpdateUserStatusPayload = z.infer<typeof UpdateUserStatusSchema>;
-export type User = z.infer<typeof UserSchema>;
+export type UpdateUserStatusDTO = z.infer<typeof UpdateUserStatusSchema>;
+export type UserDTO = z.infer<typeof UserSchema>;
 export type UserStatus = z.infer<typeof UserStatusSchema>;
 export type * from './data';

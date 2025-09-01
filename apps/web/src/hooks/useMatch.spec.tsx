@@ -3,7 +3,7 @@
  */
 import { act, renderHook } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useLocalStorage } from '@mantine/hooks';
 import { CHAT_EVENT, MATCH_EVENT } from '@packages/lib';
@@ -22,6 +22,7 @@ const mockSocket = {
   emit: vi.fn(),
   disconnect: vi.fn(),
 };
+
 vi.mock('socket.io-client', () => ({
   io: vi.fn(() => mockSocket),
 }));
@@ -32,9 +33,11 @@ describe('useMatch', () => {
 
   // Helper to create a wrapper with the real SocketProvider
   const createWrapper = () => {
-    return ({ children }: { children: ReactNode }) => (
+    const Wrapper = ({ children }: { children: ReactNode }) => (
       <SocketProvider>{children}</SocketProvider>
     );
+    Wrapper.displayName = 'SocketProviderWrapper';
+    return Wrapper;
   };
 
   const setRoomIdMock = vi.fn();
@@ -145,9 +148,13 @@ describe('useMatch', () => {
 
       // Simulate server event
       act(() => {
-        const successCallback = mockSocket.on.mock.calls.find(
+        const successCall = mockSocket.on.mock.calls.find(
           (call) => call[0] === MATCH_EVENT.SUCCESS,
-        )[1];
+        );
+        if (!successCall) {
+          throw new Error('MATCH_EVENT.SUCCESS callback not found');
+        }
+        const successCallback = successCall[1];
         successCallback({ roomId: 'new-room', userId: 'new-user' });
       });
 
@@ -168,9 +175,13 @@ describe('useMatch', () => {
       const initialMessages = [{ content: 'Hello' }];
       // Simulate server event
       act(() => {
-        const loadCallback = mockSocket.on.mock.calls.find(
+        const loadCall = mockSocket.on.mock.calls.find(
           (call) => call[0] === CHAT_EVENT.LOAD,
-        )[1];
+        );
+        if (!loadCall) {
+          throw new Error('CHAT_EVENT.LOAD callback not found');
+        }
+        const loadCallback = loadCall[1];
         loadCallback(initialMessages);
       });
 

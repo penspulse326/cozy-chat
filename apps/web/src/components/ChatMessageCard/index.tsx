@@ -1,9 +1,10 @@
 import { Flex, Stack, Text, alpha } from '@mantine/core';
-import { ChatMessage, DeviceMap } from '@packages/lib';
+import { ChatMessageDTO } from '@packages/lib';
 import styles from './styles.module.css';
+import { DeviceEnum } from '@/types';
 
 interface MessageContentProps {
-  data: ChatMessage;
+  data: ChatMessageDTO;
   isUser: boolean;
 }
 
@@ -26,7 +27,7 @@ export default function ChatMessageCard({ data, isUser }: MessageContentProps) {
       <Stack
         className={`${styles.infoStack} ${isUser ? styles.infoStackRight : styles.infoStackLeft}`}
       >
-        <Text size="xs">{DeviceMap[device]}</Text>
+        <Text size="xs">{DeviceEnum[device]}</Text>
         <Text size="xs">
           {new Date(created_at).toLocaleDateString('zh-TW', {
             year: 'numeric',

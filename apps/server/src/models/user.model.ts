@@ -1,4 +1,4 @@
-import type { CreateUserPayload, User, UserStatus } from '@packages/lib';
+import type { CreateUserDTO, UserDTO, UserStatus } from '@packages/lib';
 import type { InsertOneResult, OptionalId } from 'mongodb';
 
 import { CreateUserSchema } from '@packages/lib';
@@ -6,12 +6,12 @@ import { ObjectId, type UpdateResult } from 'mongodb';
 
 import { db } from '@/config/db';
 
-type UserData = Omit<User, '_id'> & { _id: ObjectId };
+type UserData = Omit<UserDTO, '_id'> & { _id: ObjectId };
 
 export type { UserData };
 
 async function createUser(
-  data: CreateUserPayload
+  data: CreateUserDTO
 ): Promise<InsertOneResult<UserData> | null> {
   const users = db.collection<OptionalId<UserData>>('users');
 

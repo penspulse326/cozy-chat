@@ -1,4 +1,4 @@
-import type { DeviceMap, SocketChatMessage } from '@packages/lib';
+import type { Device, SocketChatMessage } from '@packages/lib';
 import type { Server, Socket } from 'socket.io';
 
 import { CHAT_EVENT, MATCH_EVENT } from '@packages/lib';
@@ -21,7 +21,7 @@ export function createSocketServer(io: Server) {
       void userHandlers.handleCheckUser(socket.id, roomId);
     }
 
-    socket.on(MATCH_EVENT.START, (device: keyof typeof DeviceMap) => {
+    socket.on(MATCH_EVENT.START, (device: Device) => {
       void matchHandlers.handleMatchStart({ device, socketId: socket.id });
     });
 

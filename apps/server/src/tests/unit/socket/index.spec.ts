@@ -3,7 +3,6 @@ import type { Server, Socket } from 'socket.io';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChatHandlers } from '@/socket/handlers/chat';
-import type { MatchHandlers } from '@/socket/handlers/match';
 import type { UserHandlers } from '@/socket/handlers/user';
 import type { WaitingPool } from '@/socket/waiting-pool';
 
@@ -28,6 +27,13 @@ vi.mock('@/socket/handlers/user', () => ({
 vi.mock('@/socket/waiting-pool', () => ({
   createWaitingPool: vi.fn(),
 }));
+
+interface MatchHandlers {
+  handleMatchCancel: (socketId: string) => void;
+  handleMatchLeave: (userId: string) => Promise<void>;
+  handleMatchStart: (newUser: any) => Promise<void>;
+  notifyMatchLeave: (roomId: string) => void;
+}
 
 interface MockServer extends Partial<Server> {
   connectionCallback?: (socket: Socket) => void;
