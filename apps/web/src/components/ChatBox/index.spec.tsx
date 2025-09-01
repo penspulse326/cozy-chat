@@ -60,7 +60,7 @@ describe('ChatBox', () => {
     expect(messageElements.length).toBe(mockMessages.length);
   });
 
-  it('應根據 userId 正確判斷是否為用戶本人訊息', () => {
+  it('應根據 userId 正確判斷是否為使用者本人訊息', () => {
     // 這個測試需要檢查傳遞給 ChatMessageCard 的 isUser prop
     // 這通常需要對 ChatMessageCard 進行 mock，或者在 ChatMessageCard 內部渲染一些可供測試的標記
     // 這裡我們先用一個簡化的方式，假設 isUser 會影響樣式或特定文字
@@ -68,7 +68,7 @@ describe('ChatBox', () => {
       <ChatBox userId="user1" messages={mockMessages} matchStatus="matched" />
     );
 
-    // 假設用戶自己的訊息會有一個 'is-user' 的 class 或 data-attribute
+    // 假設使用者自己的訊息會有一個 'is-user' 的 class 或 data-attribute
     // 為了達成這個測試，我們需要修改 ChatMessageCard 來加上類似 data-testid="message-is-user-true" 的屬性
     // 這裡僅為示意，實際執行需要修改 ChatMessageCard 元件
     expect(screen.getByText('嗨，你好！').closest('div[data-is-user="true"]'));

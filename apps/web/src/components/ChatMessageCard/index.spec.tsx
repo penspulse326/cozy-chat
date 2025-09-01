@@ -14,7 +14,7 @@ describe('ChatMessageCard', () => {
     device: 'MB',
   };
 
-  it('應該正確渲染訊息內容、裝置和時間 (作為用戶)', () => {
+  it('應該正確渲染訊息內容、裝置和時間 (作為使用者)', () => {
     render(<ChatMessageCard data={mockChatMessage} isUser={true} />);
 
     expect(
