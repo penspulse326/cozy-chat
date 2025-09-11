@@ -45,7 +45,10 @@ export default function Home() {
       navbar={{
         width: 280,
         breakpoint: 0,
-        collapsed: { mobile: !opened, desktop: !opened },
+        collapsed: {
+          mobile: !opened,
+          desktop: !opened,
+        },
       }}
       padding="md"
       layout="alt"
