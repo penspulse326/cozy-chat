@@ -1,4 +1,4 @@
-import type { ChatMessageDTO, CreateChatMessageDTO } from '@packages/lib';
+import type { ChatMessage, CreateChatMessage } from '@packages/lib';
 import type { InsertOneResult, OptionalId } from 'mongodb';
 
 import { CreateChatMessageSchema } from '@packages/lib';
@@ -6,12 +6,12 @@ import { ObjectId } from 'mongodb';
 
 import { db } from '@/config/db';
 
-type ChatMessageData = Omit<ChatMessageDTO, '_id'> & { _id: ObjectId };
+type ChatMessageData = Omit<ChatMessage, '_id'> & { _id: ObjectId };
 
 export type { ChatMessageData };
 
 async function createChatMessage(
-  data: CreateChatMessageDTO
+  data: CreateChatMessage
 ): Promise<InsertOneResult<OptionalId<ChatMessageData>> | null> {
   const chatMessages =
     db.collection<OptionalId<ChatMessageData>>('chat_messages');
@@ -19,11 +19,11 @@ async function createChatMessage(
   try {
     const validatedChatMessage = CreateChatMessageSchema.parse(data);
     const result = await chatMessages.insertOne(validatedChatMessage);
-    console.log('新增 ChatMessageDTO 成功');
+    console.log('新增 ChatMessage 成功');
 
     return result;
   } catch (error) {
-    console.error('新增 ChatMessageDTO 失敗', error);
+    console.error('新增 ChatMessage 失敗', error);
 
     return null;
   }
@@ -38,14 +38,14 @@ async function findChatMessageById(
     const result = await chatMessages.findOne({ _id: new ObjectId(_id) });
 
     if (result) {
-      console.log(`找到 ChatMessageDTO: ${_id}: ${JSON.stringify(result)}`);
+      console.log(`找到 ChatMessage: ${_id}: ${JSON.stringify(result)}`);
       return result;
     } else {
-      console.log(`找不到 ChatMessageDTO: ${_id}`);
+      console.log(`找不到 ChatMessage: ${_id}`);
       return null;
     }
   } catch (error) {
-    console.error(`查詢 ChatMessageDTO 失敗: ${_id}`, error);
+    console.error(`查詢 ChatMessage 失敗: ${_id}`, error);
     return null;
   }
 }

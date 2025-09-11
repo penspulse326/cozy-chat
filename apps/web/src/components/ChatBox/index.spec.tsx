@@ -1,11 +1,10 @@
-
 import { render, screen } from '@/tests';
-import { ChatMessageDTO } from '@packages/lib';
+import { ChatMessage } from '@packages/lib';
 import { describe, expect, it } from 'vitest';
 import ChatBox from './index';
 
 describe('ChatBox', () => {
-  const mockMessages: ChatMessageDTO[] = [
+  const mockMessages: ChatMessage[] = [
     {
       _id: '1',
       room_id: 'room1',
@@ -25,21 +24,19 @@ describe('ChatBox', () => {
   ];
 
   it('當 matchStatus 為 waiting 時，應顯示配對中訊息', () => {
-    render(
-      <ChatBox userId="user1" messages={[]} matchStatus="waiting" />
-    );
+    render(<ChatBox userId="user1" messages={[]} matchStatus="waiting" />);
     expect(screen.getByText('配對中...')).toBeInTheDocument();
   });
 
   it('當 matchStatus 為 left 時，應顯示對方已離開訊息', () => {
-    render(<ChatBox userId="user1" messages={mockMessages} matchStatus="left" />);
+    render(
+      <ChatBox userId="user1" messages={mockMessages} matchStatus="left" />
+    );
     expect(screen.getByText('對方已離開')).toBeInTheDocument();
   });
 
   it('當 matchStatus 為 matched 且沒有訊息時，應顯示配對成功訊息', () => {
-    render(
-      <ChatBox userId="user1" messages={[]} matchStatus="matched" />
-    );
+    render(<ChatBox userId="user1" messages={[]} matchStatus="matched" />);
     expect(screen.getByText('配對成功！')).toBeInTheDocument();
     expect(screen.getByText('開始聊天吧！')).toBeInTheDocument();
   });

@@ -2,6 +2,15 @@ import '@testing-library/jest-dom/vitest';
 
 import { vi } from 'vitest';
 
+vi.mock('next/font/local', () => ({
+  default: vi.fn(() => ({
+    style: {
+      fontFamily: '__localFont_abc123',
+    },
+    className: '__localFont_abc123',
+  })),
+}));
+
 const { getComputedStyle } = window;
 window.getComputedStyle = (elt) => getComputedStyle(elt);
 window.HTMLElement.prototype.scrollIntoView = () => {};

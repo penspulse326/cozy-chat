@@ -1,4 +1,4 @@
-import type { CreateUserDTO, UserDTO, UserStatus } from '@packages/lib';
+import type { CreateUser, User, UserStatus } from '@packages/lib';
 import type { InsertOneResult, OptionalId } from 'mongodb';
 
 import { CreateUserSchema } from '@packages/lib';
@@ -6,12 +6,12 @@ import { ObjectId, type UpdateResult } from 'mongodb';
 
 import { db } from '@/config/db';
 
-type UserData = Omit<UserDTO, '_id'> & { _id: ObjectId };
+type UserData = Omit<User, '_id'> & { _id: ObjectId };
 
 export type { UserData };
 
 async function createUser(
-  data: CreateUserDTO
+  data: CreateUser
 ): Promise<InsertOneResult<UserData> | null> {
   const users = db.collection<OptionalId<UserData>>('users');
 
@@ -74,7 +74,7 @@ async function updateManyUserRoomId(
 
     return {
       acknowledged: result.acknowledged,
-      modifiedCount: result.modifiedCount
+      modifiedCount: result.modifiedCount,
     };
   } catch (error: unknown) {
     console.error('批量更新 User RoomId 失敗', error);
