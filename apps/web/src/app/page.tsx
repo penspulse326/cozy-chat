@@ -27,7 +27,7 @@ export default function Home() {
   const [opened, { toggle }] = useDisclosure();
   const viewport = useRef<HTMLDivElement>(null);
 
-  const { matchStatus, setMatchStatus, messages, emitChatSend } = useMatch();
+  const { matchStatus, setMatchStatus, messages, sendMessage } = useMatch();
 
   function handleScrollToBottom() {
     viewport.current?.scrollTo({
@@ -114,7 +114,7 @@ export default function Home() {
       <ChatActionBar
         matchStatus={matchStatus}
         onLeave={() => setMatchStatus('quit')}
-        onSend={emitChatSend}
+        onSend={sendMessage}
       />
     </AppShell>
   );

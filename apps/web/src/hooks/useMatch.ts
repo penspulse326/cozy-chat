@@ -19,7 +19,7 @@ export default function useMatch() {
     defaultValue: null,
   });
 
-  function initClient() {
+  function connectSocket() {
     socketRef.current = io('http://localhost:8080', {
       query: {
         roomId,
@@ -28,63 +28,64 @@ export default function useMatch() {
 
     socketRef.current.on('connect', () => {
       if (!roomId) {
-        emitMatchStart();
+        startMatch();
       } else {
         setMatchStatus('matched');
       }
     });
 
-    mountClientEvent(socketRef.current);
+    setupSocketEvents(socketRef.current);
   }
 
-  function mountClientEvent(client: Socket) {
-    client.on(MATCH_EVENT.SUCCESS, (data: MatchSuccessData) => {
-      onMatchSuccess(data);
-    });
-
-    client.on(MATCH_EVENT.LEAVE, () => {
-      setMatchStatus('left');
-    });
-
-    client.on(CHAT_EVENT.SEND, (data: ChatMessage) => {
-      setMessages((prev) => [...prev, data]);
-    });
-
-    client.on(CHAT_EVENT.LOAD, (data: ChatMessage[]) => {
-      setMessages(data);
-    });
-  }
-
-  function handleStandby() {
+  function disconnectSocket() {
     socketRef.current?.disconnect();
     socketRef.current = null;
   }
 
-  function handleQuit() {
+  function setupSocketEvents(client: Socket) {
+    client.on(MATCH_EVENT.SUCCESS, handleMatchSuccess);
+    client.on(MATCH_EVENT.LEAVE, handleMatchLeave);
+    client.on(CHAT_EVENT.SEND, handleMessageReceive);
+    client.on(CHAT_EVENT.LOAD, handleMessagesLoad);
+  }
+
+  function quitMatch() {
     if (!roomId || !userId) {
-      emitMatchCancel();
+      cancelMatch();
       return;
     }
 
-    emitMatchLeave(userId);
+    leaveMatch(userId);
   }
 
-  function onMatchSuccess(data: MatchSuccessData) {
+  function handleMatchSuccess(data: MatchSuccessData) {
     setRoomId(data.roomId);
     setUserId(data.userId);
     setMatchStatus('matched');
   }
 
-  function emitMatchStart() {
+  function handleMatchLeave() {
+    setMatchStatus('left');
+  }
+
+  function handleMessageReceive(data: ChatMessage) {
+    setMessages((prev) => [...prev, data]);
+  }
+
+  function handleMessagesLoad(data: ChatMessage[]) {
+    setMessages(data);
+  }
+
+  function startMatch() {
     socketRef.current?.emit(MATCH_EVENT.START, 'PC');
   }
 
-  function emitMatchCancel() {
+  function cancelMatch() {
     socketRef.current?.emit(MATCH_EVENT.CANCEL);
     setMatchStatus('standby');
   }
 
-  function emitMatchLeave(userId: string) {
+  function leaveMatch(userId: string) {
     socketRef.current?.emit(MATCH_EVENT.LEAVE, userId);
     removeUserId();
     removeRoomId();
@@ -92,7 +93,7 @@ export default function useMatch() {
     setMatchStatus('standby');
   }
 
-  function emitChatSend(content: string) {
+  function sendMessage(content: string) {
     socketRef.current?.emit(CHAT_EVENT.SEND, {
       roomId,
       userId,
@@ -100,6 +101,7 @@ export default function useMatch() {
     });
   }
 
+  // 載入頁面後，如果 roomId 存在，則設置為 reloading 狀態
   useEffect(() => {
     if (roomId && matchStatus === 'standby') {
       setMatchStatus('reloading');
@@ -109,22 +111,21 @@ export default function useMatch() {
   useEffect(() => {
     switch (matchStatus) {
       case 'standby':
-        handleStandby();
+        disconnectSocket();
         break;
       case 'waiting':
-        initClient();
+        connectSocket();
         break;
       case 'reloading':
-        initClient();
+        connectSocket();
         break;
       case 'quit':
-        handleQuit();
+        quitMatch();
         break;
-
       default:
         break;
     }
   }, [matchStatus]);
 
-  return { matchStatus, setMatchStatus, emitChatSend, messages };
+  return { matchStatus, setMatchStatus, sendMessage, messages };
 }

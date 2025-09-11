@@ -4,7 +4,6 @@ import {
   mantineHtmlProps,
 } from '@mantine/core';
 import '@mantine/core/styles.css';
-import { SocketProvider } from '../contexts/SocketContext';
 import { theme } from '../theme';
 
 export const metadata = {
@@ -23,9 +22,7 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <SocketProvider>
-          <MantineProvider theme={theme}>{children}</MantineProvider>
-        </SocketProvider>
+        <MantineProvider theme={theme}>{children}</MantineProvider>
       </body>
     </html>
   );

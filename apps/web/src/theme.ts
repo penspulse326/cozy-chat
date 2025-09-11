@@ -7,11 +7,6 @@ import localFont from 'next/font/local';
 const lineSeedTW = localFont({
   src: [
     {
-      path: '../public/fonts/line_seed_tw_th.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
       path: '../public/fonts/line_seed_tw_rg.woff2',
       weight: '500',
       style: 'normal',
