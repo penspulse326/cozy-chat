@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 
 import { connectToDB, disconnectFromDB } from '@/config/db';
-import { createSocketServer } from '@/socket';
+import { setupSocketServer } from '@/socket';
 
 const port = process.env.PORT ?? '9001';
 const __filename = fileURLToPath(import.meta.url);
@@ -27,7 +27,7 @@ async function bootstrap() {
   try {
     await connectToDB();
 
-    createSocketServer(
+    setupSocketServer(
       new Server(server, {
         cors: {
           credentials: true,

@@ -6,7 +6,7 @@ import type { ChatHandlers } from '@/socket/handlers/chat';
 import type { UserHandlers } from '@/socket/handlers/user';
 import type { WaitingPool } from '@/socket/waiting-pool';
 
-import { createSocketServer } from '@/socket';
+import { setupSocketServer } from '@/socket';
 import * as chatHandlersModule from '@/socket/handlers/chat';
 import * as matchHandlersModule from '@/socket/handlers/match';
 import * as userHandlersModule from '@/socket/handlers/user';
@@ -65,7 +65,7 @@ describe('Socket Server', () => {
     };
 
     mockState = {
-      removeWaitingUser: vi.fn(),
+      removeFromPool: vi.fn(),
     };
 
     mockChatHandlers = {
@@ -108,7 +108,7 @@ describe('Socket Server', () => {
   });
 
   it('應該建立 socket 伺服器並設置連接處理程序', () => {
-    createSocketServer(mockIo as Server);
+    setupSocketServer(mockIo as Server);
 
     expect(waitingPoolModule.createWaitingPool).toHaveBeenCalled();
     expect(chatHandlersModule.createChatHandlers).toHaveBeenCalledWith(mockIo);
@@ -124,7 +124,7 @@ describe('Socket Server', () => {
   });
 
   it('當有 roomId 時，應該檢查使用者', () => {
-    createSocketServer(mockIo as Server);
+    setupSocketServer(mockIo as Server);
 
     // 確保 connectionCallback 已被設置
     expect(mockIo.connectionCallback).toBeDefined();
@@ -146,7 +146,7 @@ describe('Socket Server', () => {
   });
 
   it('應該設置所有必要的事件監聽器', () => {
-    createSocketServer(mockIo as Server);
+    setupSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
     if (!mockIo.connectionCallback) {
@@ -177,7 +177,7 @@ describe('Socket Server', () => {
   });
 
   it('當收到 match:start 事件時，應該呼叫 handleMatchStart', () => {
-    createSocketServer(mockIo as Server);
+    setupSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
     if (!mockIo.connectionCallback) {
@@ -209,7 +209,7 @@ describe('Socket Server', () => {
   });
 
   it('當收到 match:cancel 事件時，應該呼叫 handleMatchCancel', () => {
-    createSocketServer(mockIo as Server);
+    setupSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
     if (!mockIo.connectionCallback) {
@@ -239,7 +239,7 @@ describe('Socket Server', () => {
   });
 
   it('當收到 match:leave 事件時，應該呼叫 handleMatchLeave', () => {
-    createSocketServer(mockIo as Server);
+    setupSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
     if (!mockIo.connectionCallback) {
@@ -268,7 +268,7 @@ describe('Socket Server', () => {
   });
 
   it('當收到 chat:send 事件時，應該呼叫 handleChatSend', () => {
-    createSocketServer(mockIo as Server);
+    setupSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
     if (!mockIo.connectionCallback) {
@@ -302,7 +302,7 @@ describe('Socket Server', () => {
   });
 
   it('當斷開連接時，應該從等待池中移除使用者', () => {
-    createSocketServer(mockIo as Server);
+    setupSocketServer(mockIo as Server);
 
     // 使用存儲的 callback
     if (!mockIo.connectionCallback) {
@@ -326,6 +326,6 @@ describe('Socket Server', () => {
       disconnectHandler();
     }
 
-    expect(mockState.removeWaitingUser).toHaveBeenCalledWith(mockSocket.id);
+    expect(mockState.removeFromPool).toHaveBeenCalledWith(mockSocket.id);
   });
 });

@@ -5,12 +5,12 @@ export type WaitingPool = ReturnType<typeof createWaitingPool>;
 export function createWaitingPool() {
   const waitingUsers: WaitingUser[] = [];
 
-  const addWaitingUser = (newUser: WaitingUser) => {
+  function addToPool(newUser: WaitingUser) {
     waitingUsers.push(newUser);
     return newUser;
-  };
+  }
 
-  const removeWaitingUser = (socketId: string) => {
+  function removeFromPool(socketId: string) {
     const index = waitingUsers.findIndex((user) => user.socketId === socketId);
 
     if (index === -1) {
@@ -19,20 +19,20 @@ export function createWaitingPool() {
 
     waitingUsers.splice(index, 1);
     return true;
-  };
+  }
 
-  const getNextWaitingUser = () => {
+  function getNextFromPool() {
     return waitingUsers.shift();
-  };
+  }
 
-  const getWaitingUsers = () => {
+  function getPoolUsers() {
     return [...waitingUsers];
-  };
+  }
 
   return {
-    addWaitingUser,
-    getNextWaitingUser,
-    getWaitingUsers,
-    removeWaitingUser,
+    addToPool,
+    getNextFromPool,
+    getPoolUsers,
+    removeFromPool,
   };
 }

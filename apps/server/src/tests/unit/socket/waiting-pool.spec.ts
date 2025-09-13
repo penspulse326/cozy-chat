@@ -9,82 +9,82 @@ describe('Socket State', () => {
     it('應該建立一個有正確方法的 socket 狀態', () => {
       const waitingPool = createWaitingPool();
 
-      expect(waitingPool).toHaveProperty('addWaitingUser');
-      expect(waitingPool).toHaveProperty('removeWaitingUser');
-      expect(waitingPool).toHaveProperty('getNextWaitingUser');
-      expect(waitingPool).toHaveProperty('getWaitingUsers');
+      expect(waitingPool).toHaveProperty('addToPool');
+      expect(waitingPool).toHaveProperty('removeFromPool');
+      expect(waitingPool).toHaveProperty('getNextFromPool');
+      expect(waitingPool).toHaveProperty('getPoolUsers');
     });
   });
 
-  describe('addWaitingUser', () => {
+  describe('addToPool', () => {
     it('應該添加等待使用者並返回該使用者', () => {
       const waitingPool = createWaitingPool();
       const newUser = { device: 'PC' as Device, socketId: 'socket1' };
 
-      const result = waitingPool.addWaitingUser(newUser);
+      const result = waitingPool.addToPool(newUser);
 
       expect(result).toBe(newUser);
-      expect(waitingPool.getWaitingUsers()).toContainEqual(newUser);
+      expect(waitingPool.getPoolUsers()).toContainEqual(newUser);
     });
   });
 
-  describe('removeWaitingUser', () => {
+  describe('removeFromPool', () => {
     it('當找到使用者時應該移除等待使用者並返回 true', () => {
       const waitingPool = createWaitingPool();
       const user = { device: 'PC' as Device, socketId: 'socket1' };
-      waitingPool.addWaitingUser(user);
+      waitingPool.addToPool(user);
 
-      const result = waitingPool.removeWaitingUser('socket1');
+      const result = waitingPool.removeFromPool('socket1');
 
       expect(result).toBe(true);
-      expect(waitingPool.getWaitingUsers()).not.toContainEqual(user);
+      expect(waitingPool.getPoolUsers()).not.toContainEqual(user);
     });
 
     it('當找不到使用者時應該返回 false', () => {
       const waitingPool = createWaitingPool();
 
-      const result = waitingPool.removeWaitingUser('nonexistent');
+      const result = waitingPool.removeFromPool('nonexistent');
 
       expect(result).toBe(false);
     });
   });
 
-  describe('getNextWaitingUser', () => {
+  describe('getNextFromPool', () => {
     it('應該返回並移除第一個等待使用者', () => {
       const waitingPool = createWaitingPool();
       const user1 = { device: 'PC' as Device, socketId: 'socket1' };
       const user2 = { device: 'APP' as Device, socketId: 'socket2' };
-      waitingPool.addWaitingUser(user1);
-      waitingPool.addWaitingUser(user2);
+      waitingPool.addToPool(user1);
+      waitingPool.addToPool(user2);
 
-      const result = waitingPool.getNextWaitingUser();
+      const result = waitingPool.getNextFromPool();
 
       expect(result).toBe(user1);
-      expect(waitingPool.getWaitingUsers()).not.toContainEqual(user1);
-      expect(waitingPool.getWaitingUsers()).toContainEqual(user2);
+      expect(waitingPool.getPoolUsers()).not.toContainEqual(user1);
+      expect(waitingPool.getPoolUsers()).toContainEqual(user2);
     });
 
     it('當沒有等待使用者時應該返回 undefined', () => {
       const waitingPool = createWaitingPool();
 
-      const result = waitingPool.getNextWaitingUser();
+      const result = waitingPool.getNextFromPool();
 
       expect(result).toBeUndefined();
     });
   });
 
-  describe('getWaitingUsers', () => {
+  describe('getPoolUsers', () => {
     it('應該返回所有等待使用者的副本', () => {
       const waitingPool = createWaitingPool();
       const user1 = { device: 'PC' as Device, socketId: 'socket1' };
       const user2 = { device: 'APP' as Device, socketId: 'socket2' };
-      waitingPool.addWaitingUser(user1);
-      waitingPool.addWaitingUser(user2);
+      waitingPool.addToPool(user1);
+      waitingPool.addToPool(user2);
 
-      const result = waitingPool.getWaitingUsers();
+      const result = waitingPool.getPoolUsers();
 
       expect(result).toEqual([user1, user2]);
-      expect(result).not.toBe(waitingPool.getWaitingUsers()); // 確保返回的是副本
+      expect(result).not.toBe(waitingPool.getPoolUsers()); // 確保返回的是副本
     });
   });
 });

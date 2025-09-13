@@ -54,13 +54,13 @@ describe('Match Handlers', () => {
       );
       const newUser = { device: 'PC' as Device, socketId: 'socket1' };
 
-      vi.spyOn(waitingPool, 'getNextWaitingUser').mockReturnValue(undefined);
-      vi.spyOn(waitingPool, 'addWaitingUser');
+      vi.spyOn(waitingPool, 'getNextFromPool').mockReturnValue(undefined);
+      vi.spyOn(waitingPool, 'addToPool');
 
       await matchHandlers.handleMatchStart(newUser);
 
-      expect(waitingPool.getNextWaitingUser).toHaveBeenCalled();
-      expect(waitingPool.addWaitingUser).toHaveBeenCalledWith(newUser);
+      expect(waitingPool.getNextFromPool).toHaveBeenCalled();
+      expect(waitingPool.addToPool).toHaveBeenCalledWith(newUser);
     });
 
     it('當有等待使用者時，應該匹配並通知兩個使用者', async () => {
@@ -71,7 +71,7 @@ describe('Match Handlers', () => {
       const newUser = { device: 'PC' as Device, socketId: 'socket1' };
       const peerUser = { device: 'APP' as Device, socketId: 'socket2' };
 
-      vi.spyOn(waitingPool, 'getNextWaitingUser').mockReturnValue(peerUser);
+      vi.spyOn(waitingPool, 'getNextFromPool').mockReturnValue(peerUser);
 
       const mockMatchedUsers = [
         { ...newUser, userId: 'user1' },
@@ -85,7 +85,7 @@ describe('Match Handlers', () => {
 
       await matchHandlers.handleMatchStart(newUser);
 
-      expect(waitingPool.getNextWaitingUser).toHaveBeenCalled();
+      expect(waitingPool.getNextFromPool).toHaveBeenCalled();
       expect(userService.createMatchedUsers).toHaveBeenCalledWith(
         newUser,
         peerUser
@@ -103,12 +103,12 @@ describe('Match Handlers', () => {
         waitingPool
       );
 
-      vi.spyOn(waitingPool, 'removeWaitingUser').mockReturnValue(true);
-      vi.spyOn(waitingPool, 'getWaitingUsers').mockReturnValue([]);
+      vi.spyOn(waitingPool, 'removeFromPool').mockReturnValue(true);
+      vi.spyOn(waitingPool, 'getPoolUsers').mockReturnValue([]);
 
       matchHandlers.handleMatchCancel('socket1');
 
-      expect(waitingPool.removeWaitingUser).toHaveBeenCalledWith('socket1');
+      expect(waitingPool.removeFromPool).toHaveBeenCalledWith('socket1');
       expect(mockSocket.emit).toHaveBeenCalledWith('match:cancel');
     });
 
@@ -118,11 +118,11 @@ describe('Match Handlers', () => {
         waitingPool
       );
 
-      vi.spyOn(waitingPool, 'removeWaitingUser').mockReturnValue(false);
+      vi.spyOn(waitingPool, 'removeFromPool').mockReturnValue(false);
 
       matchHandlers.handleMatchCancel('nonexistent');
 
-      expect(waitingPool.removeWaitingUser).toHaveBeenCalledWith('nonexistent');
+      expect(waitingPool.removeFromPool).toHaveBeenCalledWith('nonexistent');
       expect(mockSocket.emit).not.toHaveBeenCalled();
     });
   });

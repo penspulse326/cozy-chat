@@ -8,18 +8,18 @@ import chatMessageService from '@/services/chat-message.service';
 export type ChatHandlers = ReturnType<typeof createChatHandlers>;
 
 export function createChatHandlers(io: Server) {
-  const handleChatSend = async (data: SocketChatMessage) => {
+  async function handleChatSend(data: SocketChatMessage) {
     const newChatMessage = await chatMessageService.sendChatMessage(data);
 
     io.to(data.roomId).emit(CHAT_EVENT.SEND, newChatMessage);
-  };
+  }
 
-  const handleChatLoad = async (roomId: string) => {
+  async function handleChatLoad(roomId: string) {
     const chatMessages =
       await chatMessageService.findChatMessagesByRoomId(roomId);
 
     io.to(roomId).emit(CHAT_EVENT.LOAD, chatMessages);
-  };
+  }
 
   return {
     handleChatLoad,

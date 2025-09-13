@@ -10,7 +10,7 @@ import type { ChatHandlers } from './chat';
 export type UserHandlers = ReturnType<typeof createUserHandlers>;
 
 export function createUserHandlers(io: Server, chatHandlers: ChatHandlers) {
-  const handleCheckUser = async (socketId: string, roomId: string) => {
+  async function handleCheckUser(socketId: string, roomId: string) {
     try {
       await chatRoomService.findChatRoomById(roomId);
     } catch (error) {
@@ -28,7 +28,7 @@ export function createUserHandlers(io: Server, chatHandlers: ChatHandlers) {
     if (isLeft) {
       io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.LEAVE);
     }
-  };
+  }
 
   return {
     handleCheckUser,
