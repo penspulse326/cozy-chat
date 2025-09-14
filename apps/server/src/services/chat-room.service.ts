@@ -1,12 +1,12 @@
 import type { InsertOneResult, OptionalId } from 'mongodb';
 
-import type { ChatRoomData } from '@/models/chat-room.model';
+import type { ChatRoomEntity } from '@/models/chat-room.model';
 
 import chatRoomModel from '@/models/chat-room.model';
 
 async function createChatRoom(
   userIds: string[]
-): Promise<InsertOneResult<OptionalId<ChatRoomData>>> {
+): Promise<InsertOneResult<OptionalId<ChatRoomEntity>>> {
   const currentTime = new Date();
   const payload = {
     created_at: currentTime,
@@ -20,7 +20,7 @@ async function createChatRoom(
   return result;
 }
 
-async function findChatRoomById(id: string): Promise<ChatRoomData> {
+async function findChatRoomById(id: string): Promise<ChatRoomEntity> {
   const result = await chatRoomModel.findChatRoomById(id);
   if (result === null) {
     throw new Error(`找不到聊天室: ${id}`);

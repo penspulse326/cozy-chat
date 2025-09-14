@@ -1,23 +1,25 @@
 import type { ChatRoom, CreateChatRoom } from '@packages/lib';
-import type { InsertOneResult, OptionalId } from 'mongodb';
+import type { InsertOneResult } from 'mongodb';
 
-import { CreateChatRoomSchema } from '@packages/lib';
+import { createChatRoomDtoSchema } from '@packages/lib';
 import { ObjectId } from 'mongodb';
 
 import { db } from '@/config/db';
 
-type ChatRoomData = Omit<ChatRoom, '_id'> & { _id: ObjectId };
-
-export type { ChatRoomData };
+export type ChatRoomEntity = Omit<ChatRoom, 'id'> & { _id: ObjectId };
 
 async function createChatRoom(
   data: CreateChatRoom
-): Promise<InsertOneResult<ChatRoomData> | null> {
-  const chatRooms = db.collection<OptionalId<ChatRoomData>>('chat_rooms');
+): Promise<InsertOneResult<ChatRoomEntity> | null> {
+  const chatRooms = getChatRoomCollection();
 
   try {
-    const validatedChatRoom = CreateChatRoomSchema.parse(data);
-    const result = await chatRooms.insertOne(validatedChatRoom);
+    const candidate = createChatRoomDtoSchema.parse(data);
+
+    const result = await chatRooms.insertOne({
+      ...candidate,
+      _id: new ObjectId(),
+    });
     console.log('新增 ChatRoom 成功');
 
     return result;
@@ -28,8 +30,8 @@ async function createChatRoom(
   }
 }
 
-async function findChatRoomById(id: string): Promise<ChatRoomData | null> {
-  const chatRooms = db.collection<ChatRoomData>('chat_rooms');
+async function findChatRoomById(id: string): Promise<ChatRoomEntity | null> {
+  const chatRooms = getChatRoomCollection();
 
   try {
     const result = await chatRooms.findOne({ _id: new ObjectId(id) });
@@ -43,7 +45,14 @@ async function findChatRoomById(id: string): Promise<ChatRoomData | null> {
   }
 }
 
-export default {
+function getChatRoomCollection() {
+  return db.collection<ChatRoomEntity>('chat_rooms');
+}
+
+
+const chatRoomModel = {
   createChatRoom,
   findChatRoomById,
 };
+
+export default chatRoomModel;

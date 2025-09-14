@@ -1,24 +1,25 @@
 import type { ChatMessage, CreateChatMessage } from '@packages/lib';
 import type { InsertOneResult, OptionalId } from 'mongodb';
 
-import { CreateChatMessageSchema } from '@packages/lib';
+import { createChatMessageDtoSchema } from '@packages/lib';
 import { ObjectId } from 'mongodb';
 
 import { db } from '@/config/db';
 
-type ChatMessageData = Omit<ChatMessage, '_id'> & { _id: ObjectId };
-
-export type { ChatMessageData };
+export type ChatMessageEntity = Omit<ChatMessage, 'id'> & { _id: ObjectId };
 
 async function createChatMessage(
   data: CreateChatMessage
-): Promise<InsertOneResult<OptionalId<ChatMessageData>> | null> {
+): Promise<InsertOneResult<OptionalId<ChatMessageEntity>> | null> {
   const chatMessages =
-    db.collection<OptionalId<ChatMessageData>>('chat_messages');
+    db.collection<OptionalId<ChatMessageEntity>>('chat_messages');
 
   try {
-    const validatedChatMessage = CreateChatMessageSchema.parse(data);
-    const result = await chatMessages.insertOne(validatedChatMessage);
+    const validatedChatMessage = createChatMessageDtoSchema.parse(data);
+    const result = await chatMessages.insertOne({
+      ...validatedChatMessage,
+      _id: new ObjectId(),
+    });
     console.log('新增 ChatMessage 成功');
 
     return result;
@@ -31,8 +32,8 @@ async function createChatMessage(
 
 async function findChatMessageById(
   _id: string
-): Promise<ChatMessageData | null> {
-  const chatMessages = db.collection<ChatMessageData>('chat_messages');
+): Promise<ChatMessageEntity | null> {
+  const chatMessages = getChatMessageCollection();
 
   try {
     const result = await chatMessages.findOne({ _id: new ObjectId(_id) });
@@ -52,8 +53,8 @@ async function findChatMessageById(
 
 async function findChatMessagesByRoomId(
   roomId: string
-): Promise<ChatMessageData[] | null> {
-  const chatMessages = db.collection<ChatMessageData>('chat_messages');
+): Promise<ChatMessageEntity[] | null> {
+  const chatMessages = getChatMessageCollection();
 
   try {
     const result = await chatMessages.find({ room_id: roomId }).toArray();
@@ -64,6 +65,10 @@ async function findChatMessagesByRoomId(
     console.error(`查詢 ChatMessages 失敗: ${roomId}`, error);
     return null;
   }
+}
+
+function getChatMessageCollection() {
+  return db.collection<ChatMessageEntity>('chat_messages');
 }
 
 export default {

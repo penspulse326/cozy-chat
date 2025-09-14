@@ -1,9 +1,9 @@
 import type { UserStatus } from '@packages/lib';
 import type { InsertOneResult, OptionalId, UpdateResult } from 'mongodb';
 
-import { UserStatusSchema } from '@packages/lib';
+import { userStatusSchema } from '@packages/lib';
 
-import type { UserData } from '@/models/user.model';
+import type { UserEntity } from '@/models/user.model';
 import type { MatchedUser, WaitingUser } from '@/types';
 
 import userModel from '@/models/user.model';
@@ -14,7 +14,7 @@ async function checkUserStatus(roomId: string): Promise<boolean> {
   try {
     const users = await findUsersByRoomId(roomId);
     // findUsersByRoomId 已經處理了 null 的情況
-    return users.some((user) => user.status === UserStatusSchema.enum.LEFT);
+    return users.some((user) => user.status === userStatusSchema.enum.LEFT);
   } catch (_error) {
     // 如果找不到聊天室的使用者，則返回 false
     return false;
@@ -73,13 +73,13 @@ async function createMatchedUsers(
 
 async function createUser(
   user: WaitingUser
-): Promise<InsertOneResult<OptionalId<UserData>>> {
+): Promise<InsertOneResult<OptionalId<UserEntity>>> {
   const currentTime = new Date();
   const payload = {
     created_at: currentTime,
     device: user.device,
     last_active_at: currentTime,
-    status: UserStatusSchema.enum.ACTIVE,
+    status: userStatusSchema.enum.ACTIVE,
   };
 
   const result = await userModel.createUser(payload);
@@ -96,7 +96,7 @@ async function createUserAndGetId(user: WaitingUser): Promise<string> {
   return result.insertedId.toString();
 }
 
-async function findUserById(userId: string): Promise<UserData> {
+async function findUserById(userId: string): Promise<UserEntity> {
   const result = await userModel.findUserById(userId);
   if (result === null) {
     throw new Error(`找不到使用者: ${userId}`);
@@ -104,7 +104,7 @@ async function findUserById(userId: string): Promise<UserData> {
   return result;
 }
 
-async function findUsersByRoomId(roomId: string): Promise<UserData[]> {
+async function findUsersByRoomId(roomId: string): Promise<UserEntity[]> {
   const result = await userModel.findUsersByRoomId(roomId);
   if (result === null) {
     throw new Error(`找不到聊天室的使用者: ${roomId}`);

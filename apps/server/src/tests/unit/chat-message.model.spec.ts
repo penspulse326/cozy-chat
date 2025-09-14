@@ -62,7 +62,7 @@ describe('Chat Message Model', () => {
 
       expect(result).toEqual(mockInsertResult);
       expect(db.collection).toHaveBeenCalledWith('chat_messages');
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatMessage);
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatMessage));
     });
 
     it('當驗證失敗時應返回 null', async () => {
@@ -98,7 +98,7 @@ describe('Chat Message Model', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatMessage);
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatMessage));
     });
   });
 

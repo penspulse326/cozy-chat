@@ -51,7 +51,7 @@ describe('Chat Room Model', () => {
 
       expect(result).toEqual(mockInsertResult);
       expect(db.collection).toHaveBeenCalledWith('chat_rooms');
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatRoom);
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatRoom));
     });
 
     it('當驗證失敗時應返回 null', async () => {
@@ -79,7 +79,7 @@ describe('Chat Room Model', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(mockChatRoom);
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatRoom));
     });
   });
 

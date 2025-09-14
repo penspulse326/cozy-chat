@@ -22,8 +22,8 @@ export default function useMatch() {
   // Event handlers
   function handleMatchSuccess(data: unknown) {
     const matchData = data as MatchSuccessData;
-    setRoomId(matchData.roomId);
-    setUserId(matchData.userId);
+    setRoomId(matchdata.room_id);
+    setUserId(matchdata.user_id);
     setMatchStatus('matched');
   }
 

@@ -1,6 +1,6 @@
 import type { Server } from 'socket.io';
 
-import { MATCH_EVENT, UserStatusSchema } from '@packages/lib';
+import { MATCH_EVENT, userStatusSchema } from '@packages/lib';
 
 import type { MatchedUser, WaitingUser } from '@/types';
 
@@ -56,7 +56,7 @@ export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
   async function handleMatchLeave(userId: string) {
     const result = await userService.updateUserStatus(
       userId,
-      UserStatusSchema.enum.LEFT
+      userStatusSchema.enum.LEFT
     );
 
     notifyMatchLeave(result.roomId);

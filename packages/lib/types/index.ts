@@ -1,28 +1,29 @@
 import type { z } from 'zod';
 
 import type {
-  ChatMessageSchema,
-  ChatRoomSchema,
-  CreateChatMessageSchema,
-  CreateChatRoomSchema,
-  CreateUserSchema,
-  DeviceSchema,
-  UpdateUserLastActiveAtSchema,
-  UpdateUserStatusSchema,
-  UserSchema,
-  UserStatusSchema,
+  chatMessageDtoSchema,
+  chatRoomDtoSchema,
+  createChatMessageDtoSchema,
+  createChatRoomDtoSchema,
+  createUserDtoSchema,
+  deviceSchema,
+  updateUserLastActiveAtDtoSchema,
+  updateUserStatusDtoSchema,
+  userDtoSchema,
+  userStatusSchema
 } from '../schemas';
 
-export type ChatMessage = z.infer<typeof ChatMessageSchema>;
-export type ChatRoom = z.infer<typeof ChatRoomSchema>;
-export type CreateChatMessage = z.infer<typeof CreateChatMessageSchema>;
-export type CreateChatRoom = z.infer<typeof CreateChatRoomSchema>;
-export type CreateUser = z.infer<typeof CreateUserSchema>;
-export type Device = z.infer<typeof DeviceSchema>;
+export type ChatMessage = z.infer<typeof chatMessageDtoSchema>;
+export type ChatRoom = z.infer<typeof chatRoomDtoSchema>;
+export type CreateChatMessage = z.infer<typeof createChatMessageDtoSchema>;
+export type CreateChatRoom = z.infer<typeof createChatRoomDtoSchema>;
+export type CreateUser = z.infer<typeof createUserDtoSchema>;
+export type Device = z.infer<typeof deviceSchema>;;
 export type UpdateUserLastActiveAt = z.infer<
-  typeof UpdateUserLastActiveAtSchema
+  typeof updateUserLastActiveAtDtoSchema
 >;
-export type UpdateUserStatus = z.infer<typeof UpdateUserStatusSchema>;
-export type User = z.infer<typeof UserSchema>;
-export type UserStatus = z.infer<typeof UserStatusSchema>;
-export type * from './data';
+export type UpdateUserStatus = z.infer<typeof updateUserStatusDtoSchema>;
+export type User = z.infer<typeof userDtoSchema>;
+export type UserStatus = z.infer<typeof userStatusSchema>;
+export type * from './socket';
+

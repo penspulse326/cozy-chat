@@ -63,7 +63,7 @@ describe('User Model', () => {
 
       expect(result).toEqual(mockInsertResult);
       expect(db.collection).toHaveBeenCalledWith('users');
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(mockUser);
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockUser));
     });
 
     it('當驗證失敗時應返回 null', async () => {
@@ -95,7 +95,7 @@ describe('User Model', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(mockUser);
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockUser));
     });
   });
 

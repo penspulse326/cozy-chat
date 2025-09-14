@@ -1,23 +1,25 @@
 import type { CreateUser, User, UserStatus } from '@packages/lib';
-import type { InsertOneResult, OptionalId } from 'mongodb';
+import type { InsertOneResult } from 'mongodb';
 
-import { CreateUserSchema } from '@packages/lib';
+import { createUserDtoSchema } from '@packages/lib';
 import { ObjectId, type UpdateResult } from 'mongodb';
 
 import { db } from '@/config/db';
 
-type UserData = Omit<User, '_id'> & { _id: ObjectId };
-
-export type { UserData };
+export type UserEntity = Omit<User, 'id'> & { _id: ObjectId };
 
 async function createUser(
   data: CreateUser
-): Promise<InsertOneResult<UserData> | null> {
-  const users = db.collection<OptionalId<UserData>>('users');
+): Promise<InsertOneResult<UserEntity> | null> {
+  const users = getUserCollection();
 
   try {
-    const validatedUser = CreateUserSchema.parse(data);
-    const result = await users.insertOne(validatedUser);
+    const candidate = createUserDtoSchema.parse(data);
+
+    const result = await users.insertOne({
+      ...candidate,
+      _id: new ObjectId(),
+    });
     console.log('新增 User 成功');
 
     return result;
@@ -28,8 +30,8 @@ async function createUser(
   }
 }
 
-async function findUserById(userId: string): Promise<null | UserData> {
-  const users = db.collection<UserData>('users');
+async function findUserById(userId: string): Promise<null | UserEntity> {
+  const users = getUserCollection();
 
   try {
     const user = await users.findOne({ _id: new ObjectId(userId) });
@@ -43,8 +45,8 @@ async function findUserById(userId: string): Promise<null | UserData> {
   }
 }
 
-async function findUsersByRoomId(roomId: string): Promise<null | UserData[]> {
-  const users = db.collection<UserData>('users');
+async function findUsersByRoomId(roomId: string): Promise<null | UserEntity[]> {
+  const users = getUserCollection();
 
   try {
     const result = await users.find({ room_id: roomId }).toArray();
@@ -58,11 +60,15 @@ async function findUsersByRoomId(roomId: string): Promise<null | UserData[]> {
   }
 }
 
+function getUserCollection() {
+  return db.collection<UserEntity>('users');
+}
+
 async function updateManyUserRoomId(
   userIds: string[],
   roomId: string
 ): Promise<null | { acknowledged: boolean; modifiedCount: number }> {
-  const users = db.collection<UserData>('users');
+  const users = getUserCollection();
 
   try {
     const objectIds = userIds.map((id) => new ObjectId(id));
@@ -85,8 +91,8 @@ async function updateManyUserRoomId(
 async function updateUserRoomId(
   userId: string,
   roomId: string
-): Promise<null | UpdateResult<UserData>> {
-  const users = db.collection<UserData>('users');
+): Promise<null | UpdateResult<UserEntity>> {
+  const users = getUserCollection();
 
   try {
     const result = await users.updateOne(
@@ -105,8 +111,8 @@ async function updateUserRoomId(
 async function updateUserStatus(
   userId: string,
   status: UserStatus
-): Promise<null | UpdateResult<UserData>> {
-  const users = db.collection<UserData>('users');
+): Promise<null | UpdateResult<UserEntity>> {
+  const users = getUserCollection();
 
   try {
     const result = await users.updateOne(
@@ -121,7 +127,7 @@ async function updateUserStatus(
   }
 }
 
-export default {
+const userModel = {
   createUser,
   findUserById,
   findUsersByRoomId,
@@ -129,3 +135,5 @@ export default {
   updateUserRoomId,
   updateUserStatus,
 };
+
+export default userModel;
