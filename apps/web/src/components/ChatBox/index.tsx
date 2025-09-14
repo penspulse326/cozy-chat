@@ -3,11 +3,11 @@ import ChatMessageCard from '../ChatMessageCard';
 import styles from './styles.module.css';
 
 import { MatchStatus } from '@/types';
-import { ChatMessage } from '@packages/lib';
+import { ChatMessageDto } from '@packages/lib';
 
 interface ChatBoxProps {
   userId: string | null;
-  messages: ChatMessage[];
+  messages: ChatMessageDto[];
   matchStatus: MatchStatus;
 }
 
@@ -30,7 +30,7 @@ export default function ChatBox({
             <Text className={styles.chatBoxTextMb}>開始聊天吧！</Text>
 
             <Stack className={styles.messagesContainer}>
-              {messages.map((message: ChatMessage) => (
+              {messages.map((message: ChatMessageDto) => (
                 <ChatMessageCard
                   key={message._id}
                   data={message}

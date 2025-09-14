@@ -1,11 +1,11 @@
 import { render } from '@/tests';
-import { ChatMessage } from '@packages/lib';
+import { ChatMessageDto } from '@packages/lib';
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import ChatMessageCard from './index';
 
 describe('ChatMessageCard', () => {
-  const mockChatMessage: ChatMessage = {
+  const mockChatMessage: ChatMessageDto = {
     _id: '1',
     room_id: 'room1',
     user_id: 'user1',
@@ -40,7 +40,7 @@ describe('ChatMessageCard', () => {
       ...mockChatMessage,
       _id: '3',
       device: 'non-existent-device',
-    } as unknown as ChatMessage;
+    } as unknown as ChatMessageDto;
 
     render(<ChatMessageCard data={mockInvalidMessage} isUser={true} />);
 

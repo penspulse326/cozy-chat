@@ -1,7 +1,4 @@
-import type { Device, SocketChatMessage } from '@packages/lib';
-import type { InsertOneResult, OptionalId } from 'mongodb';
-
-import type { ChatMessageEntity } from '@/models/chat-message.model';
+import type { ChatMessageDto, Device, SocketChatMessage } from '@packages/lib';
 
 import chatMessageModel from '@/models/chat-message.model';
 import userModel from '@/models/user.model';
@@ -9,14 +6,14 @@ import userModel from '@/models/user.model';
 async function createChatMessage(
   data: SocketChatMessage,
   device: Device
-): Promise<InsertOneResult<OptionalId<ChatMessageEntity>>> {
+): Promise<ChatMessageDto> {
   const currentTime = new Date();
   const payload = {
     content: data.content,
     created_at: currentTime,
     device,
-    room_id: data.room_id,
-    user_id: data.user_id,
+    room_id: String(data.roomId),
+    user_id: String(data.userId),
   };
 
   const result = await chatMessageModel.createChatMessage(payload);
@@ -26,7 +23,7 @@ async function createChatMessage(
   return result;
 }
 
-async function findChatMessageById(id: string): Promise<ChatMessageEntity> {
+async function findChatMessageById(id: string): Promise<ChatMessageDto> {
   const result = await chatMessageModel.findChatMessageById(id);
   if (result === null) {
     throw new Error(`找不到聊天訊息: ${id}`);
@@ -36,7 +33,7 @@ async function findChatMessageById(id: string): Promise<ChatMessageEntity> {
 
 async function findChatMessagesByRoomId(
   roomId: string
-): Promise<ChatMessageEntity[]> {
+): Promise<ChatMessageDto[]> {
   const result = await chatMessageModel.findChatMessagesByRoomId(roomId);
   if (result === null) {
     throw new Error(`找不到聊天室訊息: ${roomId}`);
@@ -44,21 +41,16 @@ async function findChatMessagesByRoomId(
   return result;
 }
 
-async function sendChatMessage(data: SocketChatMessage): Promise<ChatMessageEntity> {
-  const user = await userModel.findUserById(data.user_id);
+async function sendChatMessage(data: SocketChatMessage): Promise<ChatMessageDto> {
+  const user = await userModel.findUserById(String(data.userId));
   if (!user) {
-    throw new Error(`找不到使用者: ${data.user_id}`);
+    throw new Error(`找不到使用者: ${String(data.userId)}`);
   }
 
   const result = await createChatMessage(data, user.device);
   // createChatMessage 已經處理了錯誤情況
 
-  const newChatMessage = await findChatMessageById(
-    result.insertedId.toString()
-  );
-  // findChatMessageById 已經處理了錯誤情況
-
-  return newChatMessage;
+  return result;
 }
 
 export default {

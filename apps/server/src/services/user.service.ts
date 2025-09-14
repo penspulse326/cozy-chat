@@ -1,9 +1,7 @@
-import type { UserStatus } from '@packages/lib';
-import type { InsertOneResult, OptionalId, UpdateResult } from 'mongodb';
+import type { UserDto, UserStatus } from '@packages/lib';
 
 import { userStatusSchema } from '@packages/lib';
 
-import type { UserEntity } from '@/models/user.model';
 import type { MatchedUser, WaitingUser } from '@/types';
 
 import userModel from '@/models/user.model';
@@ -39,7 +37,7 @@ async function createMatchedUsers(
     peerUserId,
   ]);
   // chatRoomService.createChatRoom 已經處理了錯誤情況
-  const roomId = newChatRoom.insertedId.toString();
+  const roomId = newChatRoom.id;
 
   // 3. 批量更新 user 的roomId
   const userIds = [newUserId, peerUserId];
@@ -73,7 +71,7 @@ async function createMatchedUsers(
 
 async function createUser(
   user: WaitingUser
-): Promise<InsertOneResult<OptionalId<UserEntity>>> {
+): Promise<UserDto> {
   const currentTime = new Date();
   const payload = {
     created_at: currentTime,
@@ -93,10 +91,10 @@ async function createUser(
 async function createUserAndGetId(user: WaitingUser): Promise<string> {
   const result = await createUser(user);
   // createUser 已經處理了 null 的情況
-  return result.insertedId.toString();
+  return result.id;
 }
 
-async function findUserById(userId: string): Promise<UserEntity> {
+async function findUserById(userId: string): Promise<UserDto> {
   const result = await userModel.findUserById(userId);
   if (result === null) {
     throw new Error(`找不到使用者: ${userId}`);
@@ -104,7 +102,7 @@ async function findUserById(userId: string): Promise<UserEntity> {
   return result;
 }
 
-async function findUsersByRoomId(roomId: string): Promise<UserEntity[]> {
+async function findUsersByRoomId(roomId: string): Promise<UserDto[]> {
   const result = await userModel.findUsersByRoomId(roomId);
   if (result === null) {
     throw new Error(`找不到聊天室的使用者: ${roomId}`);
@@ -115,7 +113,7 @@ async function findUsersByRoomId(roomId: string): Promise<UserEntity[]> {
 async function updateUserRoomId(
   userId: string,
   roomId: string
-): Promise<UpdateResult> {
+): Promise<UserDto> {
   const result = await userModel.updateUserRoomId(userId, roomId);
   if (result === null) {
     throw new Error(`更新使用者聊天室失敗: ${userId}`);

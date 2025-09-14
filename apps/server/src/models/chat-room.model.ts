@@ -1,52 +1,67 @@
-import type { ChatRoom, CreateChatRoom } from '@packages/lib';
-import type { InsertOneResult } from 'mongodb';
+import type { ChatRoomDto, CreateChatRoomDto } from '@packages/lib';
 
-import { createChatRoomDtoSchema } from '@packages/lib';
+import { chatRoomDtoSchema, createChatRoomDtoSchema } from '@packages/lib';
 import { ObjectId } from 'mongodb';
 
-import { db } from '@/config/db';
+import { getCollection } from '@/config/db';
 
-export type ChatRoomEntity = Omit<ChatRoom, 'id'> & { _id: ObjectId };
+export type ChatRoomEntity = Omit<ChatRoomDto, 'id'> & { _id: ObjectId };
+
+const convertToDto = (entity: ChatRoomEntity): ChatRoomDto => {
+  const candidate: ChatRoomDto = {
+    ...entity,
+    id: entity._id.toString(),
+  };
+  return chatRoomDtoSchema.parse(candidate);
+};
 
 async function createChatRoom(
-  data: CreateChatRoom
-): Promise<InsertOneResult<ChatRoomEntity> | null> {
-  const chatRooms = getChatRoomCollection();
+  dto: CreateChatRoomDto
+): Promise<ChatRoomDto | null> {
+  const chatRooms = getCollection<ChatRoomEntity>('chat_rooms');
 
   try {
-    const candidate = createChatRoomDtoSchema.parse(data);
+    const candidate = createChatRoomDtoSchema.parse(dto);
+    const newObjectId = new ObjectId();
 
     const result = await chatRooms.insertOne({
       ...candidate,
-      _id: new ObjectId(),
+      _id: newObjectId,
     });
-    console.log('新增 ChatRoom 成功');
+    console.log('新增 ChatRoomDto 成功');
 
-    return result;
+    if (result.acknowledged) {
+      return convertToDto({
+        ...candidate,
+        _id: newObjectId,
+      });
+    }
+
+    return null;
   } catch (error) {
-    console.error('新增 ChatRoom 失敗', error);
+    console.error('新增 ChatRoomDto 失敗', error);
 
     return null;
   }
 }
 
-async function findChatRoomById(id: string): Promise<ChatRoomEntity | null> {
-  const chatRooms = getChatRoomCollection();
+async function findChatRoomById(id: string): Promise<ChatRoomDto | null> {
+  const chatRooms = getCollection<ChatRoomEntity>('chat_rooms');
 
   try {
     const result = await chatRooms.findOne({ _id: new ObjectId(id) });
-    console.log('查詢 ChatRoom 成功');
+    console.log('查詢 ChatRoomDto 成功');
 
-    return result;
+    if (result) {
+      return convertToDto(result);
+    }
+
+    return null;
   } catch (error) {
-    console.error('查詢 ChatRoom 失敗', error);
+    console.error('查詢 ChatRoomDto 失敗', error);
 
     return null;
   }
-}
-
-function getChatRoomCollection() {
-  return db.collection<ChatRoomEntity>('chat_rooms');
 }
 
 

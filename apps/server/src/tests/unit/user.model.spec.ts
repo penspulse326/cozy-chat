@@ -12,7 +12,7 @@ vi.mock('@/config/db', () => ({
   },
 }));
 
-describe('User Model', () => {
+describe('UserDto Model', () => {
   const mockCollection = {
     find: vi.fn(),
     findOne: vi.fn(),
@@ -52,16 +52,25 @@ describe('User Model', () => {
         status: 'ACTIVE' as UserStatus,
       };
 
+      const mockObjectId = new ObjectId();
       const mockInsertResult = {
         acknowledged: true,
-        insertedId: new ObjectId(),
+        insertedId: mockObjectId,
       };
 
-      mockCollection.insertOne.mockResolvedValue(mockInsertResult);
+      mockCollection.insertOne.mockImplementation(async () => {
+        return mockInsertResult;
+      });
 
       const result = await userModel.createUser(mockUser);
 
-      expect(result).toEqual(mockInsertResult);
+      expect(result).toEqual(expect.objectContaining({
+        created_at: expect.any(Date),
+        device: mockUser.device,
+        last_active_at: expect.any(Date),
+        status: mockUser.status
+      }));
+      expect(result.id).toBeTruthy(); // 只檢查 ID 存在
       expect(db.collection).toHaveBeenCalledWith('users');
       expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockUser));
     });
@@ -102,8 +111,9 @@ describe('User Model', () => {
   describe('findUserById', () => {
     it('應該成功找到使用者並返回結果', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
+      const mockObjectId = new ObjectId(mockUserId);
       const mockUser = {
-        _id: new ObjectId(mockUserId),
+        _id: mockObjectId,
         created_at: new Date(),
         device: 'APP' as Device,
         last_active_at: new Date(),
@@ -114,7 +124,10 @@ describe('User Model', () => {
 
       const result = await userModel.findUserById(mockUserId);
 
-      expect(result).toEqual(mockUser);
+      expect(result).toEqual({
+        ...mockUser,
+        id: mockUserId,
+      });
       expect(db.collection).toHaveBeenCalledWith('users');
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
@@ -172,7 +185,10 @@ describe('User Model', () => {
 
       const result = await userModel.findUsersByRoomId(mockRoomId);
 
-      expect(result).toEqual(mockUsers);
+      expect(result).toEqual(mockUsers.map(user => ({
+        ...user,
+        id: user._id.toString(),
+      })));
       expect(db.collection).toHaveBeenCalledWith('users');
       expect(mockCollection.find).toHaveBeenCalledWith({ room_id: mockRoomId });
       expect(mockFindCursor.toArray).toHaveBeenCalled();
@@ -251,11 +267,29 @@ describe('User Model', () => {
         upsertedId: null,
       };
 
+      const mockUpdatedUser = {
+        _id: new ObjectId(mockUserId),
+        created_at: new Date(),
+        device: 'APP' as Device,
+        id: mockUserId,
+        last_active_at: new Date(),
+        room_id: mockRoomId,
+        status: 'ACTIVE' as UserStatus,
+      };
+
       mockCollection.updateOne.mockResolvedValue(mockUpdateResult);
+
+      // 首先模擬 findOne 返回更新後的用戶
+      mockCollection.findOne.mockResolvedValueOnce(mockUpdatedUser);
 
       const result = await userModel.updateUserRoomId(mockUserId, mockRoomId);
 
-      expect(result).toEqual(mockUpdateResult);
+      expect(result).toEqual(expect.objectContaining({
+        device: 'APP',
+        room_id: mockRoomId,
+        status: 'ACTIVE'
+      }));
+      expect(result.id).toBeTruthy();
       expect(db.collection).toHaveBeenCalledWith('users');
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
         { _id: expect.any(ObjectId) },
@@ -288,11 +322,27 @@ describe('User Model', () => {
         upsertedId: null,
       };
 
+      const mockUpdatedUser = {
+        _id: new ObjectId(mockUserId),
+        created_at: new Date(),
+        device: 'APP' as Device,
+        id: mockUserId,
+        last_active_at: new Date(),
+        status: mockStatus,
+      };
+
       mockCollection.updateOne.mockResolvedValue(mockUpdateResult);
+
+      // 模擬 findOne 返回更新後的用戶
+      mockCollection.findOne.mockResolvedValueOnce(mockUpdatedUser);
 
       const result = await userModel.updateUserStatus(mockUserId, mockStatus);
 
-      expect(result).toEqual(mockUpdateResult);
+      expect(result).toEqual(expect.objectContaining({
+        device: 'APP',
+        status: mockStatus
+      }));
+      expect(result.id).toBeTruthy();
       expect(db.collection).toHaveBeenCalledWith('users');
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
         { _id: expect.any(ObjectId) },

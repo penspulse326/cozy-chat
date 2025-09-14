@@ -1,5 +1,5 @@
 import { useLocalStorage } from '@mantine/hooks';
-import { CHAT_EVENT, ChatMessage, MATCH_EVENT } from '@packages/lib';
+import { CHAT_EVENT, ChatMessageDto, MATCH_EVENT } from '@packages/lib';
 import { useEffect, useState } from 'react';
 import { MatchStatus, MatchSuccessData } from '../types';
 import useSocket from './useSocket';
@@ -7,7 +7,7 @@ import useSocket from './useSocket';
 export default function useMatch() {
   const socket = useSocket();
   const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessageDto[]>([]);
 
   const [userId, setUserId, removeUserId] = useLocalStorage<string | null>({
     key: 'userId',
@@ -32,12 +32,12 @@ export default function useMatch() {
   }
 
   function handleMessageReceive(data: unknown) {
-    const message = data as ChatMessage;
+    const message = data as ChatMessageDto;
     setMessages((prev) => [...prev, message]);
   }
 
   function handleMessagesLoad(data: unknown) {
-    const messageList = data as ChatMessage[];
+    const messageList = data as ChatMessageDto[];
     setMessages(messageList);
   }
 

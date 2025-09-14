@@ -1,4 +1,4 @@
-import type { Db } from 'mongodb';
+import type { Db, Document } from 'mongodb';
 
 import { MongoClient } from 'mongodb';
 
@@ -24,4 +24,9 @@ async function disconnectFromDB() {
   console.log('DB 已斷開連線');
 }
 
-export { connectToDB, db, disconnectFromDB };
+const getCollection = <T extends Document>(name: string) =>
+  db.collection<T>(name);
+
+
+export { connectToDB, db, disconnectFromDB, getCollection };
+

@@ -1,10 +1,10 @@
 import { render, screen } from '@/tests';
-import { ChatMessage } from '@packages/lib';
+import { ChatMessageDto } from '@packages/lib';
 import { describe, expect, it } from 'vitest';
 import ChatBox from './index';
 
 describe('ChatBox', () => {
-  const mockMessages: ChatMessage[] = [
+  const mockMessages: ChatMessageDto[] = [
     {
       _id: '1',
       room_id: 'room1',

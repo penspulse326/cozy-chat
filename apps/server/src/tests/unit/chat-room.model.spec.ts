@@ -40,16 +40,23 @@ describe('Chat Room Model', () => {
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
       };
 
+      const mockObjectId = new ObjectId();
       const mockInsertResult = {
         acknowledged: true,
-        insertedId: new ObjectId(),
+        insertedId: mockObjectId,
       };
 
-      mockCollection.insertOne.mockResolvedValue(mockInsertResult);
+      mockCollection.insertOne.mockImplementation(async () => {
+        return mockInsertResult;
+      });
 
       const result = await chatRoomModel.createChatRoom(mockChatRoom);
 
-      expect(result).toEqual(mockInsertResult);
+      expect(result).toEqual(expect.objectContaining({
+        created_at: expect.any(Date),
+        users: mockChatRoom.users
+      }));
+      expect(result.id).toBeTruthy(); // 只檢查 ID 存在
       expect(db.collection).toHaveBeenCalledWith('chat_rooms');
       expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatRoom));
     });
@@ -86,8 +93,9 @@ describe('Chat Room Model', () => {
   describe('findChatRoomById', () => {
     it('應該成功找到聊天室並返回結果', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
+      const mockObjectId = new ObjectId(mockRoomId);
       const mockChatRoom = {
-        _id: new ObjectId(mockRoomId),
+        _id: mockObjectId,
         created_at: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
       };
@@ -95,7 +103,10 @@ describe('Chat Room Model', () => {
 
       const result = await chatRoomModel.findChatRoomById(mockRoomId);
 
-      expect(result).toEqual(mockChatRoom);
+      expect(result).toEqual({
+        ...mockChatRoom,
+        id: mockRoomId,
+      });
       expect(db.collection).toHaveBeenCalledWith('chat_rooms');
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),

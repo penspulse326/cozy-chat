@@ -24,7 +24,7 @@ vi.mock('@/services/chat-room.service', () => ({
   },
 }));
 
-describe('User Service', () => {
+describe('UserDto Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

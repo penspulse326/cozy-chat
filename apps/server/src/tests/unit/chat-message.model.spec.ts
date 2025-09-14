@@ -51,16 +51,26 @@ describe('Chat Message Model', () => {
         user_id: '507f1f77bcf86cd799439011',
       };
 
+      const mockObjectId = new ObjectId();
       const mockInsertResult = {
         acknowledged: true,
-        insertedId: new ObjectId(),
+        insertedId: mockObjectId,
       };
 
-      mockCollection.insertOne.mockResolvedValue(mockInsertResult);
+      // 模擬插入成功並返回的 ID
+      mockCollection.insertOne.mockImplementation(async () => {
+        return mockInsertResult;
+      });
 
       const result = await chatMessageModel.createChatMessage(mockChatMessage);
 
-      expect(result).toEqual(mockInsertResult);
+      expect(result).toEqual(expect.objectContaining({
+        content: mockChatMessage.content,
+        device: mockChatMessage.device,
+        room_id: mockChatMessage.room_id,
+        user_id: mockChatMessage.user_id,
+      }));
+      expect(result.id).toBeTruthy(); // 只檢查 ID 存在
       expect(db.collection).toHaveBeenCalledWith('chat_messages');
       expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatMessage));
     });
@@ -105,8 +115,9 @@ describe('Chat Message Model', () => {
   describe('findChatMessageById', () => {
     it('應該成功找到聊天訊息並返回結果', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
+      const mockObjectId = new ObjectId(mockMessageId);
       const mockChatMessage = {
-        _id: new ObjectId(mockMessageId),
+        _id: mockObjectId,
         content: 'Hello world',
         created_at: new Date(),
         device: 'APP' as Device,
@@ -117,7 +128,10 @@ describe('Chat Message Model', () => {
 
       const result = await chatMessageModel.findChatMessageById(mockMessageId);
 
-      expect(result).toEqual(mockChatMessage);
+      expect(result).toEqual({
+        ...mockChatMessage,
+        id: mockMessageId,
+      });
       expect(db.collection).toHaveBeenCalledWith('chat_messages');
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
@@ -173,7 +187,10 @@ describe('Chat Message Model', () => {
       const result =
         await chatMessageModel.findChatMessagesByRoomId(mockRoomId);
 
-      expect(result).toEqual(mockChatMessages);
+      expect(result).toEqual(mockChatMessages.map(message => ({
+        ...message,
+        id: message._id.toString(),
+      })));
       expect(db.collection).toHaveBeenCalledWith('chat_messages');
       expect(mockCollection.find).toHaveBeenCalledWith({ room_id: mockRoomId });
       expect(mockFindCursor.toArray).toHaveBeenCalled();

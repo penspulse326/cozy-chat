@@ -34,12 +34,16 @@ describe('Chat Message Service', () => {
         userId: '507f1f77bcf86cd799439011',
       };
       const mockDevice = 'APP';
-      const mockInsertResult = {
-        acknowledged: true,
-        insertedId: new ObjectId('507f1f77bcf86cd799439033'),
+      const mockChatMessageResult = {
+        content: 'Hello world',
+        created_at: new Date(),
+        device: mockDevice,
+        id: '507f1f77bcf86cd799439033',
+        room_id: mockChatMessageData.roomId,
+        user_id: mockChatMessageData.userId,
       };
       vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
-        mockInsertResult
+        mockChatMessageResult
       );
 
       const result = await chatMessageService.createChatMessage(
@@ -47,7 +51,7 @@ describe('Chat Message Service', () => {
         mockDevice
       );
 
-      expect(result).toBe(mockInsertResult);
+      expect(result).toBe(mockChatMessageResult);
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
       const calledWith = vi.mocked(chatMessageModel.createChatMessage).mock
         .calls[0][0];
@@ -232,32 +236,23 @@ describe('Chat Message Service', () => {
         _id: new ObjectId(mockChatMessageData.userId),
         created_at: new Date(),
         device: 'APP' as Device,
+        id: mockChatMessageData.userId,
         last_active_at: new Date(),
         room_id: mockChatMessageData.roomId,
         status: 'ACTIVE' as UserStatus,
       };
 
-      const mockInsertedId = new ObjectId('507f1f77bcf86cd799439033');
-
-      const mockInsertResult = {
-        acknowledged: true,
-        insertedId: mockInsertedId,
-      };
-
       const mockChatMessage = {
-        _id: mockInsertedId,
         content: mockChatMessageData.content,
         created_at: new Date(),
         device: mockUser.device,
+        id: '507f1f77bcf86cd799439033',
         room_id: mockChatMessageData.roomId,
         user_id: mockChatMessageData.userId,
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
       vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
-        mockInsertResult
-      );
-      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(
         mockChatMessage
       );
 
@@ -269,9 +264,6 @@ describe('Chat Message Service', () => {
         mockChatMessageData.userId
       );
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
-      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(
-        mockInsertedId.toString()
-      );
     });
 
     it('當找不到使用者時應拋出錯誤', async () => {
@@ -304,6 +296,7 @@ describe('Chat Message Service', () => {
         _id: new ObjectId(mockChatMessageData.userId),
         created_at: new Date(),
         device: 'APP' as Device,
+        id: mockChatMessageData.userId,
         last_active_at: new Date(),
         room_id: mockChatMessageData.roomId,
         status: 'ACTIVE' as UserStatus,
@@ -319,48 +312,6 @@ describe('Chat Message Service', () => {
         mockChatMessageData.userId
       );
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
-      expect(chatMessageModel.findChatMessageById).not.toHaveBeenCalled();
-    });
-
-    it('當 findChatMessageById 返回 null 時應拋出錯誤', async () => {
-      const mockChatMessageData = {
-        content: 'Hello world',
-        roomId: '507f1f77bcf86cd799439022',
-        userId: '507f1f77bcf86cd799439011',
-      };
-
-      const mockUser = {
-        _id: new ObjectId(mockChatMessageData.userId),
-        created_at: new Date(),
-        device: 'APP' as Device,
-        last_active_at: new Date(),
-        room_id: mockChatMessageData.roomId,
-        status: 'ACTIVE' as UserStatus,
-      };
-
-      const mockInsertedId = new ObjectId('507f1f77bcf86cd799439033');
-
-      const mockInsertResult = {
-        acknowledged: true,
-        insertedId: mockInsertedId,
-      };
-
-      vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
-      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
-        mockInsertResult
-      );
-      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(null);
-
-      await expect(
-        chatMessageService.sendChatMessage(mockChatMessageData)
-      ).rejects.toThrow(`找不到聊天訊息: ${mockInsertedId.toString()}`);
-      expect(userModel.findUserById).toHaveBeenCalledWith(
-        mockChatMessageData.userId
-      );
-      expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
-      expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(
-        mockInsertedId.toString()
-      );
     });
   });
 });

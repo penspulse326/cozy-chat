@@ -1,10 +1,10 @@
 import { DeviceEnum } from '@/types';
 import { Flex, Stack, Text, alpha } from '@mantine/core';
-import { ChatMessage } from '@packages/lib';
+import { ChatMessageDto } from '@packages/lib';
 import styles from './styles.module.css';
 
 interface MessageContentProps {
-  data: ChatMessage;
+  data: ChatMessageDto;
   isUser: boolean;
 }
 
