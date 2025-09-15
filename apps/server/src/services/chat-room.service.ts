@@ -6,12 +6,12 @@ async function createChatRoom(
   userIds: string[]
 ): Promise<ChatRoomDto> {
   const currentTime = new Date();
-  const payload = {
+  const dto = {
     created_at: currentTime,
     users: userIds,
   };
 
-  const result = await chatRoomModel.createChatRoom(payload);
+  const result = await chatRoomModel.createChatRoom(dto);
   if (result === null) {
     throw new Error('建立聊天室失敗');
   }

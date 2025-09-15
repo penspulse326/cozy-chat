@@ -2,7 +2,7 @@ import type { Server } from 'socket.io';
 
 import { MATCH_EVENT, userStatusSchema } from '@packages/lib';
 
-import type { MatchedUser, WaitingUser } from '@/types';
+import type { WaitingUser } from '@/types';
 
 import userService from '@/services/user.service';
 
@@ -10,15 +10,15 @@ import type { WaitingPool } from '../waiting-pool';
 
 export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
   async function handleMatchStart(newUser: WaitingUser) {
-    const peerUser = waitingPool.getNextFromPool();
+    const peerUser = waitingPool.getNextUserFromPool();
 
     if (!peerUser) {
-      waitingPool.addToPool(newUser);
+      waitingPool.addUserToPool(newUser);
       console.log(`加入等待池: ${newUser.socketId}`);
 
       // 設定超時
       setTimeout(() => {
-        const hasRemoved = waitingPool.removeFromPool(newUser.socketId);
+        const hasRemoved = waitingPool.removeUserFromPool(newUser.socketId);
 
         if (hasRemoved) {
           io.of('/').sockets.get(newUser.socketId)?.emit(MATCH_EVENT.FAIL);
@@ -35,35 +35,39 @@ export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
     newUser: WaitingUser,
     peerUser: WaitingUser
   ) {
-    const matchResult = await userService.createMatchedUsers(newUser, peerUser);
-
-    const { matchedUsers, roomId } = matchResult;
+    const matchedUsers = await userService.createMatchedUsers(newUser, peerUser);
+    const roomId = matchedUsers[0].room_id?.toString() ?? '';
 
     await Promise.all(
-      matchedUsers.map((user) => notifyMatchSuccess(user, roomId))
+      matchedUsers.map((user) => notifyMatchSuccess({
+        ...newUser,
+        userId: user.id,
+      }, roomId))
     );
   }
 
   function handleMatchCancel(socketId: string) {
-    const hasRemoved = waitingPool.removeFromPool(socketId);
+    const hasRemoved = waitingPool.removeUserFromPool(socketId);
 
     if (hasRemoved) {
-      console.log('waitingUsers', waitingPool.getPoolUsers());
+      console.log('waitingPool', waitingPool.getPoolUsers());
       io.of('/').sockets.get(socketId)?.emit(MATCH_EVENT.CANCEL);
     }
   }
 
   async function handleMatchLeave(userId: string) {
-    const result = await userService.updateUserStatus(
+    const updatedUser = await userService.updateUserStatus(
       userId,
       userStatusSchema.enum.LEFT
     );
 
-    notifyMatchLeave(result.roomId);
+    if (updatedUser.room_id) {
+      notifyMatchLeave(updatedUser.room_id.toString());
+    }
   }
 
   async function notifyMatchSuccess(
-    user: MatchedUser,
+    user: WaitingUser & { userId: string },
     roomId: string
   ) {
     await io.of('/').sockets.get(user.socketId)?.join(roomId);

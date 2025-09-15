@@ -3,36 +3,35 @@ import type { WaitingUser } from '@/types';
 export type WaitingPool = ReturnType<typeof createWaitingPool>;
 
 export function createWaitingPool() {
-  const waitingUsers: WaitingUser[] = [];
+  const waitingPool: WaitingUser[] = [];
 
-  function addToPool(newUser: WaitingUser) {
-    waitingUsers.push(newUser);
-    return newUser;
+  function addUserToPool(newUser: WaitingUser) {
+    waitingPool.push(newUser);
   }
 
-  function removeFromPool(socketId: string) {
-    const index = waitingUsers.findIndex((user) => user.socketId === socketId);
+  function removeUserFromPool(socketId: string) {
+    const index = waitingPool.findIndex((user) => user.socketId === socketId);
 
     if (index === -1) {
       return false;
     }
 
-    waitingUsers.splice(index, 1);
+    waitingPool.splice(index, 1);
     return true;
   }
 
-  function getNextFromPool() {
-    return waitingUsers.shift();
+  function getNextUserFromPool() {
+    return waitingPool.shift();
   }
 
   function getPoolUsers() {
-    return [...waitingUsers];
+    return [...waitingPool];
   }
 
   return {
-    addToPool,
-    getNextFromPool,
+    addUserToPool,
+    getNextUserFromPool,
     getPoolUsers,
-    removeFromPool,
+    removeUserFromPool,
   };
 }

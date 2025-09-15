@@ -16,9 +16,9 @@ describe('UserDto Model', () => {
   const mockCollection = {
     find: vi.fn(),
     findOne: vi.fn(),
+    findOneAndUpdate: vi.fn(),
     insertOne: vi.fn(),
     updateMany: vi.fn(),
-    updateOne: vi.fn(),
   };
 
   const mockFindCursor = {
@@ -64,7 +64,7 @@ describe('UserDto Model', () => {
 
       const result = await userModel.createUser(mockUser);
 
-      expect(result).toEqual(expect.objectContaining({
+      expect(result!).toEqual(expect.objectContaining({
         created_at: expect.any(Date),
         device: mockUser.device,
         last_active_at: expect.any(Date),
@@ -185,7 +185,7 @@ describe('UserDto Model', () => {
 
       const result = await userModel.findUsersByRoomId(mockRoomId);
 
-      expect(result).toEqual(mockUsers.map(user => ({
+      expect(result).toEqual(mockUsers?.map(user => ({
         ...user,
         id: user._id.toString(),
       })));
@@ -207,7 +207,7 @@ describe('UserDto Model', () => {
   });
 
   describe('updateManyUserRoomId', () => {
-    it('應該成功更新多個使用者的房間 ID 並返回結果', async () => {
+    it('應該成功更新多個使用者的房間 ID 並返回更新後的使用者', async () => {
       const mockUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
@@ -217,22 +217,46 @@ describe('UserDto Model', () => {
         acknowledged: true,
         modifiedCount: 2,
       };
+      const mockUpdatedUsers = [
+        {
+          _id: new ObjectId(mockUserIds[0]),
+          created_at: new Date(),
+          device: 'APP' as Device,
+          last_active_at: new Date(),
+          room_id: mockRoomId,
+          status: 'ACTIVE' as UserStatus,
+        },
+        {
+          _id: new ObjectId(mockUserIds[1]),
+          created_at: new Date(),
+          device: 'PC' as Device,
+          last_active_at: new Date(),
+          room_id: mockRoomId,
+          status: 'ACTIVE' as UserStatus,
+        },
+      ];
 
       mockCollection.updateMany.mockResolvedValue(mockUpdateResult);
+      mockCollection.find.mockReturnValue({
+        toArray: vi.fn().mockResolvedValue(mockUpdatedUsers),
+      });
 
       const result = await userModel.updateManyUserRoomId(
         mockUserIds,
         mockRoomId
       );
 
-      expect(result).toEqual({
-        acknowledged: mockUpdateResult.acknowledged,
-        modifiedCount: mockUpdateResult.modifiedCount,
-      });
+      expect(result).toEqual(mockUpdatedUsers.map(user => ({
+        ...user,
+        id: user._id.toString(),
+      })));
       expect(db.collection).toHaveBeenCalledWith('users');
       expect(mockCollection.updateMany).toHaveBeenCalledWith(
         { _id: { $in: expect.any(Array) } },
         { $set: { room_id: mockRoomId } }
+      );
+      expect(mockCollection.find).toHaveBeenCalledWith(
+        { _id: { $in: expect.any(Array) } }
       );
     });
 
@@ -256,44 +280,31 @@ describe('UserDto Model', () => {
   });
 
   describe('updateUserRoomId', () => {
-    it('應該成功更新使用者的房間 ID 並返回結果', async () => {
+    it('應該成功更新使用者的房間 ID 並返回更新後的使用者', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
-      const mockUpdateResult = {
-        acknowledged: true,
-        matchedCount: 1,
-        modifiedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null,
-      };
-
       const mockUpdatedUser = {
         _id: new ObjectId(mockUserId),
         created_at: new Date(),
         device: 'APP' as Device,
-        id: mockUserId,
         last_active_at: new Date(),
         room_id: mockRoomId,
         status: 'ACTIVE' as UserStatus,
       };
 
-      mockCollection.updateOne.mockResolvedValue(mockUpdateResult);
-
-      // 首先模擬 findOne 返回更新後的用戶
-      mockCollection.findOne.mockResolvedValueOnce(mockUpdatedUser);
+      mockCollection.findOneAndUpdate.mockResolvedValue(mockUpdatedUser);
 
       const result = await userModel.updateUserRoomId(mockUserId, mockRoomId);
 
-      expect(result).toEqual(expect.objectContaining({
-        device: 'APP',
-        room_id: mockRoomId,
-        status: 'ACTIVE'
-      }));
-      expect(result.id).toBeTruthy();
+      expect(result).toEqual({
+        ...mockUpdatedUser,
+        id: mockUpdatedUser._id.toString(),
+      });
       expect(db.collection).toHaveBeenCalledWith('users');
-      expect(mockCollection.updateOne).toHaveBeenCalledWith(
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: expect.any(ObjectId) },
-        { $set: { room_id: mockRoomId } }
+        { $set: { room_id: mockRoomId } },
+        { returnDocument: 'after' }
       );
     });
 
@@ -301,7 +312,7 @@ describe('UserDto Model', () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
 
-      mockCollection.updateOne.mockRejectedValue(new Error('DB Error'));
+      mockCollection.findOneAndUpdate.mockRejectedValue(new Error('DB Error'));
 
       const result = await userModel.updateUserRoomId(mockUserId, mockRoomId);
 
@@ -311,42 +322,30 @@ describe('UserDto Model', () => {
   });
 
   describe('updateUserStatus', () => {
-    it('應該成功更新使用者狀態並返回結果', async () => {
+    it('應該成功更新使用者狀態並返回更新後的使用者', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as UserStatus;
-      const mockUpdateResult = {
-        acknowledged: true,
-        matchedCount: 1,
-        modifiedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null,
-      };
-
       const mockUpdatedUser = {
         _id: new ObjectId(mockUserId),
         created_at: new Date(),
         device: 'APP' as Device,
-        id: mockUserId,
         last_active_at: new Date(),
         status: mockStatus,
       };
 
-      mockCollection.updateOne.mockResolvedValue(mockUpdateResult);
-
-      // 模擬 findOne 返回更新後的用戶
-      mockCollection.findOne.mockResolvedValueOnce(mockUpdatedUser);
+      mockCollection.findOneAndUpdate.mockResolvedValue(mockUpdatedUser);
 
       const result = await userModel.updateUserStatus(mockUserId, mockStatus);
 
-      expect(result).toEqual(expect.objectContaining({
-        device: 'APP',
-        status: mockStatus
-      }));
-      expect(result.id).toBeTruthy();
+      expect(result).toEqual({
+        ...mockUpdatedUser,
+        id: mockUpdatedUser._id.toString(),
+      });
       expect(db.collection).toHaveBeenCalledWith('users');
-      expect(mockCollection.updateOne).toHaveBeenCalledWith(
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: expect.any(ObjectId) },
-        { $set: { status: mockStatus } }
+        { $set: { status: mockStatus } },
+        { returnDocument: 'after' }
       );
     });
 
@@ -354,7 +353,7 @@ describe('UserDto Model', () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as UserStatus;
 
-      mockCollection.updateOne.mockRejectedValue(new Error('DB Error'));
+      mockCollection.findOneAndUpdate.mockRejectedValue(new Error('DB Error'));
 
       const result = await userModel.updateUserStatus(mockUserId, mockStatus);
 

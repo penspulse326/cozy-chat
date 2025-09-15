@@ -2,7 +2,7 @@ import type { UserDto, UserStatus } from '@packages/lib';
 
 import { userStatusSchema } from '@packages/lib';
 
-import type { MatchedUser, WaitingUser } from '@/types';
+import type { WaitingUser } from '@/types';
 
 import userModel from '@/models/user.model';
 
@@ -22,76 +22,49 @@ async function checkUserStatus(roomId: string): Promise<boolean> {
 async function createMatchedUsers(
   newUser: WaitingUser,
   peerUser: WaitingUser
-): Promise<{
-  matchedUsers: MatchedUser[];
-  roomId: string;
-}> {
-  // 1. 建立兩個 user
-  const newUserId = await createUserAndGetId(newUser);
-  const peerUserId = await createUserAndGetId(peerUser);
-  // createUserAndGetId 已經處理了錯誤情況
+): Promise<UserDto[]> {
+  // 1. 並行建立兩個 user
+  const [newUserResult, peerUserResult] = await Promise.all([
+    createUser(newUser),
+    createUser(peerUser)
+  ]);
+  // createUser 已經處理了錯誤情況
 
   // 2. 建立聊天室
   const newChatRoom = await chatRoomService.createChatRoom([
-    newUserId,
-    peerUserId,
+    newUserResult.id,
+    peerUserResult.id,
   ]);
   // chatRoomService.createChatRoom 已經處理了錯誤情況
   const roomId = newChatRoom.id;
 
   // 3. 批量更新 user 的roomId
-  const userIds = [newUserId, peerUserId];
-  const updateResult = await userModel.updateManyUserRoomId(userIds, roomId);
+  const userIds = [newUserResult.id, peerUserResult.id];
+  const updatedUsers = await userModel.updateManyUserRoomId(userIds, roomId);
 
-  if (
-    !updateResult ||
-    !updateResult.acknowledged ||
-    updateResult.modifiedCount !== 2
-  ) {
+  if (!updatedUsers) {
     throw new Error(`批量更新使用者聊天室失敗: ${userIds.join(', ')}`);
   }
 
-  // 4. 返回結果
-  const matchedUsers = [
-    {
-      ...newUser,
-      userId: newUserId,
-    },
-    {
-      ...peerUser,
-      userId: peerUserId,
-    },
-  ];
-
-  return {
-    matchedUsers,
-    roomId,
-  };
+  return updatedUsers;
 }
 
 async function createUser(
   user: WaitingUser
 ): Promise<UserDto> {
   const currentTime = new Date();
-  const payload = {
+  const dto = {
     created_at: currentTime,
     device: user.device,
     last_active_at: currentTime,
     status: userStatusSchema.enum.ACTIVE,
   };
 
-  const result = await userModel.createUser(payload);
+  const result = await userModel.createUser(dto);
   if (result === null) {
     throw new Error('建立使用者失敗');
   }
   return result;
-}
-
-// 建立單個 user 並返回ID
-async function createUserAndGetId(user: WaitingUser): Promise<string> {
-  const result = await createUser(user);
-  // createUser 已經處理了 null 的情況
-  return result.id;
 }
 
 async function findUserById(userId: string): Promise<UserDto> {
@@ -124,7 +97,7 @@ async function updateUserRoomId(
 async function updateUserStatus(
   userId: string,
   status: UserStatus
-): Promise<{ roomId: string }> {
+): Promise<UserDto> {
   const user = await findUserById(userId);
   // findUserById 已經處理了 null 的情況
 
@@ -137,16 +110,13 @@ async function updateUserStatus(
     throw new Error(`更新使用者狀態失敗: ${userId}`);
   }
 
-  return {
-    roomId: user.room_id.toString(),
-  };
+  return result;
 }
 
 export default {
   checkUserStatus,
   createMatchedUsers,
   createUser,
-  createUserAndGetId,
   findUserById,
   findUsersByRoomId,
   updateUserRoomId,

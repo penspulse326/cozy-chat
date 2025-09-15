@@ -38,7 +38,7 @@ export function setupSocketServer(io: Server) {
     });
 
     client.on('disconnect', () => {
-      waitingPool.removeFromPool(client.id);
+      waitingPool.removeUserFromPool(client.id);
       console.log('使用者斷開連線:', client.id);
     });
   });

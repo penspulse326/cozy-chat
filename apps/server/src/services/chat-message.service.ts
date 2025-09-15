@@ -8,7 +8,7 @@ async function createChatMessage(
   device: Device
 ): Promise<ChatMessageDto> {
   const currentTime = new Date();
-  const payload = {
+  const dto = {
     content: data.content,
     created_at: currentTime,
     device,
@@ -16,7 +16,7 @@ async function createChatMessage(
     user_id: String(data.userId),
   };
 
-  const result = await chatMessageModel.createChatMessage(payload);
+  const result = await chatMessageModel.createChatMessage(dto);
   if (result === null) {
     throw new Error('建立聊天訊息失敗');
   }

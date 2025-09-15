@@ -89,7 +89,7 @@ async function findUsersByRoomId(roomId: string): Promise<null | UserDto[]> {
 async function updateManyUserRoomId(
   userIds: string[],
   roomId: string
-): Promise<null | { acknowledged: boolean; modifiedCount: number }> {
+): Promise<null | UserDto[]> {
   const users = getCollection<UserEntity>('users');
 
   try {
@@ -100,10 +100,16 @@ async function updateManyUserRoomId(
     );
     console.log('批量更新 UserDto RoomId 成功');
 
-    return {
-      acknowledged: result.acknowledged,
-      modifiedCount: result.modifiedCount,
-    };
+    if (result.acknowledged) {
+      // 查找所有更新後的用戶並返回
+      const updatedUsers = await users.find({ _id: { $in: objectIds } }).toArray();
+      return updatedUsers.map(user => convertToDto({
+        ...user,
+        _id: user._id,
+      }));
+    }
+
+    return null;
   } catch (error: unknown) {
     console.error('批量更新 UserDto RoomId 失敗', error);
     return null;
@@ -117,16 +123,18 @@ async function updateUserRoomId(
   const users = getCollection<UserEntity>('users');
 
   try {
-    const result = await users.updateOne(
+    const result = await users.findOneAndUpdate(
       { _id: new ObjectId(userId) },
-      { $set: { room_id: roomId } }
+      { $set: { room_id: roomId } },
+      { returnDocument: 'after' }
     );
     console.log('更新 UserDto RoomId 成功');
 
-    if (result.acknowledged) {
-      // 查找更新後的用戶並返回
-      const user = await findUserById(userId);
-      return user;
+    if (result) {
+      return convertToDto({
+        ...result,
+        _id: result._id,
+      });
     }
 
     return null;
@@ -143,15 +151,17 @@ async function updateUserStatus(
   const users = getCollection<UserEntity>('users');
 
   try {
-    const result = await users.updateOne(
+    const result = await users.findOneAndUpdate(
       { _id: new ObjectId(userId) },
-      { $set: { status } }
+      { $set: { status } },
+      { returnDocument: 'after' }
     );
 
-    if (result.acknowledged) {
-      // 查找更新後的用戶並返回
-      const user = await findUserById(userId);
-      return user;
+    if (result) {
+      return convertToDto({
+        ...result,
+        _id: result._id,
+      });
     }
 
     return null;

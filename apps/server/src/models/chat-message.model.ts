@@ -53,15 +53,15 @@ async function findChatMessageById(
   const chatMessages = getCollection<ChatMessageEntity>('chat_messages');
 
   try {
-    const result = await chatMessages.findOne({ _id: new ObjectId(_id) });
+    const message = await chatMessages.findOne({ _id: new ObjectId(_id) });
 
-    if (result) {
-      console.log(`找到 ChatMessageDto: ${_id}: ${JSON.stringify(result)}`);
-      return convertToDto(result);
-    } else {
-      console.log(`找不到 ChatMessageDto: ${_id}`);
-      return null;
+    if (message) {
+      console.log(`找到 ChatMessageDto: ${_id}: ${JSON.stringify(message)}`);
+      return convertToDto(message);
     }
+
+    console.log(`找不到 ChatMessageDto: ${_id}`);
+    return null;
   } catch (error: unknown) {
     console.error(`查詢 ChatMessageDto 失敗: ${_id}`, error);
     return null;
@@ -74,10 +74,10 @@ async function findChatMessagesByRoomId(
   const chatMessages = getCollection<ChatMessageEntity>('chat_messages');
 
   try {
-    const result = await chatMessages.find({ room_id: roomId }).toArray();
-    console.log(`找到 ChatMessages: ${roomId}: ${JSON.stringify(result)}`);
+    const messages = await chatMessages.find({ room_id: roomId }).toArray();
+    console.log(`找到 ChatMessages: ${roomId}: ${JSON.stringify(messages)}`);
 
-    return result.map(message => convertToDto(message));
+    return messages.map(message => convertToDto(message));
   } catch (error: unknown) {
     console.error(`查詢 ChatMessages 失敗: ${roomId}`, error);
     return null;
