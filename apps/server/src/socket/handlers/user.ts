@@ -20,7 +20,6 @@ export function createUserHandlers(io: Server, chatHandlers: ChatHandlers) {
     }
 
     await io.of('/').sockets.get(socketId)?.join(roomId);
-
     await chatHandlers.handleChatLoad(roomId);
 
     const isLeft = await userService.checkUserStatus(roomId);

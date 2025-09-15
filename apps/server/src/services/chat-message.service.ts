@@ -12,11 +12,12 @@ async function createChatMessage(
     content: data.content,
     created_at: currentTime,
     device,
-    room_id: String(data.roomId),
-    user_id: String(data.userId),
+    room_id: data.roomId,
+    user_id: data.userId,
   };
 
   const result = await chatMessageModel.createChatMessage(dto);
+
   if (result === null) {
     throw new Error('建立聊天訊息失敗');
   }
@@ -41,14 +42,16 @@ async function findChatMessagesByRoomId(
   return result;
 }
 
-async function sendChatMessage(data: SocketChatMessage): Promise<ChatMessageDto> {
-  const user = await userModel.findUserById(String(data.userId));
+async function sendChatMessage(
+  data: SocketChatMessage
+): Promise<ChatMessageDto> {
+  const user = await userModel.findUserById(data.userId);
+
   if (!user) {
-    throw new Error(`找不到使用者: ${String(data.userId)}`);
+    throw new Error(`找不到使用者: ${data.userId}`);
   }
 
   const result = await createChatMessage(data, user.device);
-  // createChatMessage 已經處理了錯誤情況
 
   return result;
 }

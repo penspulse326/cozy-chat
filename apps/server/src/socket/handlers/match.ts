@@ -35,14 +35,23 @@ export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
     newUser: WaitingUser,
     peerUser: WaitingUser
   ) {
-    const matchedUsers = await userService.createMatchedUsers(newUser, peerUser);
+    const matchedUsers = await userService.createMatchedUsers(
+      newUser,
+      peerUser
+    );
     const roomId = matchedUsers[0].room_id?.toString() ?? '';
 
+    // 將兩個使用者的 socketId 與 userId 對應起來
+    const userSocketMap = [
+      { socketId: newUser.socketId, userId: matchedUsers[0].id },
+      { socketId: peerUser.socketId, userId: matchedUsers[1].id },
+    ];
+
+    // 確保每個使用者都收到正確的配對成功通知
     await Promise.all(
-      matchedUsers.map((user) => notifyMatchSuccess({
-        ...newUser,
-        userId: user.id,
-      }, roomId))
+      userSocketMap.map((user) =>
+        notifyMatchSuccess(user.socketId, user.userId, roomId)
+      )
     );
   }
 
@@ -67,14 +76,15 @@ export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
   }
 
   async function notifyMatchSuccess(
-    user: WaitingUser & { userId: string },
+    clientId: string,
+    userId: string,
     roomId: string
   ) {
-    await io.of('/').sockets.get(user.socketId)?.join(roomId);
+    await io.of('/').sockets.get(clientId)?.join(roomId);
 
-    io.to(user.socketId).emit(MATCH_EVENT.SUCCESS, {
-      roomId: roomId,
-      userId: user.userId,
+    io.to(clientId).emit(MATCH_EVENT.SUCCESS, {
+      roomId,
+      userId,
     });
   }
 
