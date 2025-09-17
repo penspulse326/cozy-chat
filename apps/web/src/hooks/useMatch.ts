@@ -1,6 +1,6 @@
 import { useLocalStorage } from '@mantine/hooks';
 import { CHAT_EVENT, ChatMessageDto, MATCH_EVENT } from '@packages/lib';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MatchStatus, MatchSuccessData } from '../types';
 import useSocket from './useSocket';
 
@@ -8,6 +8,7 @@ export default function useMatch() {
   const socket = useSocket();
   const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
+  const newMsgAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const [userId, setUserId, removeUserId] = useLocalStorage<string | null>({
     key: 'userId',
@@ -34,6 +35,11 @@ export default function useMatch() {
   function handleMessageReceive(data: unknown) {
     const message = data as ChatMessageDto;
     setMessages((prev) => [...prev, message]);
+
+    if (message.user_id !== userId && newMsgAudioRef.current) {
+      newMsgAudioRef.current.currentTime = 0;
+      newMsgAudioRef.current.play().catch(() => {});
+    }
   }
 
   function handleMessagesLoad(data: unknown) {
@@ -133,6 +139,18 @@ export default function useMatch() {
         break;
     }
   }, [matchStatus]);
+
+  useEffect(() => {
+    newMsgAudioRef.current = new Audio('/new-msg-hint.mp3');
+    newMsgAudioRef.current.volume = 0.8;
+
+    return () => {
+      if (newMsgAudioRef.current) {
+        newMsgAudioRef.current.pause();
+        newMsgAudioRef.current = null;
+      }
+    };
+  }, []);
 
   return { matchStatus, setMatchStatus, sendMessage, messages };
 }

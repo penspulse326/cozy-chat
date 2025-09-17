@@ -32,7 +32,7 @@ export default function ChatBox({
             <Stack className={styles.messagesContainer}>
               {messages.map((message: ChatMessageDto) => (
                 <ChatMessageCard
-                  key={message._id}
+                  key={message.id}
                   data={message}
                   isUser={message.user_id === userId}
                 />
