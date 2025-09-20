@@ -9,7 +9,7 @@ interface MessageContentProps {
 }
 
 export default function ChatMessageCard({ data, isUser }: MessageContentProps) {
-  const { device, content, created_at } = data;
+  const { device, content, createdAt } = data;
   const justify = isUser ? styles.wrapperEnd : styles.wrapperStart;
 
   return (
@@ -29,7 +29,7 @@ export default function ChatMessageCard({ data, isUser }: MessageContentProps) {
       >
         <Text size="xs">{DeviceEnum[device]}</Text>
         <Text size="xs">
-          {new Date(created_at).toLocaleDateString('zh-TW', {
+          {new Date(createdAt).toLocaleDateString('zh-TW', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',

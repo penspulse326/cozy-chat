@@ -7,7 +7,7 @@ async function createChatRoom(
 ): Promise<ChatRoomDto> {
   const currentTime = new Date();
   const dto = {
-    created_at: currentTime,
+    createdAt: currentTime,
     users: userIds,
   };
 

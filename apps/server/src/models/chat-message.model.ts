@@ -74,7 +74,7 @@ async function findChatMessagesByRoomId(
   const chatMessages = getCollection<ChatMessageEntity>('chat_messages');
 
   try {
-    const messages = await chatMessages.find({ room_id: roomId }).toArray();
+    const messages = await chatMessages.find({ roomId: roomId }).toArray();
     console.log(`找到 ChatMessages: ${roomId}: ${JSON.stringify(messages)}`);
 
     return messages.map(message => convertToDto(message));

@@ -36,11 +36,11 @@ describe('Chat Message Service', () => {
       const mockDevice = 'APP';
       const mockChatMessageResult = {
         content: 'Hello world',
-        created_at: new Date(),
+        createdAt: new Date(),
         device: mockDevice,
         id: '507f1f77bcf86cd799439033',
-        room_id: mockChatMessageData.roomId,
-        user_id: mockChatMessageData.userId,
+        roomId: mockChatMessageData.roomId,
+        userId: mockChatMessageData.userId,
       };
       vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
         mockChatMessageResult
@@ -58,10 +58,10 @@ describe('Chat Message Service', () => {
       expect(calledWith).toEqual(
         expect.objectContaining({
           content: mockChatMessageData.content,
-          created_at: expect.any(Date),
+          createdAt: expect.any(Date),
           device: mockDevice,
-          room_id: mockChatMessageData.roomId,
-          user_id: mockChatMessageData.userId,
+          roomId: mockChatMessageData.roomId,
+          userId: mockChatMessageData.userId,
         })
       );
     });
@@ -106,10 +106,10 @@ describe('Chat Message Service', () => {
       const mockChatMessage = {
         _id: new ObjectId(mockMessageId),
         content: 'Hello world',
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        room_id: '507f1f77bcf86cd799439022',
-        user_id: '507f1f77bcf86cd799439011',
+        roomId: '507f1f77bcf86cd799439022',
+        userId: '507f1f77bcf86cd799439011',
       };
 
       vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(
@@ -160,18 +160,18 @@ describe('Chat Message Service', () => {
         {
           _id: new ObjectId('507f1f77bcf86cd799439033'),
           content: 'Hello world',
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'APP' as Device,
-          room_id: mockRoomId,
-          user_id: '507f1f77bcf86cd799439011',
+          roomId: mockRoomId,
+          userId: '507f1f77bcf86cd799439011',
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439034'),
           content: 'How are you?',
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'PC' as Device,
-          room_id: mockRoomId,
-          user_id: '507f1f77bcf86cd799439012',
+          roomId: mockRoomId,
+          userId: '507f1f77bcf86cd799439012',
         },
       ];
 
@@ -234,21 +234,21 @@ describe('Chat Message Service', () => {
 
       const mockUser = {
         _id: new ObjectId(mockChatMessageData.userId),
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
         id: mockChatMessageData.userId,
-        last_active_at: new Date(),
-        room_id: mockChatMessageData.roomId,
+        lastActiveAt: new Date(),
+        roomId: mockChatMessageData.roomId,
         status: 'ACTIVE' as UserStatus,
       };
 
       const mockChatMessage = {
         content: mockChatMessageData.content,
-        created_at: new Date(),
+        createdAt: new Date(),
         device: mockUser.device,
         id: '507f1f77bcf86cd799439033',
-        room_id: mockChatMessageData.roomId,
-        user_id: mockChatMessageData.userId,
+        roomId: mockChatMessageData.roomId,
+        userId: mockChatMessageData.userId,
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
@@ -294,11 +294,11 @@ describe('Chat Message Service', () => {
 
       const mockUser = {
         _id: new ObjectId(mockChatMessageData.userId),
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
         id: mockChatMessageData.userId,
-        last_active_at: new Date(),
-        room_id: mockChatMessageData.roomId,
+        lastActiveAt: new Date(),
+        roomId: mockChatMessageData.roomId,
         status: 'ACTIVE' as UserStatus,
       };
 

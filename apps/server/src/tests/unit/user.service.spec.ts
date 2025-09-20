@@ -48,9 +48,9 @@ describe('UserDto Service', () => {
       const calledWith = vi.mocked(userModel.createUser).mock.calls[0][0];
       expect(calledWith).toEqual(
         expect.objectContaining({
-          created_at: expect.any(Date),
+          createdAt: expect.any(Date),
           device: 'APP',
-          last_active_at: expect.any(Date),
+          lastActiveAt: expect.any(Date),
           status: 'ACTIVE',
         })
       );
@@ -90,10 +90,10 @@ describe('UserDto Service', () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockUser = {
         _id: new ObjectId(mockUserId),
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        last_active_at: new Date(),
-        room_id: '507f1f77bcf86cd799439022',
+        lastActiveAt: new Date(),
+        roomId: '507f1f77bcf86cd799439022',
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -124,18 +124,18 @@ describe('UserDto Service', () => {
       const mockUsers = [
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'APP' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'PC' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
       ];
@@ -208,10 +208,10 @@ describe('UserDto Service', () => {
       const mockStatus = 'LEFT' as const;
       const mockUser = {
         _id: new ObjectId(mockUserId),
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        last_active_at: new Date(),
-        room_id: mockRoomId,
+        lastActiveAt: new Date(),
+        roomId: mockRoomId,
         status: 'ACTIVE' as UserStatus,
       };
       const mockUpdateResult = {
@@ -255,9 +255,9 @@ describe('UserDto Service', () => {
       const mockStatus = 'LEFT' as const;
       const mockUser = {
         _id: new ObjectId(mockUserId),
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        last_active_at: new Date(),
+        lastActiveAt: new Date(),
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -278,18 +278,18 @@ describe('UserDto Service', () => {
       const mockUsers = [
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'APP' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'PC' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'LEFT' as UserStatus,
         },
       ];
@@ -307,18 +307,18 @@ describe('UserDto Service', () => {
       const mockUsers = [
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'APP' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'PC' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
       ];

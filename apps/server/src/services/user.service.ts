@@ -54,9 +54,9 @@ async function createUser(
 ): Promise<UserDto> {
   const currentTime = new Date();
   const dto = {
-    created_at: currentTime,
+    createdAt: currentTime,
     device: user.device,
-    last_active_at: currentTime,
+    lastActiveAt: currentTime,
     status: userStatusSchema.enum.ACTIVE,
   };
 
@@ -101,7 +101,7 @@ async function updateUserStatus(
   const user = await findUserById(userId);
   // findUserById 已經處理了 null 的情況
 
-  if (!user.room_id) {
+  if (!user.roomId) {
     throw new Error(`使用者沒有聊天室: ${userId}`);
   }
 

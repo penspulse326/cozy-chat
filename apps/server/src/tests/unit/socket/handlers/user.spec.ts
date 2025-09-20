@@ -65,7 +65,7 @@ describe('UserDto Handlers', () => {
 
       vi.mocked(chatRoomService.findChatRoomById).mockResolvedValue({
         _id: new ObjectId('507f1f77bcf86cd799439011'),
-        created_at: new Date(),
+        createdAt: new Date(),
         users: ['user1', 'user2'],
       });
 
@@ -111,7 +111,7 @@ describe('UserDto Handlers', () => {
 
       vi.mocked(chatRoomService.findChatRoomById).mockResolvedValue({
         _id: new ObjectId('507f1f77bcf86cd799439011'),
-        created_at: new Date(),
+        createdAt: new Date(),
         users: ['user1', 'user2'],
       });
 

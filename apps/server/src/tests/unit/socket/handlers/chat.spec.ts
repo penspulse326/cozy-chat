@@ -31,10 +31,10 @@ describe('Chat Handlers', () => {
       const mockNewChatMessage = {
         _id: new ObjectId('507f1f77bcf86cd799439011'),
         content: '你好',
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'PC' as Device,
-        room_id: 'room123',
-        user_id: 'user456',
+        roomId: 'room123',
+        userId: 'user456',
       };
 
       vi.mocked(chatMessageService.sendChatMessage).mockResolvedValue(
@@ -59,18 +59,18 @@ describe('Chat Handlers', () => {
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
           content: '你好',
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'PC' as Device,
-          room_id: mockRoomId,
-          user_id: 'user1',
+          roomId: mockRoomId,
+          userId: 'user1',
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439022'),
           content: '你好嗎？',
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'APP' as Device,
-          room_id: mockRoomId,
-          user_id: 'user2',
+          roomId: mockRoomId,
+          userId: 'user2',
         },
       ];
 

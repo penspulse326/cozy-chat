@@ -39,7 +39,7 @@ export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
       newUser,
       peerUser
     );
-    const roomId = matchedUsers[0].room_id?.toString() ?? '';
+    const roomId = matchedUsers[0].roomId?.toString() ?? '';
 
     // 將兩個使用者的 socketId 與 userId 對應起來
     const userSocketMap = [
@@ -70,8 +70,8 @@ export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
       userStatusSchema.enum.LEFT
     );
 
-    if (updatedUser.room_id) {
-      notifyMatchLeave(updatedUser.room_id.toString());
+    if (updatedUser.roomId) {
+      notifyMatchLeave(updatedUser.roomId.toString());
     }
   }
 

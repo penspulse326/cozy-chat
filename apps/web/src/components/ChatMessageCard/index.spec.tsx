@@ -7,10 +7,10 @@ import ChatMessageCard from './index';
 describe('ChatMessageCard', () => {
   const mockChatMessage: ChatMessageDto = {
     _id: '1',
-    room_id: 'room1',
-    user_id: 'user1',
+    roomId: 'room1',
+    userId: 'user1',
     content: 'Hello, this is a test message!',
-    created_at: new Date('2023-10-27T10:00:00Z'),
+    createdAt: new Date('2023-10-27T10:00:00Z'),
     device: 'MB',
   };
 

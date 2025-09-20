@@ -46,9 +46,9 @@ describe('UserDto Model', () => {
   describe('createUser', () => {
     it('應該成功建立使用者並返回結果', async () => {
       const mockUser = {
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        last_active_at: new Date(),
+        lastActiveAt: new Date(),
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -65,9 +65,9 @@ describe('UserDto Model', () => {
       const result = await userModel.createUser(mockUser);
 
       expect(result!).toEqual(expect.objectContaining({
-        created_at: expect.any(Date),
+        createdAt: expect.any(Date),
         device: mockUser.device,
-        last_active_at: expect.any(Date),
+        lastActiveAt: expect.any(Date),
         status: mockUser.status
       }));
       expect(result.id).toBeTruthy(); // 只檢查 ID 存在
@@ -77,9 +77,9 @@ describe('UserDto Model', () => {
 
     it('當驗證失敗時應返回 null', async () => {
       const mockInvalidUser = {
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'INVALID_DEVICE' as unknown as Device,
-        last_active_at: new Date(),
+        lastActiveAt: new Date(),
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -92,9 +92,9 @@ describe('UserDto Model', () => {
 
     it('當數據庫操作失敗時應返回 null', async () => {
       const mockUser = {
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        last_active_at: new Date(),
+        lastActiveAt: new Date(),
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -114,9 +114,9 @@ describe('UserDto Model', () => {
       const mockObjectId = new ObjectId(mockUserId);
       const mockUser = {
         _id: mockObjectId,
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        last_active_at: new Date(),
+        lastActiveAt: new Date(),
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -165,18 +165,18 @@ describe('UserDto Model', () => {
       const mockUsers = [
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'APP' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'PC' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
       ];
@@ -190,7 +190,7 @@ describe('UserDto Model', () => {
         id: user._id.toString(),
       })));
       expect(db.collection).toHaveBeenCalledWith('users');
-      expect(mockCollection.find).toHaveBeenCalledWith({ room_id: mockRoomId });
+      expect(mockCollection.find).toHaveBeenCalledWith({ roomId: mockRoomId });
       expect(mockFindCursor.toArray).toHaveBeenCalled();
     });
 
@@ -220,18 +220,18 @@ describe('UserDto Model', () => {
       const mockUpdatedUsers = [
         {
           _id: new ObjectId(mockUserIds[0]),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'APP' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId(mockUserIds[1]),
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'PC' as Device,
-          last_active_at: new Date(),
-          room_id: mockRoomId,
+          lastActiveAt: new Date(),
+          roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
       ];
@@ -253,7 +253,7 @@ describe('UserDto Model', () => {
       expect(db.collection).toHaveBeenCalledWith('users');
       expect(mockCollection.updateMany).toHaveBeenCalledWith(
         { _id: { $in: expect.any(Array) } },
-        { $set: { room_id: mockRoomId } }
+        { $set: { roomId: mockRoomId } }
       );
       expect(mockCollection.find).toHaveBeenCalledWith(
         { _id: { $in: expect.any(Array) } }
@@ -285,10 +285,10 @@ describe('UserDto Model', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUpdatedUser = {
         _id: new ObjectId(mockUserId),
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        last_active_at: new Date(),
-        room_id: mockRoomId,
+        lastActiveAt: new Date(),
+        roomId: mockRoomId,
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -303,7 +303,7 @@ describe('UserDto Model', () => {
       expect(db.collection).toHaveBeenCalledWith('users');
       expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: expect.any(ObjectId) },
-        { $set: { room_id: mockRoomId } },
+        { $set: { roomId: mockRoomId } },
         { returnDocument: 'after' }
       );
     });
@@ -327,9 +327,9 @@ describe('UserDto Model', () => {
       const mockStatus = 'LEFT' as UserStatus;
       const mockUpdatedUser = {
         _id: new ObjectId(mockUserId),
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        last_active_at: new Date(),
+        lastActiveAt: new Date(),
         status: mockStatus,
       };
 

@@ -45,10 +45,10 @@ describe('Chat Message Model', () => {
     it('應該成功建立聊天訊息並返回結果', async () => {
       const mockChatMessage = {
         content: 'Hello world',
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        room_id: '507f1f77bcf86cd799439022',
-        user_id: '507f1f77bcf86cd799439011',
+        roomId: '507f1f77bcf86cd799439022',
+        userId: '507f1f77bcf86cd799439011',
       };
 
       const mockObjectId = new ObjectId();
@@ -67,8 +67,8 @@ describe('Chat Message Model', () => {
       expect(result).toEqual(expect.objectContaining({
         content: mockChatMessage.content,
         device: mockChatMessage.device,
-        room_id: mockChatMessage.room_id,
-        user_id: mockChatMessage.user_id,
+        roomId: mockChatMessage.roomId,
+        userId: mockChatMessage.userId,
       }));
       expect(result.id).toBeTruthy(); // 只檢查 ID 存在
       expect(db.collection).toHaveBeenCalledWith('chat_messages');
@@ -78,10 +78,10 @@ describe('Chat Message Model', () => {
     it('當驗證失敗時應返回 null', async () => {
       const mockInvalidChatMessage = {
         content: 123 as unknown as string,
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'INVALID_DEVICE' as Device,
-        room_id: '',
-        user_id: '',
+        roomId: '',
+        userId: '',
       };
 
       const result = await chatMessageModel.createChatMessage(
@@ -96,10 +96,10 @@ describe('Chat Message Model', () => {
     it('當數據庫操作失敗時應返回 null', async () => {
       const mockChatMessage = {
         content: 'Hello world',
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        room_id: '507f1f77bcf86cd799439022',
-        user_id: '507f1f77bcf86cd799439011',
+        roomId: '507f1f77bcf86cd799439022',
+        userId: '507f1f77bcf86cd799439011',
       };
 
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
@@ -119,10 +119,10 @@ describe('Chat Message Model', () => {
       const mockChatMessage = {
         _id: mockObjectId,
         content: 'Hello world',
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'APP' as Device,
-        room_id: '507f1f77bcf86cd799439022',
-        user_id: '507f1f77bcf86cd799439011',
+        roomId: '507f1f77bcf86cd799439022',
+        userId: '507f1f77bcf86cd799439011',
       };
       mockCollection.findOne.mockResolvedValue(mockChatMessage);
 
@@ -168,18 +168,18 @@ describe('Chat Message Model', () => {
         {
           _id: new ObjectId('507f1f77bcf86cd799439033'),
           content: 'Hello world',
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'APP' as Device,
-          room_id: mockRoomId,
-          user_id: '507f1f77bcf86cd799439011',
+          roomId: mockRoomId,
+          userId: '507f1f77bcf86cd799439011',
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439034'),
           content: 'How are you?',
-          created_at: new Date(),
+          createdAt: new Date(),
           device: 'PC' as Device,
-          room_id: mockRoomId,
-          user_id: '507f1f77bcf86cd799439012',
+          roomId: mockRoomId,
+          userId: '507f1f77bcf86cd799439012',
         },
       ];
       mockFindCursor.toArray.mockResolvedValue(mockChatMessages);
@@ -192,7 +192,7 @@ describe('Chat Message Model', () => {
         id: message._id.toString(),
       })));
       expect(db.collection).toHaveBeenCalledWith('chat_messages');
-      expect(mockCollection.find).toHaveBeenCalledWith({ room_id: mockRoomId });
+      expect(mockCollection.find).toHaveBeenCalledWith({ roomId: mockRoomId });
       expect(mockFindCursor.toArray).toHaveBeenCalled();
     });
 

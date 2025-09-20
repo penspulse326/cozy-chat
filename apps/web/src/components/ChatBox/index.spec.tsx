@@ -7,18 +7,18 @@ describe('ChatBox', () => {
   const mockMessages: ChatMessageDto[] = [
     {
       _id: '1',
-      room_id: 'room1',
-      user_id: 'user1',
+      roomId: 'room1',
+      userId: 'user1',
       content: '嗨，你好！',
-      created_at: new Date(),
+      createdAt: new Date(),
       device: 'PC',
     },
     {
       _id: '2',
-      room_id: 'room1',
-      user_id: 'user2',
+      roomId: 'room1',
+      userId: 'user2',
       content: '你好啊！',
-      created_at: new Date(),
+      createdAt: new Date(),
       device: 'MB',
     },
   ];

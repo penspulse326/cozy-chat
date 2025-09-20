@@ -39,7 +39,7 @@ describe('Chat Room Service', () => {
         .calls[0][0];
       expect(calledWith).toEqual(
         expect.objectContaining({
-          created_at: expect.any(Date),
+          createdAt: expect.any(Date),
           users: mockChatRoomUserIds,
         })
       );
@@ -79,7 +79,7 @@ describe('Chat Room Service', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatRoom = {
         _id: new ObjectId(mockRoomId),
-        created_at: new Date(),
+        createdAt: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
       };
 

@@ -167,10 +167,10 @@ describe('useMatch', () => {
 
       const newMessage = {
         _id: '1',
-        room_id: 'room1',
-        user_id: 'user1',
+        roomId: 'room1',
+        userId: 'user1',
         content: '測試訊息',
-        created_at: new Date(),
+        createdAt: new Date(),
         device: 'PC',
       };
 

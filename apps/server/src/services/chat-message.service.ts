@@ -10,10 +10,10 @@ async function createChatMessage(
   const currentTime = new Date();
   const dto = {
     content: data.content,
-    created_at: currentTime,
+    createdAt: currentTime,
     device,
-    room_id: data.roomId,
-    user_id: data.userId,
+    roomId: data.roomId,
+    userId: data.userId,
   };
 
   const result = await chatMessageModel.createChatMessage(dto);

@@ -71,7 +71,7 @@ async function findUsersByRoomId(roomId: string): Promise<null | UserDto[]> {
   const users = getCollection<UserEntity>('users');
 
   try {
-    const result = await users.find({ room_id: roomId }).toArray();
+    const result = await users.find({ roomId: roomId }).toArray();
     console.log('查詢 UserDto 成功');
 
     return result.map(user => convertToDto({
@@ -96,7 +96,7 @@ async function updateManyUserRoomId(
     const objectIds = userIds.map((id) => new ObjectId(id));
     const result = await users.updateMany(
       { _id: { $in: objectIds } },
-      { $set: { room_id: roomId } }
+      { $set: { roomId: roomId } }
     );
     console.log('批量更新 UserDto RoomId 成功');
 
@@ -125,7 +125,7 @@ async function updateUserRoomId(
   try {
     const result = await users.findOneAndUpdate(
       { _id: new ObjectId(userId) },
-      { $set: { room_id: roomId } },
+      { $set: { roomId: roomId } },
       { returnDocument: 'after' }
     );
     console.log('更新 UserDto RoomId 成功');

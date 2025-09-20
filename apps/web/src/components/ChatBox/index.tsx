@@ -34,7 +34,7 @@ export default function ChatBox({
                 <ChatMessageCard
                   key={message.id}
                   data={message}
-                  isUser={message.user_id === userId}
+                  isUser={message.userId === userId}
                 />
               ))}
             </Stack>

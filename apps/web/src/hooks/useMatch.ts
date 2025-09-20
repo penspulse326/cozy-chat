@@ -36,9 +36,9 @@ export default function useMatch() {
     const message = data as ChatMessageDto;
     setMessages((prev) => [...prev, message]);
 
-    if (message.user_id !== userId && newMsgAudioRef.current) {
+    if (message.userId !== userId && newMsgAudioRef.current) {
       newMsgAudioRef.current.currentTime = 0;
-      newMsgAudioRef.current.play().catch(() => {});
+      newMsgAudioRef.current.play().catch(() => { });
     }
   }
 

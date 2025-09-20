@@ -36,7 +36,7 @@ describe('Chat Room Model', () => {
   describe('createChatRoom', () => {
     it('應該成功建立聊天室並返回結果', async () => {
       const mockChatRoom = {
-        created_at: new Date(),
+        createdAt: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
       };
 
@@ -53,7 +53,7 @@ describe('Chat Room Model', () => {
       const result = await chatRoomModel.createChatRoom(mockChatRoom);
 
       expect(result).toEqual(expect.objectContaining({
-        created_at: expect.any(Date),
+        createdAt: expect.any(Date),
         users: mockChatRoom.users
       }));
       expect(result.id).toBeTruthy(); // 只檢查 ID 存在
@@ -63,7 +63,7 @@ describe('Chat Room Model', () => {
 
     it('當驗證失敗時應返回 null', async () => {
       const mockInvalidChatRoom = {
-        created_at: new Date(),
+        createdAt: new Date(),
         users: 'not-an-array' as unknown as string[],
       };
 
@@ -76,7 +76,7 @@ describe('Chat Room Model', () => {
 
     it('當數據庫操作失敗時應返回 null', async () => {
       const mockChatRoom = {
-        created_at: new Date(),
+        createdAt: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
       };
 
@@ -96,7 +96,7 @@ describe('Chat Room Model', () => {
       const mockObjectId = new ObjectId(mockRoomId);
       const mockChatRoom = {
         _id: mockObjectId,
-        created_at: new Date(),
+        createdAt: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
       };
       mockCollection.findOne.mockResolvedValue(mockChatRoom);
