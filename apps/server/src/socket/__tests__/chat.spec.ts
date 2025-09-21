@@ -29,10 +29,10 @@ describe('Chat Handlers', () => {
         userId: 'user456',
       };
       const mockNewChatMessage = {
-        id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
         content: '你好',
         createdAt: new Date(),
         device: 'PC' as Device,
+        id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
         roomId: 'room123',
         userId: 'user456',
       };
@@ -55,18 +55,18 @@ describe('Chat Handlers', () => {
       const mockRoomId = 'room123';
       const mockChatMessages = [
         {
-          id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
           content: '你好',
           createdAt: new Date(),
           device: 'PC' as Device,
+          id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
           roomId: mockRoomId,
           userId: 'user1',
         },
         {
-          id: new ObjectId('507f1f77bcf86cd799439022').toHexString(),
           content: '你好嗎？',
           createdAt: new Date(),
           device: 'APP' as Device,
+          id: new ObjectId('507f1f77bcf86cd799439022').toHexString(),
           roomId: mockRoomId,
           userId: 'user2',
         },

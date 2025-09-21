@@ -61,7 +61,7 @@ describe('Database Configuration', () => {
   });
 
   describe('connectToDB', () => {
-    it('應該使用預設值連接到數據庫', async () => {
+    it('應該使用預設值連接到資料庫', async () => {
       delete process.env.MONGODB_URI;
       delete process.env.DB_NAME;
 
@@ -75,7 +75,7 @@ describe('Database Configuration', () => {
       expect(consoleLogSpy).toHaveBeenCalledWith('DB 連線成功');
     });
 
-    it('應該使用環境變數連接到數據庫', async () => {
+    it('應該使用環境變數連接到資料庫', async () => {
       process.env.MONGODB_URI = 'mongodb://user:pass@testhost:27017';
       process.env.DB_NAME = 'testdb';
 
@@ -97,7 +97,7 @@ describe('Database Configuration', () => {
   });
 
   describe('disconnectFromDB', () => {
-    it('應該從數據庫斷開連接', async () => {
+    it('應該從資料庫斷開連接', async () => {
       await dbModule.connectToDB();
       await dbModule.disconnectFromDB();
 

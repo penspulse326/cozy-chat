@@ -10,7 +10,7 @@ vi.mock('@/config/db', () => ({
   getCollection: vi.fn(),
 }));
 
-describe('UserDto Model', () => {
+describe('User Model', () => {
   const mockCollection = {
     find: vi.fn(),
     findOne: vi.fn(),
@@ -22,6 +22,8 @@ describe('UserDto Model', () => {
   const mockFindCursor = {
     toArray: vi.fn(),
   };
+
+  const mockCurrentDate = new Date();
 
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
@@ -37,16 +39,12 @@ describe('UserDto Model', () => {
       .mockImplementation(() => undefined);
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   describe('createUser', () => {
     it('應該成功建立使用者並返回結果', async () => {
       const mockUser = {
-        createdAt: new Date(),
+        createdAt: mockCurrentDate,
         device: 'APP' as Device,
-        lastActiveAt: new Date(),
+        lastActiveAt: mockCurrentDate,
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -75,9 +73,9 @@ describe('UserDto Model', () => {
 
     it('當驗證失敗時應返回 null', async () => {
       const mockInvalidUser = {
-        createdAt: new Date(),
+        createdAt: mockCurrentDate,
         device: 'INVALID_DEVICE' as unknown as Device,
-        lastActiveAt: new Date(),
+        lastActiveAt: mockCurrentDate,
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -88,11 +86,11 @@ describe('UserDto Model', () => {
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
-    it('當數據庫操作失敗時應返回 null', async () => {
+    it('當資料庫操作失敗時應返回 null', async () => {
       const mockUser = {
-        createdAt: new Date(),
+        createdAt: mockCurrentDate,
         device: 'APP' as Device,
-        lastActiveAt: new Date(),
+        lastActiveAt: mockCurrentDate,
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -112,9 +110,9 @@ describe('UserDto Model', () => {
       const mockObjectId = new ObjectId(mockUserId);
       const mockUser = {
         _id: mockObjectId,
-        createdAt: new Date(),
+        createdAt: mockCurrentDate,
         device: 'APP' as Device,
-        lastActiveAt: new Date(),
+        lastActiveAt: mockCurrentDate,
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -148,7 +146,7 @@ describe('UserDto Model', () => {
       });
     });
 
-    it('當數據庫操作失敗時應返回 null', async () => {
+    it('當資料庫操作失敗時應返回 null', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
 
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
@@ -166,17 +164,17 @@ describe('UserDto Model', () => {
       const mockUsers = [
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
-          createdAt: new Date(),
+          createdAt: mockCurrentDate,
           device: 'APP' as Device,
-          lastActiveAt: new Date(),
+          lastActiveAt: mockCurrentDate,
           roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
-          createdAt: new Date(),
+          createdAt: mockCurrentDate,
           device: 'PC' as Device,
-          lastActiveAt: new Date(),
+          lastActiveAt: mockCurrentDate,
           roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
@@ -199,7 +197,7 @@ describe('UserDto Model', () => {
       expect(mockFindCursor.toArray).toHaveBeenCalled();
     });
 
-    it('當數據庫操作失敗時應返回 null', async () => {
+    it('當資料庫操作失敗時應返回 null', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
       mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
@@ -225,17 +223,17 @@ describe('UserDto Model', () => {
       const mockUpdatedUsers = [
         {
           _id: new ObjectId(mockUserIds[0]),
-          createdAt: new Date(),
+          createdAt: mockCurrentDate,
           device: 'APP' as Device,
-          lastActiveAt: new Date(),
+          lastActiveAt: mockCurrentDate,
           roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
         {
           _id: new ObjectId(mockUserIds[1]),
-          createdAt: new Date(),
+          createdAt: mockCurrentDate,
           device: 'PC' as Device,
-          lastActiveAt: new Date(),
+          lastActiveAt: mockCurrentDate,
           roomId: mockRoomId,
           status: 'ACTIVE' as UserStatus,
         },
@@ -269,7 +267,7 @@ describe('UserDto Model', () => {
       );
     });
 
-    it('當數據庫操作失敗時應返回 null', async () => {
+    it('當資料庫操作失敗時應返回 null', async () => {
       const mockUserIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
@@ -294,9 +292,9 @@ describe('UserDto Model', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUpdatedUser = {
         _id: new ObjectId(mockUserId),
-        createdAt: new Date(),
+        createdAt: mockCurrentDate,
         device: 'APP' as Device,
-        lastActiveAt: new Date(),
+        lastActiveAt: mockCurrentDate,
         roomId: mockRoomId,
         status: 'ACTIVE' as UserStatus,
       };
@@ -321,7 +319,7 @@ describe('UserDto Model', () => {
       );
     });
 
-    it('當數據庫操作失敗時應返回 null', async () => {
+    it('當資料庫操作失敗時應返回 null', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
 
@@ -340,9 +338,9 @@ describe('UserDto Model', () => {
       const mockStatus = 'LEFT' as UserStatus;
       const mockUpdatedUser = {
         _id: new ObjectId(mockUserId),
-        createdAt: new Date(),
+        createdAt: mockCurrentDate,
         device: 'APP' as Device,
-        lastActiveAt: new Date(),
+        lastActiveAt: mockCurrentDate,
         status: mockStatus,
       };
 
@@ -365,7 +363,7 @@ describe('UserDto Model', () => {
       );
     });
 
-    it('當數據庫操作失敗時應返回 null', async () => {
+    it('當資料庫操作失敗時應返回 null', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as UserStatus;
 

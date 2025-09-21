@@ -8,6 +8,8 @@ import userService from '@/services/user.service';
 
 import type { WaitingPool } from '../waiting-pool';
 
+export type MatchHandlers = ReturnType<typeof createMatchHandlers>;
+
 export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
   async function handleMatchStart(newUser: WaitingUser) {
     const peerUser = waitingPool.getNextUserFromPool();

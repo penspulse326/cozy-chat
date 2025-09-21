@@ -1,10 +1,10 @@
 import type { Device } from '@packages/lib/dist';
+import type { UserStatus } from '@packages/lib/dist/types';
 import type { Server, Socket } from 'socket.io';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { WaitingPool } from '@/socket/waiting-pool';
-import type { UserStatus } from '@packages/lib/dist/types';
 
 import userService from '@/services/user.service';
 import { createMatchHandlers } from '@/socket/handlers/match';
@@ -75,8 +75,8 @@ describe('Match Handlers', () => {
       vi.spyOn(waitingPool, 'getNextUserFromPool').mockReturnValue(peerUser);
 
       const mockMatchedUsers = [
-        { ...newUser, id: 'user1', roomId: 'room123', createdAt: new Date(), lastActiveAt: new Date(), status: 'ACTIVE' as UserStatus },
-        { ...peerUser, id: 'user2', roomId: 'room123', createdAt: new Date(), lastActiveAt: new Date(), status: 'ACTIVE' as UserStatus },
+        { ...newUser, createdAt: new Date(), id: 'user1', lastActiveAt: new Date(), roomId: 'room123', status: 'ACTIVE' as UserStatus },
+        { ...peerUser, createdAt: new Date(), id: 'user2', lastActiveAt: new Date(), roomId: 'room123', status: 'ACTIVE' as UserStatus },
       ];
 
       vi.mocked(userService.createMatchedUsers).mockResolvedValue(
@@ -137,12 +137,12 @@ describe('Match Handlers', () => {
       const roomId = 'room123';
 
       vi.mocked(userService.updateUserStatus).mockResolvedValue({
-        id: userId,
         createdAt: new Date(),
         device: 'PC' as Device,
+        id: userId,
         lastActiveAt: new Date(),
-        status: 'LEFT' as UserStatus,
         roomId: roomId,
+        status: 'LEFT' as UserStatus,
       });
 
       await matchHandlers.handleMatchLeave(userId);

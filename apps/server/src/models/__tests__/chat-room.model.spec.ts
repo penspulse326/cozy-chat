@@ -74,7 +74,7 @@ describe('Chat Room Model', () => {
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
 
-    it('當數據庫操作失敗時應返回 null', async () => {
+    it('當資料庫操作失敗時應返回 null', async () => {
       const mockChatRoom = {
         createdAt: new Date(),
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
@@ -126,7 +126,7 @@ describe('Chat Room Model', () => {
       });
     });
 
-    it('當數據庫操作失敗時應返回 null', async () => {
+    it('當資料庫操作失敗時應返回 null', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
 

@@ -1,6 +1,5 @@
 import type { Server, Socket } from 'socket.io';
 
-import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChatHandlers } from '@/socket/handlers/chat';
@@ -27,6 +26,8 @@ describe('UserDto Handlers', () => {
   let mockSocketsMap: Map<string, Socket>;
   let mockChatHandlers: Partial<ChatHandlers>;
 
+  const mockCurrentTime = new Date();
+
   beforeEach(() => {
     mockSocket = {
       emit: vi.fn(),
@@ -34,7 +35,7 @@ describe('UserDto Handlers', () => {
     };
 
     mockSocketsMap = new Map();
-    mockSocketsMap.set('socket1', mockSocket as unknown as Socket);
+    mockSocketsMap.set('socket1', mockSocket as Socket);
 
     mockIo = {
       emit: vi.fn(),
@@ -57,15 +58,15 @@ describe('UserDto Handlers', () => {
   describe('handleCheckUser', () => {
     it('當聊天室存在時，應該加入房間並載入聊天訊息', async () => {
       const userHandlers = createUserHandlers(
-        mockIo as unknown as Server,
+        mockIo as Server,
         mockChatHandlers as ChatHandlers
       );
       const socketId = 'socket1';
       const roomId = 'room123';
 
       vi.mocked(chatRoomService.findChatRoomById).mockResolvedValue({
-        id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
-        createdAt: new Date(),
+        createdAt: mockCurrentTime,
+        id: 'room123',
         users: ['user1', 'user2'],
       });
 
@@ -82,7 +83,7 @@ describe('UserDto Handlers', () => {
 
     it('當聊天室不存在時，應該發送重連失敗事件', async () => {
       const userHandlers = createUserHandlers(
-        mockIo as unknown as Server,
+        mockIo as Server,
         mockChatHandlers as ChatHandlers
       );
       const socketId = 'socket1';
@@ -103,15 +104,15 @@ describe('UserDto Handlers', () => {
 
     it('當使用者已離開時，應該發送離開事件', async () => {
       const userHandlers = createUserHandlers(
-        mockIo as unknown as Server,
+        mockIo as Server,
         mockChatHandlers as ChatHandlers
       );
       const socketId = 'socket1';
       const roomId = 'room123';
 
       vi.mocked(chatRoomService.findChatRoomById).mockResolvedValue({
-        id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
-        createdAt: new Date(),
+        createdAt: mockCurrentTime,
+        id: 'room123',
         users: ['user1', 'user2'],
       });
 
