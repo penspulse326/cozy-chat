@@ -112,4 +112,19 @@ describe('Database Configuration', () => {
       expect(dbModule.db).toBeDefined();
     });
   });
+
+  describe('getCollection', () => {
+    it('應該返回指定名稱的集合', async () => {
+      await dbModule.connectToDB();
+      const mockCollectionName = 'test_collection';
+      const mockDbInstance = mockMongoClientInstance.db();
+      const mockCollection = {} as any; // Mock collection object
+      vi.mocked(mockDbInstance.collection).mockReturnValue(mockCollection);
+
+      const collection = dbModule.getCollection(mockCollectionName);
+
+      expect(mockDbInstance.collection).toHaveBeenCalledWith(mockCollectionName);
+      expect(collection).toBe(mockCollection);
+    });
+  });
 });

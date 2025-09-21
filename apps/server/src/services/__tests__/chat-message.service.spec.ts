@@ -1,6 +1,5 @@
 import type { Device, UserStatus } from '@packages/lib';
 
-import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import chatMessageModel from '@/models/chat-message.model';
@@ -22,6 +21,8 @@ vi.mock('@/models/user.model', () => ({
 }));
 
 describe('Chat Message Service', () => {
+  const ANY_DATE = expect.any(Date);
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -36,30 +37,28 @@ describe('Chat Message Service', () => {
       const mockDevice = 'APP';
       const mockChatMessageResult = {
         content: 'Hello world',
-        createdAt: new Date(),
-        device: mockDevice,
+        createdAt: ANY_DATE,
+        device: mockDevice as Device,
         id: '507f1f77bcf86cd799439033',
         roomId: mockChatMessageData.roomId,
         userId: mockChatMessageData.userId,
       };
-      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
-        mockChatMessageResult
-      );
+      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(mockChatMessageResult);
 
-      const result = await chatMessageService.createChatMessage(
+      const actual = await chatMessageService.createChatMessage(
         mockChatMessageData,
         mockDevice
       );
 
-      expect(result).toBe(mockChatMessageResult);
+      expect(actual).toBe(mockChatMessageResult);
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
       const calledWith = vi.mocked(chatMessageModel.createChatMessage).mock
         .calls[0][0];
       expect(calledWith).toEqual(
         expect.objectContaining({
           content: mockChatMessageData.content,
-          createdAt: expect.any(Date),
-          device: mockDevice,
+          createdAt: ANY_DATE,
+          device: mockDevice as Device,
           roomId: mockChatMessageData.roomId,
           userId: mockChatMessageData.userId,
         })
@@ -104,21 +103,20 @@ describe('Chat Message Service', () => {
     it('當找到聊天訊息時應返回聊天訊息', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
       const mockChatMessage = {
-        _id: new ObjectId(mockMessageId),
+        _id: 'mockMessageId',
         content: 'Hello world',
-        createdAt: new Date(),
+        createdAt: ANY_DATE,
         device: 'APP' as Device,
+        id: mockMessageId,
         roomId: '507f1f77bcf86cd799439022',
         userId: '507f1f77bcf86cd799439011',
       };
 
-      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(
-        mockChatMessage
-      );
+      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(mockChatMessage);
 
-      const result =
+      const actual =
         await chatMessageService.findChatMessageById(mockMessageId);
-      expect(result).toBe(mockChatMessage);
+      expect(actual).toBe(mockChatMessage);
       expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(
         mockMessageId
       );
@@ -158,30 +156,30 @@ describe('Chat Message Service', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatMessages = [
         {
-          _id: new ObjectId('507f1f77bcf86cd799439033'),
+          _id: 'mockMessageId1',
           content: 'Hello world',
-          createdAt: new Date(),
+          createdAt: ANY_DATE,
           device: 'APP' as Device,
+          id: '507f1f77bcf86cd799439033',
           roomId: mockRoomId,
           userId: '507f1f77bcf86cd799439011',
         },
         {
-          _id: new ObjectId('507f1f77bcf86cd799439034'),
+          _id: 'mockMessageId2',
           content: 'How are you?',
-          createdAt: new Date(),
+          createdAt: ANY_DATE,
           device: 'PC' as Device,
+          id: '507f1f77bcf86cd799439034',
           roomId: mockRoomId,
           userId: '507f1f77bcf86cd799439012',
         },
       ];
 
-      vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockResolvedValue(
-        mockChatMessages
-      );
+      vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockResolvedValue(mockChatMessages);
 
-      const result =
+      const actual =
         await chatMessageService.findChatMessagesByRoomId(mockRoomId);
-      expect(result).toBe(mockChatMessages);
+      expect(actual).toBe(mockChatMessages);
       expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledWith(
         mockRoomId
       );
@@ -233,18 +231,18 @@ describe('Chat Message Service', () => {
       };
 
       const mockUser = {
-        _id: new ObjectId(mockChatMessageData.userId),
-        createdAt: new Date(),
+        _id: 'mockUserId',
+        createdAt: ANY_DATE,
         device: 'APP' as Device,
         id: mockChatMessageData.userId,
-        lastActiveAt: new Date(),
+        lastActiveAt: ANY_DATE,
         roomId: mockChatMessageData.roomId,
         status: 'ACTIVE' as UserStatus,
       };
 
       const mockChatMessage = {
         content: mockChatMessageData.content,
-        createdAt: new Date(),
+        createdAt: ANY_DATE,
         device: mockUser.device,
         id: '507f1f77bcf86cd799439033',
         roomId: mockChatMessageData.roomId,
@@ -252,14 +250,12 @@ describe('Chat Message Service', () => {
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
-      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
-        mockChatMessage
-      );
+      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(mockChatMessage);
 
-      const result =
+      const actual =
         await chatMessageService.sendChatMessage(mockChatMessageData);
 
-      expect(result).toBe(mockChatMessage);
+      expect(actual).toBe(mockChatMessage);
       expect(userModel.findUserById).toHaveBeenCalledWith(
         mockChatMessageData.userId
       );
@@ -293,11 +289,11 @@ describe('Chat Message Service', () => {
       };
 
       const mockUser = {
-        _id: new ObjectId(mockChatMessageData.userId),
-        createdAt: new Date(),
+        _id: 'mockUserId',
+        createdAt: ANY_DATE,
         device: 'APP' as Device,
         id: mockChatMessageData.userId,
-        lastActiveAt: new Date(),
+        lastActiveAt: ANY_DATE,
         roomId: mockChatMessageData.roomId,
         status: 'ACTIVE' as UserStatus,
       };

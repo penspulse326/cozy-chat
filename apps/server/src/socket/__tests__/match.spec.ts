@@ -4,6 +4,7 @@ import type { Server, Socket } from 'socket.io';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { WaitingPool } from '@/socket/waiting-pool';
+import type { UserStatus } from '@packages/lib/dist/types';
 
 import userService from '@/services/user.service';
 import { createMatchHandlers } from '@/socket/handlers/match';
@@ -54,13 +55,13 @@ describe('Match Handlers', () => {
       );
       const newUser = { device: 'PC' as Device, socketId: 'socket1' };
 
-      vi.spyOn(waitingPool, 'getNextFromPool').mockReturnValue(undefined);
-      vi.spyOn(waitingPool, 'addToPool');
+      vi.spyOn(waitingPool, 'getNextUserFromPool').mockReturnValue(undefined);
+      vi.spyOn(waitingPool, 'addUserToPool');
 
       await matchHandlers.handleMatchStart(newUser);
 
-      expect(waitingPool.getNextFromPool).toHaveBeenCalled();
-      expect(waitingPool.addToPool).toHaveBeenCalledWith(newUser);
+      expect(waitingPool.getNextUserFromPool).toHaveBeenCalled();
+      expect(waitingPool.addUserToPool).toHaveBeenCalledWith(newUser);
     });
 
     it('當有等待使用者時，應該匹配並通知兩個使用者', async () => {
@@ -71,21 +72,20 @@ describe('Match Handlers', () => {
       const newUser = { device: 'PC' as Device, socketId: 'socket1' };
       const peerUser = { device: 'APP' as Device, socketId: 'socket2' };
 
-      vi.spyOn(waitingPool, 'getNextFromPool').mockReturnValue(peerUser);
+      vi.spyOn(waitingPool, 'getNextUserFromPool').mockReturnValue(peerUser);
 
       const mockMatchedUsers = [
-        { ...newUser, userId: 'user1' },
-        { ...peerUser, userId: 'user2' },
+        { ...newUser, id: 'user1', roomId: 'room123', createdAt: new Date(), lastActiveAt: new Date(), status: 'ACTIVE' as UserStatus },
+        { ...peerUser, id: 'user2', roomId: 'room123', createdAt: new Date(), lastActiveAt: new Date(), status: 'ACTIVE' as UserStatus },
       ];
 
-      vi.mocked(userService.createMatchedUsers).mockResolvedValue({
-        matchedUsers: mockMatchedUsers,
-        roomId: 'room123',
-      });
+      vi.mocked(userService.createMatchedUsers).mockResolvedValue(
+        mockMatchedUsers
+      );
 
       await matchHandlers.handleMatchStart(newUser);
 
-      expect(waitingPool.getNextFromPool).toHaveBeenCalled();
+      expect(waitingPool.getNextUserFromPool).toHaveBeenCalled();
       expect(userService.createMatchedUsers).toHaveBeenCalledWith(
         newUser,
         peerUser
@@ -103,12 +103,12 @@ describe('Match Handlers', () => {
         waitingPool
       );
 
-      vi.spyOn(waitingPool, 'removeFromPool').mockReturnValue(true);
+      vi.spyOn(waitingPool, 'removeUserFromPool').mockReturnValue(true);
       vi.spyOn(waitingPool, 'getPoolUsers').mockReturnValue([]);
 
       matchHandlers.handleMatchCancel('socket1');
 
-      expect(waitingPool.removeFromPool).toHaveBeenCalledWith('socket1');
+      expect(waitingPool.removeUserFromPool).toHaveBeenCalledWith('socket1');
       expect(mockSocket.emit).toHaveBeenCalledWith('match:cancel');
     });
 
@@ -118,11 +118,11 @@ describe('Match Handlers', () => {
         waitingPool
       );
 
-      vi.spyOn(waitingPool, 'removeFromPool').mockReturnValue(false);
+      vi.spyOn(waitingPool, 'removeUserFromPool').mockReturnValue(false);
 
       matchHandlers.handleMatchCancel('nonexistent');
 
-      expect(waitingPool.removeFromPool).toHaveBeenCalledWith('nonexistent');
+      expect(waitingPool.removeUserFromPool).toHaveBeenCalledWith('nonexistent');
       expect(mockSocket.emit).not.toHaveBeenCalled();
     });
   });
@@ -137,7 +137,12 @@ describe('Match Handlers', () => {
       const roomId = 'room123';
 
       vi.mocked(userService.updateUserStatus).mockResolvedValue({
-        roomId,
+        id: userId,
+        createdAt: new Date(),
+        device: 'PC' as Device,
+        lastActiveAt: new Date(),
+        status: 'LEFT' as UserStatus,
+        roomId: roomId,
       });
 
       await matchHandlers.handleMatchLeave(userId);

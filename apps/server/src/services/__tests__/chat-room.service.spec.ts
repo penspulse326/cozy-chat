@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import chatRoomModel from '@/models/chat-room.model';
@@ -12,6 +11,8 @@ vi.mock('@/models/chat-room.model', () => ({
 }));
 
 describe('Chat Room Service', () => {
+  const ANY_DATE = expect.any(Date);
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -22,24 +23,26 @@ describe('Chat Room Service', () => {
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439012',
       ];
-      const mockRoomId = new ObjectId('507f1f77bcf86cd799439022');
-      const mockInsertResult = {
-        acknowledged: true,
-        insertedId: mockRoomId,
-      };
-      vi.mocked(chatRoomModel.createChatRoom).mockResolvedValue(
-        mockInsertResult
-      );
+      const mockRoomId = 'mockRoomId';
+      vi.mocked(chatRoomModel.createChatRoom).mockResolvedValue({
+        createdAt: ANY_DATE,
+        id: mockRoomId,
+        users: mockChatRoomUserIds,
+      });
 
-      const result = await chatRoomService.createChatRoom(mockChatRoomUserIds);
+      const actual = await chatRoomService.createChatRoom(mockChatRoomUserIds);
 
-      expect(result).toBe(mockInsertResult);
+      expect(actual).toEqual({
+        createdAt: ANY_DATE,
+        id: mockRoomId,
+        users: mockChatRoomUserIds,
+      });
       expect(chatRoomModel.createChatRoom).toHaveBeenCalledTimes(1);
       const calledWith = vi.mocked(chatRoomModel.createChatRoom).mock
         .calls[0][0];
       expect(calledWith).toEqual(
         expect.objectContaining({
-          createdAt: expect.any(Date),
+          createdAt: ANY_DATE,
           users: mockChatRoomUserIds,
         })
       );
@@ -78,15 +81,23 @@ describe('Chat Room Service', () => {
     it('當找到聊天室時應返回聊天室', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatRoom = {
-        _id: new ObjectId(mockRoomId),
-        createdAt: new Date(),
+        _id: 'mockRoomId',
+        createdAt: ANY_DATE,
         users: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
       };
 
-      vi.mocked(chatRoomModel.findChatRoomById).mockResolvedValue(mockChatRoom);
+      vi.mocked(chatRoomModel.findChatRoomById).mockResolvedValue({
+        createdAt: mockChatRoom.createdAt,
+        id: mockRoomId,
+        users: mockChatRoom.users,
+      });
 
-      const result = await chatRoomService.findChatRoomById(mockRoomId);
-      expect(result).toBe(mockChatRoom);
+      const actual = await chatRoomService.findChatRoomById(mockRoomId);
+      expect(actual).toEqual({
+        createdAt: ANY_DATE,
+        id: mockRoomId,
+        users: mockChatRoom.users,
+      });
       expect(chatRoomModel.findChatRoomById).toHaveBeenCalledWith(mockRoomId);
       expect(chatRoomModel.findChatRoomById).toHaveBeenCalledTimes(1);
     });

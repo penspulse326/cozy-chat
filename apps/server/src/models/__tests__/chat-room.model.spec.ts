@@ -1,13 +1,11 @@
 import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { db } from '@/config/db';
+import { getCollection } from '@/config/db';
 import chatRoomModel from '@/models/chat-room.model';
 
 vi.mock('@/config/db', () => ({
-  db: {
-    collection: vi.fn(),
-  },
+  getCollection: vi.fn(),
 }));
 
 describe('Chat Room Model', () => {
@@ -20,8 +18,8 @@ describe('Chat Room Model', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(db.collection).mockReturnValue(
-      mockCollection as unknown as ReturnType<typeof db.collection>
+    vi.mocked(getCollection).mockReturnValue(
+      mockCollection as unknown as ReturnType<typeof getCollection>
     );
 
     consoleErrorSpy = vi
@@ -46,18 +44,20 @@ describe('Chat Room Model', () => {
         insertedId: mockObjectId,
       };
 
-      mockCollection.insertOne.mockImplementation(async () => {
+      mockCollection.insertOne.mockImplementation(() => {
         return mockInsertResult;
       });
 
-      const result = await chatRoomModel.createChatRoom(mockChatRoom);
+      const actual = await chatRoomModel.createChatRoom(mockChatRoom);
 
-      expect(result).toEqual(expect.objectContaining({
+      expect(actual).toEqual(expect.objectContaining({
         createdAt: expect.any(Date),
         users: mockChatRoom.users
       }));
-      expect(result.id).toBeTruthy(); // 只檢查 ID 存在
-      expect(db.collection).toHaveBeenCalledWith('chat_rooms');
+      if (actual) {
+        expect(actual.id).toBeTruthy(); // 只檢查 ID 存在
+      }
+      expect(getCollection).toHaveBeenCalledWith('chat_rooms');
       expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatRoom));
     });
 
@@ -67,9 +67,9 @@ describe('Chat Room Model', () => {
         users: 'not-an-array' as unknown as string[],
       };
 
-      const result = await chatRoomModel.createChatRoom(mockInvalidChatRoom);
+      const actual = await chatRoomModel.createChatRoom(mockInvalidChatRoom);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
@@ -82,9 +82,9 @@ describe('Chat Room Model', () => {
 
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
 
-      const result = await chatRoomModel.createChatRoom(mockChatRoom);
+      const actual = await chatRoomModel.createChatRoom(mockChatRoom);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatRoom));
     });
@@ -101,13 +101,14 @@ describe('Chat Room Model', () => {
       };
       mockCollection.findOne.mockResolvedValue(mockChatRoom);
 
-      const result = await chatRoomModel.findChatRoomById(mockRoomId);
+      const actual = await chatRoomModel.findChatRoomById(mockRoomId);
 
-      expect(result).toEqual({
-        ...mockChatRoom,
+      expect(actual).toEqual({
+        createdAt: mockChatRoom.createdAt,
         id: mockRoomId,
+        users: mockChatRoom.users,
       });
-      expect(db.collection).toHaveBeenCalledWith('chat_rooms');
+      expect(getCollection).toHaveBeenCalledWith('chat_rooms');
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
       });
@@ -117,9 +118,9 @@ describe('Chat Room Model', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       mockCollection.findOne.mockResolvedValue(null);
 
-      const result = await chatRoomModel.findChatRoomById(mockRoomId);
+      const actual = await chatRoomModel.findChatRoomById(mockRoomId);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
       });
@@ -129,9 +130,9 @@ describe('Chat Room Model', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
 
-      const result = await chatRoomModel.findChatRoomById(mockRoomId);
+      const actual = await chatRoomModel.findChatRoomById(mockRoomId);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });

@@ -3,13 +3,11 @@ import type { Device, UserStatus } from '@packages/lib';
 import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { db } from '@/config/db';
+import { getCollection } from '@/config/db';
 import userModel from '@/models/user.model';
 
 vi.mock('@/config/db', () => ({
-  db: {
-    collection: vi.fn(),
-  },
+  getCollection: vi.fn(),
 }));
 
 describe('UserDto Model', () => {
@@ -29,8 +27,8 @@ describe('UserDto Model', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(db.collection).mockReturnValue(
-      mockCollection as unknown as ReturnType<typeof db.collection>
+    vi.mocked(getCollection).mockReturnValue(
+      mockCollection as unknown as ReturnType<typeof getCollection>
     );
     mockCollection.find.mockReturnValue(mockFindCursor);
 
@@ -58,20 +56,20 @@ describe('UserDto Model', () => {
         insertedId: mockObjectId,
       };
 
-      mockCollection.insertOne.mockImplementation(async () => {
+      mockCollection.insertOne.mockImplementation(() => {
         return mockInsertResult;
       });
 
-      const result = await userModel.createUser(mockUser);
+      const actual = await userModel.createUser(mockUser);
 
-      expect(result!).toEqual(expect.objectContaining({
+      expect(actual).toEqual(expect.objectContaining({
         createdAt: expect.any(Date),
         device: mockUser.device,
         lastActiveAt: expect.any(Date),
         status: mockUser.status
       }));
-      expect(result.id).toBeTruthy(); // 只檢查 ID 存在
-      expect(db.collection).toHaveBeenCalledWith('users');
+      expect(actual?.id).toBeTruthy(); // 只檢查 ID 存在
+      expect(getCollection).toHaveBeenCalledWith('users');
       expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockUser));
     });
 
@@ -83,9 +81,9 @@ describe('UserDto Model', () => {
         status: 'ACTIVE' as UserStatus,
       };
 
-      const result = await userModel.createUser(mockInvalidUser);
+      const actual = await userModel.createUser(mockInvalidUser);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
@@ -100,9 +98,9 @@ describe('UserDto Model', () => {
 
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
 
-      const result = await userModel.createUser(mockUser);
+      const actual = await userModel.createUser(mockUser);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockUser));
     });
@@ -122,13 +120,16 @@ describe('UserDto Model', () => {
 
       mockCollection.findOne.mockResolvedValue(mockUser);
 
-      const result = await userModel.findUserById(mockUserId);
+      const actual = await userModel.findUserById(mockUserId);
 
-      expect(result).toEqual({
-        ...mockUser,
+      expect(actual).toEqual({
+        createdAt: mockUser.createdAt,
+        device: mockUser.device,
         id: mockUserId,
+        lastActiveAt: mockUser.lastActiveAt,
+        status: mockUser.status,
       });
-      expect(db.collection).toHaveBeenCalledWith('users');
+      expect(getCollection).toHaveBeenCalledWith('users');
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
       });
@@ -139,9 +140,9 @@ describe('UserDto Model', () => {
 
       mockCollection.findOne.mockResolvedValue(null);
 
-      const result = await userModel.findUserById(mockUserId);
+      const actual = await userModel.findUserById(mockUserId);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
       });
@@ -152,9 +153,9 @@ describe('UserDto Model', () => {
 
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
 
-      const result = await userModel.findUserById(mockUserId);
+      const actual = await userModel.findUserById(mockUserId);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
@@ -183,13 +184,17 @@ describe('UserDto Model', () => {
 
       mockFindCursor.toArray.mockResolvedValue(mockUsers);
 
-      const result = await userModel.findUsersByRoomId(mockRoomId);
+      const actual = await userModel.findUsersByRoomId(mockRoomId);
 
-      expect(result).toEqual(mockUsers?.map(user => ({
-        ...user,
+      expect(actual).toEqual(mockUsers.map(user => ({
+        createdAt: user.createdAt,
+        device: user.device,
         id: user._id.toString(),
+        lastActiveAt: user.lastActiveAt,
+        roomId: user.roomId,
+        status: user.status,
       })));
-      expect(db.collection).toHaveBeenCalledWith('users');
+      expect(getCollection).toHaveBeenCalledWith('users');
       expect(mockCollection.find).toHaveBeenCalledWith({ roomId: mockRoomId });
       expect(mockFindCursor.toArray).toHaveBeenCalled();
     });
@@ -199,9 +204,9 @@ describe('UserDto Model', () => {
 
       mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
 
-      const result = await userModel.findUsersByRoomId(mockRoomId);
+      const actual = await userModel.findUsersByRoomId(mockRoomId);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
@@ -241,16 +246,20 @@ describe('UserDto Model', () => {
         toArray: vi.fn().mockResolvedValue(mockUpdatedUsers),
       });
 
-      const result = await userModel.updateManyUserRoomId(
+      const actual = await userModel.updateManyUserRoomId(
         mockUserIds,
         mockRoomId
       );
 
-      expect(result).toEqual(mockUpdatedUsers.map(user => ({
-        ...user,
+      expect(actual).toEqual(mockUpdatedUsers.map(user => ({
+        createdAt: user.createdAt,
+        device: user.device,
         id: user._id.toString(),
+        lastActiveAt: user.lastActiveAt,
+        roomId: user.roomId,
+        status: user.status,
       })));
-      expect(db.collection).toHaveBeenCalledWith('users');
+      expect(getCollection).toHaveBeenCalledWith('users');
       expect(mockCollection.updateMany).toHaveBeenCalledWith(
         { _id: { $in: expect.any(Array) } },
         { $set: { roomId: mockRoomId } }
@@ -269,12 +278,12 @@ describe('UserDto Model', () => {
 
       mockCollection.updateMany.mockRejectedValue(new Error('DB Error'));
 
-      const result = await userModel.updateManyUserRoomId(
+      const actual = await userModel.updateManyUserRoomId(
         mockUserIds,
         mockRoomId
       );
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
@@ -294,13 +303,17 @@ describe('UserDto Model', () => {
 
       mockCollection.findOneAndUpdate.mockResolvedValue(mockUpdatedUser);
 
-      const result = await userModel.updateUserRoomId(mockUserId, mockRoomId);
+      const actual = await userModel.updateUserRoomId(mockUserId, mockRoomId);
 
-      expect(result).toEqual({
-        ...mockUpdatedUser,
+      expect(actual).toEqual({
+        createdAt: mockUpdatedUser.createdAt,
+        device: mockUpdatedUser.device,
         id: mockUpdatedUser._id.toString(),
+        lastActiveAt: mockUpdatedUser.lastActiveAt,
+        roomId: mockUpdatedUser.roomId,
+        status: mockUpdatedUser.status,
       });
-      expect(db.collection).toHaveBeenCalledWith('users');
+      expect(getCollection).toHaveBeenCalledWith('users');
       expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: expect.any(ObjectId) },
         { $set: { roomId: mockRoomId } },
@@ -314,9 +327,9 @@ describe('UserDto Model', () => {
 
       mockCollection.findOneAndUpdate.mockRejectedValue(new Error('DB Error'));
 
-      const result = await userModel.updateUserRoomId(mockUserId, mockRoomId);
+      const actual = await userModel.updateUserRoomId(mockUserId, mockRoomId);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
@@ -335,13 +348,16 @@ describe('UserDto Model', () => {
 
       mockCollection.findOneAndUpdate.mockResolvedValue(mockUpdatedUser);
 
-      const result = await userModel.updateUserStatus(mockUserId, mockStatus);
+      const actual = await userModel.updateUserStatus(mockUserId, mockStatus);
 
-      expect(result).toEqual({
-        ...mockUpdatedUser,
+      expect(actual).toEqual({
+        createdAt: mockUpdatedUser.createdAt,
+        device: mockUpdatedUser.device,
         id: mockUpdatedUser._id.toString(),
+        lastActiveAt: mockUpdatedUser.lastActiveAt,
+        status: mockUpdatedUser.status,
       });
-      expect(db.collection).toHaveBeenCalledWith('users');
+      expect(getCollection).toHaveBeenCalledWith('users');
       expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: expect.any(ObjectId) },
         { $set: { status: mockStatus } },
@@ -355,9 +371,9 @@ describe('UserDto Model', () => {
 
       mockCollection.findOneAndUpdate.mockRejectedValue(new Error('DB Error'));
 
-      const result = await userModel.updateUserStatus(mockUserId, mockStatus);
+      const actual = await userModel.updateUserStatus(mockUserId, mockStatus);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });

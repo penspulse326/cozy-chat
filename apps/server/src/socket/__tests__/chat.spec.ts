@@ -29,7 +29,7 @@ describe('Chat Handlers', () => {
         userId: 'user456',
       };
       const mockNewChatMessage = {
-        _id: new ObjectId('507f1f77bcf86cd799439011'),
+        id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
         content: '你好',
         createdAt: new Date(),
         device: 'PC' as Device,
@@ -37,9 +37,7 @@ describe('Chat Handlers', () => {
         userId: 'user456',
       };
 
-      vi.mocked(chatMessageService.sendChatMessage).mockResolvedValue(
-        mockNewChatMessage
-      );
+      vi.mocked(chatMessageService.sendChatMessage).mockResolvedValue(mockNewChatMessage);
 
       await chatHandlers.handleChatSend(mockChatMessage);
 
@@ -57,7 +55,7 @@ describe('Chat Handlers', () => {
       const mockRoomId = 'room123';
       const mockChatMessages = [
         {
-          _id: new ObjectId('507f1f77bcf86cd799439011'),
+          id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
           content: '你好',
           createdAt: new Date(),
           device: 'PC' as Device,
@@ -65,7 +63,7 @@ describe('Chat Handlers', () => {
           userId: 'user1',
         },
         {
-          _id: new ObjectId('507f1f77bcf86cd799439022'),
+          id: new ObjectId('507f1f77bcf86cd799439022').toHexString(),
           content: '你好嗎？',
           createdAt: new Date(),
           device: 'APP' as Device,
@@ -74,9 +72,7 @@ describe('Chat Handlers', () => {
         },
       ];
 
-      vi.mocked(chatMessageService.findChatMessagesByRoomId).mockResolvedValue(
-        mockChatMessages
-      );
+      vi.mocked(chatMessageService.findChatMessagesByRoomId).mockResolvedValue(mockChatMessages);
 
       await chatHandlers.handleChatLoad(mockRoomId);
 

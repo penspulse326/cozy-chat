@@ -65,7 +65,7 @@ describe('Socket Server', () => {
     };
 
     mockState = {
-      removeFromPool: vi.fn(),
+      removeUserFromPool: vi.fn(),
     };
 
     mockChatHandlers = {
@@ -326,6 +326,6 @@ describe('Socket Server', () => {
       disconnectHandler();
     }
 
-    expect(mockState.removeFromPool).toHaveBeenCalledWith(mockSocket.id);
+    expect(mockState.removeUserFromPool).toHaveBeenCalledWith(mockSocket.id);
   });
 });

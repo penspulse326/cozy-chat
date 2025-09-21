@@ -64,7 +64,7 @@ describe('UserDto Handlers', () => {
       const roomId = 'room123';
 
       vi.mocked(chatRoomService.findChatRoomById).mockResolvedValue({
-        _id: new ObjectId('507f1f77bcf86cd799439011'),
+        id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
         createdAt: new Date(),
         users: ['user1', 'user2'],
       });
@@ -110,7 +110,7 @@ describe('UserDto Handlers', () => {
       const roomId = 'room123';
 
       vi.mocked(chatRoomService.findChatRoomById).mockResolvedValue({
-        _id: new ObjectId('507f1f77bcf86cd799439011'),
+        id: new ObjectId('507f1f77bcf86cd799439011').toHexString(),
         createdAt: new Date(),
         users: ['user1', 'user2'],
       });

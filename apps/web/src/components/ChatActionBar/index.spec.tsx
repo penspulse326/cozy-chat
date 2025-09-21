@@ -51,7 +51,7 @@ describe('ChatActionBar', () => {
     expect(screen.getByRole('button', { name: '送出' })).toBeDisabled();
   });
 
-  it('點擊離開按鈕時，應呼叫 onLeave', async () => {
+  it('點擊離開按鈕時，應呼叫 onLeave', () => {
     render(
       <ChatActionBar
         matchStatus="matched"
@@ -63,7 +63,7 @@ describe('ChatActionBar', () => {
     expect(onLeaveMock).toHaveBeenCalledOnce();
   });
 
-  it('輸入文字並點擊送出按鈕時，應呼叫 onSend 並清空輸入框', async () => {
+  it('輸入文字並點擊送出按鈕時，應呼叫 onSend 並清空輸入框', () => {
     render(
       <ChatActionBar
         matchStatus="matched"
@@ -80,7 +80,7 @@ describe('ChatActionBar', () => {
     expect(input).toHaveValue('');
   });
 
-  it('輸入空白訊息時，點擊送出不應呼叫 onSend', async () => {
+  it('輸入空白訊息時，點擊送出不應呼叫 onSend', () => {
     render(
       <ChatActionBar
         matchStatus="matched"
@@ -94,7 +94,7 @@ describe('ChatActionBar', () => {
     expect(onSendMock).not.toHaveBeenCalled();
   });
 
-  it('在輸入框中按下 Enter 鍵時，應呼叫 onSend', async () => {
+  it('在輸入框中按下 Enter 鍵時，應呼叫 onSend', () => {
     render(
       <ChatActionBar
         matchStatus="matched"

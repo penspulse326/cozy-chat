@@ -1,7 +1,6 @@
 import type { Device, UserStatus } from '@packages/lib';
 
-import { ObjectId } from 'mongodb';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, } from 'vitest';
 
 import userModel from '@/models/user.model';
 import chatRoomService from '@/services/chat-room.service';
@@ -24,33 +23,41 @@ vi.mock('@/services/chat-room.service', () => ({
   },
 }));
 
-describe('UserDto Service', () => {
+describe('User Service', () => {
+  const ANY_DATE = expect.any(Date);
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('createUser', () => {
-    it('應該使用正確的載荷建立使用者', async () => {
+    it('應該使用正確的資料建立使用者', async () => {
+
       const mockUserData = {
-        device: 'APP' as Device,
+        device: 'APP' as any,
         socketId: 'socket123',
       };
       const mockInsertResult = {
-        acknowledged: true,
-        insertedId: new ObjectId(),
+        createdAt: ANY_DATE,
+        device: 'APP' as any,
+        id: 'mockUserId1',
+        lastActiveAt: ANY_DATE,
+        socketId: 'socket123',
+        status: 'ACTIVE' as any,
       };
       vi.mocked(userModel.createUser).mockResolvedValue(mockInsertResult);
 
-      const result = await userService.createUser(mockUserData);
+      const actual = await userService.createUser(mockUserData);
 
-      expect(result).toBe(mockInsertResult);
+      expect(actual).toBe(mockInsertResult);
       expect(userModel.createUser).toHaveBeenCalledTimes(1);
+
       const calledWith = vi.mocked(userModel.createUser).mock.calls[0][0];
       expect(calledWith).toEqual(
         expect.objectContaining({
-          createdAt: expect.any(Date),
+          createdAt: ANY_DATE,
           device: 'APP',
-          lastActiveAt: expect.any(Date),
+          lastActiveAt: ANY_DATE,
           status: 'ACTIVE',
         })
       );
@@ -89,18 +96,19 @@ describe('UserDto Service', () => {
     it('當找到使用者時應返回使用者', async () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockUser = {
-        _id: new ObjectId(mockUserId),
-        createdAt: new Date(),
+        createdAt: ANY_DATE,
         device: 'APP' as Device,
-        lastActiveAt: new Date(),
+        id: mockUserId,
+        lastActiveAt: ANY_DATE,
         roomId: '507f1f77bcf86cd799439022',
+        socketId: 'socket123',
         status: 'ACTIVE' as UserStatus,
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
 
-      const result = await userService.findUserById(mockUserId);
-      expect(result).toBe(mockUser);
+      const actual = await userService.findUserById(mockUserId);
+      expect(actual).toBe(mockUser);
       expect(userModel.findUserById).toHaveBeenCalledWith(mockUserId);
       expect(userModel.findUserById).toHaveBeenCalledTimes(1);
     });
@@ -123,27 +131,29 @@ describe('UserDto Service', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUsers = [
         {
-          _id: new ObjectId('507f1f77bcf86cd799439011'),
-          createdAt: new Date(),
+          createdAt: ANY_DATE,
           device: 'APP' as Device,
-          lastActiveAt: new Date(),
+          id: 'mockUserId1',
+          lastActiveAt: ANY_DATE,
           roomId: mockRoomId,
+          socketId: 'socket111',
           status: 'ACTIVE' as UserStatus,
         },
         {
-          _id: new ObjectId('507f1f77bcf86cd799439012'),
-          createdAt: new Date(),
+          createdAt: ANY_DATE,
           device: 'PC' as Device,
-          lastActiveAt: new Date(),
+          id: 'mockUserId2',
+          lastActiveAt: ANY_DATE,
           roomId: mockRoomId,
+          socketId: 'socket222',
           status: 'ACTIVE' as UserStatus,
         },
       ];
 
       vi.mocked(userModel.findUsersByRoomId).mockResolvedValue(mockUsers);
 
-      const result = await userService.findUsersByRoomId(mockRoomId);
-      expect(result).toBe(mockUsers);
+      const actual = await userService.findUsersByRoomId(mockRoomId);
+      expect(actual).toBe(mockUsers);
       expect(userModel.findUsersByRoomId).toHaveBeenCalledWith(mockRoomId);
       expect(userModel.findUsersByRoomId).toHaveBeenCalledTimes(1);
     });
@@ -166,17 +176,19 @@ describe('UserDto Service', () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUpdateResult = {
-        acknowledged: true,
-        matchedCount: 1,
-        modifiedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null,
+        createdAt: ANY_DATE,
+        device: 'APP' as Device,
+        id: mockUserId,
+        lastActiveAt: ANY_DATE,
+        roomId: mockRoomId,
+        socketId: 'socket123',
+        status: 'ACTIVE' as UserStatus,
       };
 
       vi.mocked(userModel.updateUserRoomId).mockResolvedValue(mockUpdateResult);
 
-      const result = await userService.updateUserRoomId(mockUserId, mockRoomId);
-      expect(result).toBe(mockUpdateResult);
+      const actual = await userService.updateUserRoomId(mockUserId, mockRoomId);
+      expect(actual).toBe(mockUpdateResult);
       expect(userModel.updateUserRoomId).toHaveBeenCalledWith(
         mockUserId,
         mockRoomId
@@ -207,26 +219,29 @@ describe('UserDto Service', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockStatus = 'LEFT' as const;
       const mockUser = {
-        _id: new ObjectId(mockUserId),
-        createdAt: new Date(),
+        createdAt: ANY_DATE,
         device: 'APP' as Device,
-        lastActiveAt: new Date(),
+        id: mockUserId,
+        lastActiveAt: ANY_DATE,
         roomId: mockRoomId,
+        socketId: 'socket123',
         status: 'ACTIVE' as UserStatus,
       };
       const mockUpdateResult = {
-        acknowledged: true,
-        matchedCount: 1,
-        modifiedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null,
+        createdAt: ANY_DATE,
+        device: 'APP' as Device,
+        id: mockUserId,
+        lastActiveAt: ANY_DATE,
+        roomId: mockRoomId,
+        socketId: 'socket123',
+        status: mockStatus,
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
       vi.mocked(userModel.updateUserStatus).mockResolvedValue(mockUpdateResult);
 
-      const result = await userService.updateUserStatus(mockUserId, mockStatus);
-      expect(result).toEqual({ roomId: mockRoomId });
+      const actual = await userService.updateUserStatus(mockUserId, mockStatus);
+      expect(actual).toEqual(mockUpdateResult);
       expect(userModel.findUserById).toHaveBeenCalledWith(mockUserId);
       expect(userModel.updateUserStatus).toHaveBeenCalledWith(
         mockUserId,
@@ -254,10 +269,11 @@ describe('UserDto Service', () => {
       const mockUserId = '507f1f77bcf86cd799439011';
       const mockStatus = 'LEFT' as const;
       const mockUser = {
-        _id: new ObjectId(mockUserId),
-        createdAt: new Date(),
+        createdAt: ANY_DATE,
         device: 'APP' as Device,
-        lastActiveAt: new Date(),
+        id: mockUserId,
+        lastActiveAt: ANY_DATE,
+        socketId: 'socket123',
         status: 'ACTIVE' as UserStatus,
       };
 
@@ -277,27 +293,29 @@ describe('UserDto Service', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUsers = [
         {
-          _id: new ObjectId('507f1f77bcf86cd799439011'),
-          createdAt: new Date(),
+          createdAt: ANY_DATE,
           device: 'APP' as Device,
-          lastActiveAt: new Date(),
+          id: 'mockUserId1',
+          lastActiveAt: ANY_DATE,
           roomId: mockRoomId,
+          socketId: 'socket111',
           status: 'ACTIVE' as UserStatus,
         },
         {
-          _id: new ObjectId('507f1f77bcf86cd799439012'),
-          createdAt: new Date(),
+          createdAt: ANY_DATE,
           device: 'PC' as Device,
-          lastActiveAt: new Date(),
+          id: 'mockUserId2',
+          lastActiveAt: ANY_DATE,
           roomId: mockRoomId,
+          socketId: 'socket222',
           status: 'LEFT' as UserStatus,
         },
       ];
 
       vi.mocked(userModel.findUsersByRoomId).mockResolvedValue(mockUsers);
 
-      const result = await userService.checkUserStatus(mockRoomId);
-      expect(result).toBe(true);
+      const actual = await userService.checkUserStatus(mockRoomId);
+      expect(actual).toBe(true);
       expect(userModel.findUsersByRoomId).toHaveBeenCalledWith(mockRoomId);
       expect(userModel.findUsersByRoomId).toHaveBeenCalledTimes(1);
     });
@@ -306,27 +324,29 @@ describe('UserDto Service', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockUsers = [
         {
-          _id: new ObjectId('507f1f77bcf86cd799439011'),
-          createdAt: new Date(),
+          createdAt: ANY_DATE,
           device: 'APP' as Device,
-          lastActiveAt: new Date(),
+          id: 'mockUserId1',
+          lastActiveAt: ANY_DATE,
           roomId: mockRoomId,
+          socketId: 'socket111',
           status: 'ACTIVE' as UserStatus,
         },
         {
-          _id: new ObjectId('507f1f77bcf86cd799439012'),
-          createdAt: new Date(),
+          createdAt: ANY_DATE,
           device: 'PC' as Device,
-          lastActiveAt: new Date(),
+          id: 'mockUserId2',
+          lastActiveAt: ANY_DATE,
           roomId: mockRoomId,
+          socketId: 'socket222',
           status: 'ACTIVE' as UserStatus,
         },
       ];
 
       vi.mocked(userModel.findUsersByRoomId).mockResolvedValue(mockUsers);
 
-      const result = await userService.checkUserStatus(mockRoomId);
-      expect(result).toBe(false);
+      const actual = await userService.checkUserStatus(mockRoomId);
+      expect(actual).toBe(false);
       expect(userModel.findUsersByRoomId).toHaveBeenCalledWith(mockRoomId);
       expect(userModel.findUsersByRoomId).toHaveBeenCalledTimes(1);
     });
@@ -336,8 +356,8 @@ describe('UserDto Service', () => {
 
       vi.mocked(userModel.findUsersByRoomId).mockResolvedValue(null);
 
-      const result = await userService.checkUserStatus(mockRoomId);
-      expect(result).toBe(false);
+      const actual = await userService.checkUserStatus(mockRoomId);
+      expect(actual).toBe(false);
       expect(userModel.findUsersByRoomId).toHaveBeenCalledWith(mockRoomId);
       expect(userModel.findUsersByRoomId).toHaveBeenCalledTimes(1);
     });
@@ -354,29 +374,54 @@ describe('UserDto Service', () => {
         socketId: 'socket456',
       };
 
-      const mockNewUserId = new ObjectId('507f1f77bcf86cd799439011');
-      const mockPeerUserId = new ObjectId('507f1f77bcf86cd799439012');
-      const mockRoomId = new ObjectId('507f1f77bcf86cd799439022');
+      const mockNewUserId = 'mockNewUserId';
+      const mockPeerUserId = 'mockPeerUserId';
+      const mockRoomId = 'mockRoomId';
 
       const mockNewUserResult = {
-        acknowledged: true,
-        insertedId: mockNewUserId,
+        createdAt: ANY_DATE,
+        device: mockNewUserData.device,
+        id: mockNewUserId,
+        lastActiveAt: ANY_DATE,
+        socketId: mockNewUserData.socketId,
+        status: 'ACTIVE' as UserStatus,
       };
 
       const mockPeerUserResult = {
-        acknowledged: true,
-        insertedId: mockPeerUserId,
+        createdAt: ANY_DATE,
+        device: mockPeerUserData.device,
+        id: mockPeerUserId,
+        lastActiveAt: ANY_DATE,
+        socketId: mockPeerUserData.socketId,
+        status: 'ACTIVE' as UserStatus,
       };
 
       const mockChatRoomResult = {
-        acknowledged: true,
-        insertedId: mockRoomId,
+        createdAt: ANY_DATE,
+        id: mockRoomId,
+        users: [mockNewUserId, mockPeerUserId],
       };
 
-      const mockUpdateManyResult = {
-        acknowledged: true,
-        modifiedCount: 2,
-      };
+      const mockUpdateManyResult = [
+        {
+          createdAt: ANY_DATE,
+          device: mockNewUserData.device,
+          id: mockNewUserId,
+          lastActiveAt: ANY_DATE,
+          roomId: mockRoomId,
+          socketId: mockNewUserData.socketId,
+          status: 'ACTIVE' as UserStatus,
+        },
+        {
+          createdAt: ANY_DATE,
+          device: mockPeerUserData.device,
+          id: mockPeerUserId,
+          lastActiveAt: ANY_DATE,
+          roomId: mockRoomId,
+          socketId: mockPeerUserData.socketId,
+          status: 'ACTIVE' as UserStatus,
+        },
+      ];
 
       vi.mocked(userModel.createUser).mockReset();
       vi.mocked(userModel.createUser)
@@ -390,33 +435,21 @@ describe('UserDto Service', () => {
         mockUpdateManyResult
       );
 
-      const result = await userService.createMatchedUsers(
+      const actual = await userService.createMatchedUsers(
         mockNewUserData,
         mockPeerUserData
       );
 
-      expect(result).toEqual({
-        matchedUsers: [
-          {
-            ...mockNewUserData,
-            userId: mockNewUserId.toString(),
-          },
-          {
-            ...mockPeerUserData,
-            userId: mockPeerUserId.toString(),
-          },
-        ],
-        roomId: mockRoomId.toString(),
-      });
+      expect(actual).toEqual(mockUpdateManyResult);
 
       expect(userModel.createUser).toHaveBeenCalledTimes(2);
       expect(chatRoomService.createChatRoom).toHaveBeenCalledWith([
-        mockNewUserId.toString(),
-        mockPeerUserId.toString(),
+        mockNewUserId,
+        mockPeerUserId,
       ]);
       expect(userModel.updateManyUserRoomId).toHaveBeenCalledWith(
-        [mockNewUserId.toString(), mockPeerUserId.toString()],
-        mockRoomId.toString()
+        [mockNewUserId, mockPeerUserId],
+        mockRoomId
       );
       expect(userModel.updateManyUserRoomId).toHaveBeenCalledTimes(1);
     });
@@ -438,7 +471,7 @@ describe('UserDto Service', () => {
         userService.createMatchedUsers(mockNewUserData, mockPeerUserData)
       ).rejects.toThrow('建立使用者失敗');
 
-      expect(userModel.createUser).toHaveBeenCalledTimes(1);
+      expect(userModel.createUser).toHaveBeenCalledTimes(2);
       expect(chatRoomService.createChatRoom).not.toHaveBeenCalled();
       expect(userModel.updateUserRoomId).not.toHaveBeenCalled();
     });
@@ -453,11 +486,15 @@ describe('UserDto Service', () => {
         socketId: 'socket456',
       };
 
-      const mockNewUserId = new ObjectId('507f1f77bcf86cd799439011');
+      const mockNewUserId = 'mockNewUserId';
 
       const mockNewUserResult = {
-        acknowledged: true,
-        insertedId: mockNewUserId,
+        createdAt: ANY_DATE,
+        device: mockNewUserData.device,
+        id: mockNewUserId,
+        lastActiveAt: ANY_DATE,
+        socketId: mockNewUserData.socketId,
+        status: 'ACTIVE' as UserStatus,
       };
 
       vi.mocked(userModel.createUser).mockReset();
@@ -484,17 +521,25 @@ describe('UserDto Service', () => {
         socketId: 'socket456',
       };
 
-      const mockNewUserId = new ObjectId('507f1f77bcf86cd799439011');
-      const mockPeerUserId = new ObjectId('507f1f77bcf86cd799439012');
+      const mockNewUserId = 'mockNewUserId';
+      const mockPeerUserId = 'mockPeerUserId';
 
       const mockNewUserResult = {
-        acknowledged: true,
-        insertedId: mockNewUserId,
+        createdAt: ANY_DATE,
+        device: mockNewUserData.device,
+        id: mockNewUserId,
+        lastActiveAt: ANY_DATE,
+        socketId: mockNewUserData.socketId,
+        status: 'ACTIVE' as UserStatus,
       };
 
       const mockPeerUserResult = {
-        acknowledged: true,
-        insertedId: mockPeerUserId,
+        createdAt: ANY_DATE,
+        device: mockPeerUserData.device,
+        id: mockPeerUserId,
+        lastActiveAt: ANY_DATE,
+        socketId: mockPeerUserData.socketId,
+        status: 'ACTIVE' as UserStatus,
       };
 
       vi.mocked(userModel.createUser).mockReset();

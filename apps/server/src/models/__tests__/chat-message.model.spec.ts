@@ -3,13 +3,11 @@ import type { Device } from '@packages/lib';
 import { ObjectId } from 'mongodb';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { db } from '@/config/db';
+import { getCollection } from '@/config/db';
 import chatMessageModel from '@/models/chat-message.model';
 
 vi.mock('@/config/db', () => ({
-  db: {
-    collection: vi.fn(),
-  },
+  getCollection: vi.fn(),
 }));
 
 describe('Chat Message Model', () => {
@@ -27,8 +25,8 @@ describe('Chat Message Model', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(db.collection).mockReturnValue(
-      mockCollection as unknown as ReturnType<typeof db.collection>
+    vi.mocked(getCollection).mockReturnValue(
+      mockCollection as unknown as ReturnType<typeof getCollection>
     );
     mockCollection.find.mockReturnValue(mockFindCursor);
 
@@ -58,20 +56,21 @@ describe('Chat Message Model', () => {
       };
 
       // 模擬插入成功並返回的 ID
-      mockCollection.insertOne.mockImplementation(async () => {
+      mockCollection.insertOne.mockImplementation(() => {
         return mockInsertResult;
       });
 
-      const result = await chatMessageModel.createChatMessage(mockChatMessage);
+      const actual = await chatMessageModel.createChatMessage(mockChatMessage);
 
-      expect(result).toEqual(expect.objectContaining({
+      expect(actual).toEqual(expect.objectContaining({
         content: mockChatMessage.content,
         device: mockChatMessage.device,
         roomId: mockChatMessage.roomId,
         userId: mockChatMessage.userId,
       }));
-      expect(result.id).toBeTruthy(); // 只檢查 ID 存在
-      expect(db.collection).toHaveBeenCalledWith('chat_messages');
+      expect(actual).not.toBeNull(); // 確保 actual 不為 null
+      expect((actual as any).id).toBeTruthy(); // 只檢查 ID 存在
+      expect(getCollection).toHaveBeenCalledWith('chat_messages');
       expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatMessage));
     });
 
@@ -84,11 +83,11 @@ describe('Chat Message Model', () => {
         userId: '',
       };
 
-      const result = await chatMessageModel.createChatMessage(
+      const actual = await chatMessageModel.createChatMessage(
         mockInvalidChatMessage
       );
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).not.toHaveBeenCalled();
     });
@@ -104,9 +103,9 @@ describe('Chat Message Model', () => {
 
       mockCollection.insertOne.mockRejectedValue(new Error('DB Error'));
 
-      const result = await chatMessageModel.createChatMessage(mockChatMessage);
+      const actual = await chatMessageModel.createChatMessage(mockChatMessage);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatMessage));
     });
@@ -126,13 +125,17 @@ describe('Chat Message Model', () => {
       };
       mockCollection.findOne.mockResolvedValue(mockChatMessage);
 
-      const result = await chatMessageModel.findChatMessageById(mockMessageId);
+      const actual = await chatMessageModel.findChatMessageById(mockMessageId);
 
-      expect(result).toEqual({
-        ...mockChatMessage,
+      expect(actual).toEqual({
+        content: mockChatMessage.content,
+        createdAt: mockChatMessage.createdAt,
+        device: mockChatMessage.device,
         id: mockMessageId,
+        roomId: mockChatMessage.roomId,
+        userId: mockChatMessage.userId,
       });
-      expect(db.collection).toHaveBeenCalledWith('chat_messages');
+      expect(getCollection).toHaveBeenCalledWith('chat_messages');
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
       });
@@ -142,9 +145,9 @@ describe('Chat Message Model', () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
       mockCollection.findOne.mockResolvedValue(null);
 
-      const result = await chatMessageModel.findChatMessageById(mockMessageId);
+      const actual = await chatMessageModel.findChatMessageById(mockMessageId);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(mockCollection.findOne).toHaveBeenCalledWith({
         _id: expect.any(ObjectId),
       });
@@ -154,9 +157,9 @@ describe('Chat Message Model', () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
 
-      const result = await chatMessageModel.findChatMessageById(mockMessageId);
+      const actual = await chatMessageModel.findChatMessageById(mockMessageId);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
@@ -184,14 +187,18 @@ describe('Chat Message Model', () => {
       ];
       mockFindCursor.toArray.mockResolvedValue(mockChatMessages);
 
-      const result =
+      const actual =
         await chatMessageModel.findChatMessagesByRoomId(mockRoomId);
 
-      expect(result).toEqual(mockChatMessages.map(message => ({
-        ...message,
+      expect(actual).toEqual(mockChatMessages.map(message => ({
+        content: message.content,
+        createdAt: message.createdAt,
+        device: message.device,
         id: message._id.toString(),
+        roomId: message.roomId,
+        userId: message.userId,
       })));
-      expect(db.collection).toHaveBeenCalledWith('chat_messages');
+      expect(getCollection).toHaveBeenCalledWith('chat_messages');
       expect(mockCollection.find).toHaveBeenCalledWith({ roomId: mockRoomId });
       expect(mockFindCursor.toArray).toHaveBeenCalled();
     });
@@ -200,10 +207,10 @@ describe('Chat Message Model', () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
 
-      const result =
+      const actual =
         await chatMessageModel.findChatMessagesByRoomId(mockRoomId);
 
-      expect(result).toBeNull();
+      expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
