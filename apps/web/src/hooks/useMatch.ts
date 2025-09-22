@@ -114,7 +114,7 @@ export default function useMatch() {
   }
 
   // Effects
-  // 載入頁面後，如果 roomId 存在，則設置為 reloading 狀態
+  // 載入頁面後，如果 roomId 存在，則設定為 reloading 狀態
   useEffect(() => {
     if (roomId && matchStatus === 'standby') {
       setMatchStatus('reloading');

@@ -6,7 +6,7 @@ import ChatBox from './index';
 describe('ChatBox', () => {
   const mockMessages: ChatMessageDto[] = [
     {
-      _id: '1',
+      id: '1',
       roomId: 'room1',
       userId: 'user1',
       content: '嗨，你好！',
@@ -14,7 +14,7 @@ describe('ChatBox', () => {
       device: 'PC',
     },
     {
-      _id: '2',
+      id: '2',
       roomId: 'room1',
       userId: 'user2',
       content: '你好啊！',

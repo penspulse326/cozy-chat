@@ -1,12 +1,12 @@
 import { render } from '@/tests';
-import { ChatMessageDto } from '@packages/lib';
+import { ChatMessageDto, Device } from '@packages/lib';
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import ChatMessageCard from './index';
 
 describe('ChatMessageCard', () => {
   const mockChatMessage: ChatMessageDto = {
-    _id: '1',
+    id: '1',
     roomId: 'room1',
     userId: 'user1',
     content: 'Hello, this is a test message!',
@@ -25,7 +25,7 @@ describe('ChatMessageCard', () => {
   });
 
   it('應該正確渲染訊息內容、裝置和時間 (作為對方)', () => {
-    const mockOtherMessage = { ...mockChatMessage, sender_id: 'otherUser' };
+    const mockOtherMessage = { ...mockChatMessage };
     render(<ChatMessageCard data={mockOtherMessage} isUser={false} />);
 
     expect(
@@ -35,12 +35,12 @@ describe('ChatMessageCard', () => {
     expect(screen.getByText('2023/10/27')).toBeInTheDocument();
   });
 
-  it('當 device 型別不合法時，應能正常渲染而不顯示裝置資訊', () => {
+  it('當 device 不合法時，應能正常渲染而不顯示裝置資訊', () => {
     const mockInvalidMessage = {
       ...mockChatMessage,
-      _id: '3',
-      device: 'non-existent-device',
-    } as unknown as ChatMessageDto;
+      id: '3',
+      device: 'non-existent-device' as Device,
+    };
 
     render(<ChatMessageCard data={mockInvalidMessage} isUser={true} />);
 

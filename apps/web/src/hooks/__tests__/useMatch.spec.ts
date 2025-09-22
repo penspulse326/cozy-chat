@@ -1,8 +1,32 @@
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import useMatch from '../useMatch';
 
-// Mock useSocket hook
+beforeAll(() => {
+  vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+  vi.spyOn(window.HTMLMediaElement.prototype, 'pause').mockImplementation(() => { });
+});
+
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value.toString();
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
+
 const mockSocket = {
   connect: vi.fn(),
   disconnect: vi.fn(),
@@ -15,49 +39,25 @@ vi.mock('../useSocket', () => ({
   default: () => mockSocket,
 }));
 
-// Mock localStorage
-const mockLocalStorage = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-};
-
-Object.defineProperty(window, 'localStorage', {
-  value: mockLocalStorage,
-  writable: true,
-});
-
-// Mock @mantine/hooks
-vi.mock('@mantine/hooks', () => ({
-  useLocalStorage: (options: { key: string; defaultValue: unknown }) => {
-    const value = mockLocalStorage.getItem(options.key) || options.defaultValue;
-    const setValue = vi.fn((newValue: unknown) => {
-      mockLocalStorage.setItem(options.key, newValue);
-    });
-    const removeValue = vi.fn(() => {
-      mockLocalStorage.removeItem(options.key);
-    });
-    return [value, setValue, removeValue];
-  },
-}));
 
 describe('useMatch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLocalStorage.getItem.mockReturnValue(null);
+    localStorageMock.clear();
   });
 
   describe('初始狀態', () => {
-    it('應該設置正確的初始狀態', () => {
+    it('應該設定正確的初始狀態', () => {
       const { result } = renderHook(() => useMatch());
 
       expect(result.current.matchStatus).toBe('standby');
       expect(result.current.messages).toEqual([]);
+      expect(localStorageMock.getItem).toHaveBeenCalledWith('roomId');
     });
   });
 
   describe('狀態轉移', () => {
-    it('設置為 waiting 時應該建立 socket 連線', () => {
+    it('設定為 waiting 時應該建立 socket 連線', () => {
       const { result } = renderHook(() => useMatch());
 
       act(() => {
@@ -70,7 +70,7 @@ describe('useMatch', () => {
       });
     });
 
-    it('設置為 standby 時應該斷開 socket 連線', () => {
+    it('設定為 standby 時應該斷開 socket 連線', () => {
       const { result } = renderHook(() => useMatch());
 
       // 先連接
@@ -86,7 +86,7 @@ describe('useMatch', () => {
       expect(mockSocket.disconnect).toHaveBeenCalled();
     });
 
-    it('設置為 reloading 時應該建立 socket 連線', () => {
+    it('設定為 reloading 時應該建立 socket 連線', () => {
       const { result } = renderHook(() => useMatch());
 
       act(() => {
@@ -101,14 +101,14 @@ describe('useMatch', () => {
   });
 
   describe('Socket 事件處理', () => {
-    it('應該設置正確的 socket 事件監聽器', () => {
+    it('應該設定正確的 socket 事件監聽器', () => {
       const { result } = renderHook(() => useMatch());
 
       act(() => {
         result.current.setMatchStatus('waiting');
       });
 
-      // 檢查是否設置了正確的事件監聽器
+      // 檢查是否設定了正確的事件監聽器
       expect(mockSocket.on).toHaveBeenCalledWith('connect', expect.any(Function));
       expect(mockSocket.on).toHaveBeenCalledWith('match:success', expect.any(Function));
       expect(mockSocket.on).toHaveBeenCalledWith('match:leave', expect.any(Function));
@@ -137,12 +137,12 @@ describe('useMatch', () => {
     it('處理配對離開事件時應該更新狀態', () => {
       const { result } = renderHook(() => useMatch());
 
-      // 先建立連線以設置事件監聽器
+      // 先建立連線以設定事件監聽器
       act(() => {
         result.current.setMatchStatus('waiting');
       });
 
-      // 設置為 matched 狀態
+      // 設定為 matched 狀態
       act(() => {
         result.current.setMatchStatus('matched');
       });
@@ -168,7 +168,7 @@ describe('useMatch', () => {
       const newMessage = {
         _id: '1',
         roomId: 'room1',
-        userId: 'user1',
+        userId: null, // 將 userId 修改為 null，使其與 result.current.userId 相同
         content: '測試訊息',
         createdAt: new Date(),
         device: 'PC',
@@ -183,10 +183,47 @@ describe('useMatch', () => {
       });
 
       expect(result.current.messages).toContain(newMessage);
+      expect(window.HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    });
+
+    it('處理收到來自其他使用者的訊息事件時應該更新訊息列表並播放音效', () => {
+      const { result } = renderHook(() => useMatch());
+
+      act(() => {
+        result.current.setMatchStatus('waiting');
+      });
+
+      // 模擬配對成功以設定 userId
+      const matchSuccessHandler = mockSocket.on.mock.calls
+        .find(call => call[0] === 'match:success')?.[1];
+
+      act(() => {
+        matchSuccessHandler?.({ roomId: 'room123', userId: 'user456' });
+      });
+
+      const newMessage = {
+        id: '1',
+        roomId: 'room123',
+        userId: 'anotherUser', // 來自其他使用者的訊息
+        content: '測試訊息',
+        createdAt: new Date(),
+        device: 'PC',
+      };
+
+      // 模擬收到訊息事件
+      const messageReceiveHandler = mockSocket.on.mock.calls
+        .find(call => call[0] === 'chat:send')?.[1];
+
+      act(() => {
+        messageReceiveHandler?.(newMessage);
+      });
+
+      expect(result.current.messages).toContain(newMessage);
+      expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('用戶操作', () => {
+  describe('使用者操作', () => {
     it('sendMessage 應該發送正確的 socket 事件', () => {
       const { result } = renderHook(() => useMatch());
 
@@ -201,7 +238,7 @@ describe('useMatch', () => {
       });
     });
 
-    it('設置為 quit 時應該處理離開邏輯', () => {
+    it('設定為 quit 時應該處理離開邏輯', () => {
       const { result } = renderHook(() => useMatch());
 
       act(() => {
@@ -215,17 +252,15 @@ describe('useMatch', () => {
   });
 
   describe('重新載入邏輯', () => {
-    it('當 localStorage 有 roomId 時應該設置為 reloading 狀態', () => {
-      // 模擬 localStorage 有 roomId
-      mockLocalStorage.getItem.mockImplementation((key: string) => {
-        if (key === 'roomId') return 'room123';
-        return null;
-      });
+    it('當 localStorage 有 roomId 時應該設定為 reloading 狀態', () => {
+      // 直接設定 mockStore，模擬 localStorage 中有 roomId
+      localStorage.setItem('roomId', 'room123');
 
       const { result } = renderHook(() => useMatch());
 
-      // 應該自動設置為 reloading 狀態
+      // 應該自動設定為 reloading 狀態
       expect(result.current.matchStatus).toBe('reloading');
+      expect(localStorage.getItem).toHaveBeenCalledWith('roomId');
     });
   });
 });

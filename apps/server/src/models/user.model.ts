@@ -101,7 +101,7 @@ async function updateManyUserRoomId(
     console.log('批量更新 UserDto RoomId 成功');
 
     if (result.acknowledged) {
-      // 查找所有更新後的用戶並返回
+      // 查找所有更新後的使用者並返回
       const updatedUsers = await users.find({ _id: { $in: objectIds } }).toArray();
       return updatedUsers.map(user => convertToDto({
         ...user,

@@ -103,7 +103,7 @@ describe('Socket Server', () => {
     vi.clearAllMocks();
   });
 
-  it('應該建立 socket 伺服器並設置連接處理程序', () => {
+  it('應該建立 socket 伺服器並設定連接處理程序', () => {
     setupSocketServer(mockIo as Server);
 
     expect(waitingPoolModule.createWaitingPool).toHaveBeenCalled();
@@ -122,7 +122,7 @@ describe('Socket Server', () => {
   it('當有 roomId 時，應該檢查使用者', () => {
     setupSocketServer(mockIo as Server);
 
-    // 確保 connectionCallback 已被設置
+    // 確保 connectionCallback 已被設定
     expect(mockIo.connectionCallback).toBeDefined();
     if (!mockIo.connectionCallback) {
       return;
@@ -141,7 +141,7 @@ describe('Socket Server', () => {
     );
   });
 
-  it('應該設置所有必要的事件監聽器', () => {
+  it('應該設定所有必要的事件監聽器', () => {
     setupSocketServer(mockIo as Server);
 
     // 使用存儲的 callback

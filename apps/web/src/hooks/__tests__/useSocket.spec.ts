@@ -135,7 +135,7 @@ describe('useSocket', () => {
   });
 
   describe('on', () => {
-    it('應該正確設置事件監聽器', () => {
+    it('應該正確設定事件監聽器', () => {
       const { result } = renderHook(() => useSocket());
       const mockHandler = vi.fn();
 
@@ -146,7 +146,7 @@ describe('useSocket', () => {
         });
       });
 
-      // 設置事件監聽器
+      // 設定事件監聽器
       act(() => {
         result.current.on('test-event', mockHandler);
       });
