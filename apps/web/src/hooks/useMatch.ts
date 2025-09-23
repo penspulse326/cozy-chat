@@ -38,7 +38,7 @@ export default function useMatch() {
 
     if (message.userId !== userId && newMsgAudioRef.current) {
       newMsgAudioRef.current.currentTime = 0;
-      newMsgAudioRef.current.play().catch(() => { });
+      newMsgAudioRef.current.play().catch(() => {});
     }
   }
 
@@ -92,7 +92,7 @@ export default function useMatch() {
 
   function connectSocket() {
     socket.connect({
-      url: 'http://localhost:8080',
+      url: process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:8080',
       query: {
         roomId,
       },
