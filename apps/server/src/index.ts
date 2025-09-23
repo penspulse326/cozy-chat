@@ -22,7 +22,7 @@ app.get('/', (_, res) => {
 async function bootstrap() {
   const url =
     process.env.ENV === 'production'
-      ? 'https://casual-meet-web.vercel.app'
+      ? 'https://cozy-chat.vercel.app'
       : 'http://localhost:3000';
 
   try {
