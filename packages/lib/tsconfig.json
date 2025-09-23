@@ -7,6 +7,10 @@
       "@packages/lib/*": ["./src/*"]
     }
   },
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "moduleResolution": "node"
+  },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

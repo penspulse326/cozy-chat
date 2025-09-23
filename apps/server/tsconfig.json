@@ -9,7 +9,12 @@
     },
     "types": ["node", "vitest/globals"],
     "lib": ["es2022"],
-    "noImplicitReturns": true
+    "noImplicitReturns": true,
+    "moduleResolution": "node"
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "moduleResolution": "node"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
