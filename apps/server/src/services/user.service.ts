@@ -5,8 +5,7 @@ import { userStatusSchema } from '@packages/lib';
 import type { WaitingUser } from '@/types';
 
 import userModel from '@/models/user.model';
-
-import chatRoomService from './chat-room.service';
+import chatRoomService from '@/services/chat-room.service';
 
 async function checkUserStatus(roomId: string): Promise<boolean> {
   try {
@@ -87,19 +86,26 @@ async function removeInactiveUsers(): Promise<void> {
     throw new Error(`查詢使用者失敗`);
   }
 
-  const inactiveUserIds = users
-    .filter((user) => {
-      const lastActiveTime = new Date(user.lastActiveAt).getTime();
-      const currentTime = Date.now();
-      const inactiveThreshold = 5 * 60 * 1000; // 5 分鐘
-      return currentTime - lastActiveTime > inactiveThreshold;
-    })
-    .map((user) => user.id);
+  const inactiveUsers = users.filter((user) => {
+    const lastActiveTime = new Date(user.lastActiveAt).getTime();
+    const currentTime = Date.now();
+    const inactiveThreshold = 5 * 60 * 1000; // 5 分鐘
+    return currentTime - lastActiveTime > inactiveThreshold;
+  });
 
-  if (inactiveUserIds.length === 0) {
+  if (inactiveUsers.length === 0) {
     return;
   }
 
+  // 先從聊天室移除使用者
+  for (const user of inactiveUsers) {
+    if (user.roomId) {
+      await chatRoomService.removeUserFromChatRoom(user.roomId, user.id);
+    }
+  }
+
+  // 再移除使用者
+  const inactiveUserIds = inactiveUsers.map((user) => user.id);
   const result = await userModel.removeMany(inactiveUserIds);
   if (!result) {
     throw new Error(`移除不活躍使用者失敗: ${inactiveUserIds.join(', ')}`);

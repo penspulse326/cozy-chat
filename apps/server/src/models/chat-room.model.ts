@@ -64,9 +64,36 @@ async function findChatRoomById(id: string): Promise<ChatRoomDto | null> {
   }
 }
 
+async function removeUserFromChatRoom(
+  roomId: string,
+  userId: string
+): Promise<ChatRoomDto | null> {
+  const chatRooms = getCollection<ChatRoomEntity>('chat_rooms');
+
+  try {
+    const result = await chatRooms.findOneAndUpdate(
+      { _id: new ObjectId(roomId) },
+      { $pull: { users: userId } },
+      { returnDocument: 'after' }
+    );
+    console.log('從 ChatRoom 移除使用者成功');
+
+    if (result) {
+      return convertToDto(result);
+    }
+
+    return null;
+  } catch (error) {
+    console.error('從 ChatRoom 移除使用者失敗', error);
+
+    return null;
+  }
+}
+
 const chatRoomModel = {
   createChatRoom,
   findChatRoomById,
+  removeUserFromChatRoom,
 };
 
 export default chatRoomModel;

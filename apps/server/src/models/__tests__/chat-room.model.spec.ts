@@ -11,6 +11,7 @@ vi.mock('@/config/db', () => ({
 describe('Chat Room Model', () => {
   const mockCollection = {
     findOne: vi.fn(),
+    findOneAndUpdate: vi.fn(),
     insertOne: vi.fn(),
   };
 
@@ -50,15 +51,19 @@ describe('Chat Room Model', () => {
 
       const actual = await chatRoomModel.createChatRoom(mockChatRoom);
 
-      expect(actual).toEqual(expect.objectContaining({
-        createdAt: expect.any(Date),
-        users: mockChatRoom.users
-      }));
+      expect(actual).toEqual(
+        expect.objectContaining({
+          createdAt: expect.any(Date),
+          users: mockChatRoom.users,
+        })
+      );
       if (actual) {
         expect(actual.id).toBeTruthy(); // 只檢查 ID 存在
       }
       expect(getCollection).toHaveBeenCalledWith('chat_rooms');
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatRoom));
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(
+        expect.objectContaining(mockChatRoom)
+      );
     });
 
     it('當驗證失敗時應返回 null', async () => {
@@ -86,7 +91,9 @@ describe('Chat Room Model', () => {
 
       expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockChatRoom));
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(
+        expect.objectContaining(mockChatRoom)
+      );
     });
   });
 
@@ -131,6 +138,71 @@ describe('Chat Room Model', () => {
       mockCollection.findOne.mockRejectedValue(new Error('DB Error'));
 
       const actual = await chatRoomModel.findChatRoomById(mockRoomId);
+
+      expect(actual).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('removeUserFromChatRoom', () => {
+    it('應該成功從聊天室移除使用者並返回更新後的聊天室', async () => {
+      const mockRoomId = '507f1f77bcf86cd799439022';
+      const mockUserId = '507f1f77bcf86cd799439011';
+      const mockUpdatedChatRoom = {
+        _id: new ObjectId(mockRoomId),
+        createdAt: new Date(),
+        users: ['507f1f77bcf86cd799439012'], // 已移除 mockUserId
+      };
+
+      mockCollection.findOneAndUpdate.mockResolvedValue(mockUpdatedChatRoom);
+
+      const actual = await chatRoomModel.removeUserFromChatRoom(
+        mockRoomId,
+        mockUserId
+      );
+
+      expect(actual).toEqual({
+        createdAt: mockUpdatedChatRoom.createdAt,
+        id: mockRoomId,
+        users: mockUpdatedChatRoom.users,
+      });
+      expect(getCollection).toHaveBeenCalledWith('chat_rooms');
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: expect.any(ObjectId) },
+        { $pull: { users: mockUserId } },
+        { returnDocument: 'after' }
+      );
+    });
+
+    it('當聊天室不存在時應返回 null', async () => {
+      const mockRoomId = '507f1f77bcf86cd799439022';
+      const mockUserId = '507f1f77bcf86cd799439011';
+
+      mockCollection.findOneAndUpdate.mockResolvedValue(null);
+
+      const actual = await chatRoomModel.removeUserFromChatRoom(
+        mockRoomId,
+        mockUserId
+      );
+
+      expect(actual).toBeNull();
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: expect.any(ObjectId) },
+        { $pull: { users: mockUserId } },
+        { returnDocument: 'after' }
+      );
+    });
+
+    it('當資料庫操作失敗時應返回 null', async () => {
+      const mockRoomId = '507f1f77bcf86cd799439022';
+      const mockUserId = '507f1f77bcf86cd799439011';
+
+      mockCollection.findOneAndUpdate.mockRejectedValue(new Error('DB Error'));
+
+      const actual = await chatRoomModel.removeUserFromChatRoom(
+        mockRoomId,
+        mockUserId
+      );
 
       expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();

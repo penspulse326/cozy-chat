@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 
-import { setupRemoveInactiveUserJob } from './remove-inactive-user';
+import { setupRemoveInactiveDocuments } from './remove-inactive-documents';
 
 export function setupCronJobs() {
   cron.schedule('*/10 * * * *', () => {
@@ -8,5 +8,5 @@ export function setupCronJobs() {
   });
 
   // 移除不活躍的使用者
-  setupRemoveInactiveUserJob();
+  setupRemoveInactiveDocuments();
 }

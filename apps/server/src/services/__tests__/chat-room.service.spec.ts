@@ -7,6 +7,7 @@ vi.mock('@/models/chat-room.model', () => ({
   default: {
     createChatRoom: vi.fn(),
     findChatRoomById: vi.fn(),
+    removeUserFromChatRoom: vi.fn(),
   },
 }));
 
@@ -125,6 +126,64 @@ describe('Chat Room Service', () => {
         chatRoomService.findChatRoomById(mockRoomId)
       ).rejects.toThrow('Find chat room failed');
       expect(chatRoomModel.findChatRoomById).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('removeUserFromChatRoom', () => {
+    it('當成功移除使用者時應返回更新後的聊天室', async () => {
+      const mockRoomId = '507f1f77bcf86cd799439022';
+      const mockUserId = '507f1f77bcf86cd799439011';
+      const mockChatRoom = {
+        createdAt: ANY_DATE,
+        id: mockRoomId,
+        users: ['507f1f77bcf86cd799439012'], // 已移除 mockUserId
+      };
+
+      vi.mocked(chatRoomModel.removeUserFromChatRoom).mockResolvedValue(
+        mockChatRoom
+      );
+
+      const actual = await chatRoomService.removeUserFromChatRoom(
+        mockRoomId,
+        mockUserId
+      );
+
+      expect(actual).toEqual(mockChatRoom);
+      expect(chatRoomModel.removeUserFromChatRoom).toHaveBeenCalledWith(
+        mockRoomId,
+        mockUserId
+      );
+      expect(chatRoomModel.removeUserFromChatRoom).toHaveBeenCalledTimes(1);
+    });
+
+    it('當找不到聊天室時應拋出錯誤', async () => {
+      const mockRoomId = '507f1f77bcf86cd799439022';
+      const mockUserId = '507f1f77bcf86cd799439011';
+
+      vi.mocked(chatRoomModel.removeUserFromChatRoom).mockResolvedValue(null);
+
+      await expect(
+        chatRoomService.removeUserFromChatRoom(mockRoomId, mockUserId)
+      ).rejects.toThrow(`從聊天室移除使用者失敗: ${mockUserId}`);
+      expect(chatRoomModel.removeUserFromChatRoom).toHaveBeenCalledWith(
+        mockRoomId,
+        mockUserId
+      );
+      expect(chatRoomModel.removeUserFromChatRoom).toHaveBeenCalledTimes(1);
+    });
+
+    it('如果模型拋出錯誤時應拋出錯誤', async () => {
+      const mockRoomId = '507f1f77bcf86cd799439022';
+      const mockUserId = '507f1f77bcf86cd799439011';
+
+      vi.mocked(chatRoomModel.removeUserFromChatRoom).mockRejectedValue(
+        new Error('Remove user from chat room failed')
+      );
+
+      await expect(
+        chatRoomService.removeUserFromChatRoom(mockRoomId, mockUserId)
+      ).rejects.toThrow('Remove user from chat room failed');
+      expect(chatRoomModel.removeUserFromChatRoom).toHaveBeenCalledTimes(1);
     });
   });
 });
