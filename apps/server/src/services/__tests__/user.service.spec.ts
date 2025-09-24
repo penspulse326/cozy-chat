@@ -570,7 +570,7 @@ describe('User Service', () => {
           createdAt: ANY_DATE,
           device: 'APP' as Device,
           id: 'mockUserId1',
-          lastActiveAt: new Date(Date.now() - 6 * 60 * 1000), // 6 分鐘前
+          lastActiveAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 小時前
           roomId: 'mockRoomId1',
           socketId: 'socket111',
           status: 'ACTIVE' as UserStatus,
@@ -579,7 +579,7 @@ describe('User Service', () => {
           createdAt: ANY_DATE,
           device: 'PC' as Device,
           id: 'mockUserId2',
-          lastActiveAt: new Date(Date.now() - 7 * 60 * 1000), // 7 分鐘前
+          lastActiveAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 小時前
           roomId: 'mockRoomId2',
           socketId: 'socket222',
           status: 'ACTIVE' as UserStatus,
@@ -588,7 +588,7 @@ describe('User Service', () => {
           createdAt: ANY_DATE,
           device: 'APP' as Device,
           id: 'mockUserId3',
-          lastActiveAt: new Date(Date.now() - 2 * 60 * 1000), // 2 分鐘前
+          lastActiveAt: new Date(Date.now() - 30 * 60 * 1000), // 30 分鐘前
           socketId: 'socket333',
           status: 'ACTIVE' as UserStatus,
         },
@@ -626,7 +626,7 @@ describe('User Service', () => {
           createdAt: ANY_DATE,
           device: 'APP' as Device,
           id: 'mockUserId1',
-          lastActiveAt: new Date(Date.now() - 2 * 60 * 1000), // 2 分鐘前
+          lastActiveAt: new Date(Date.now() - 30 * 60 * 1000), // 30 分鐘前
           roomId: 'mockRoomId1',
           socketId: 'socket111',
           status: 'ACTIVE' as UserStatus,
@@ -635,7 +635,7 @@ describe('User Service', () => {
           createdAt: ANY_DATE,
           device: 'PC' as Device,
           id: 'mockUserId2',
-          lastActiveAt: new Date(Date.now() - 3 * 60 * 1000), // 3 分鐘前
+          lastActiveAt: new Date(Date.now() - 45 * 60 * 1000), // 45 分鐘前
           roomId: 'mockRoomId2',
           socketId: 'socket222',
           status: 'ACTIVE' as UserStatus,
@@ -666,7 +666,7 @@ describe('User Service', () => {
           createdAt: ANY_DATE,
           device: 'APP' as Device,
           id: 'mockUserId1',
-          lastActiveAt: new Date(Date.now() - 6 * 60 * 1000), // 6 分鐘前
+          lastActiveAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 小時前
           roomId: 'mockRoomId1',
           socketId: 'socket111',
           status: 'ACTIVE' as UserStatus,
@@ -694,7 +694,7 @@ describe('User Service', () => {
           createdAt: ANY_DATE,
           device: 'APP' as Device,
           id: 'mockUserId1',
-          lastActiveAt: new Date(Date.now() - 6 * 60 * 1000), // 6 分鐘前
+          lastActiveAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 小時前
           roomId: 'mockRoomId1',
           socketId: 'socket111',
           status: 'ACTIVE' as UserStatus,
