@@ -35,11 +35,18 @@ async function findChatMessageById(id: string): Promise<ChatMessageDto> {
 async function findChatMessagesByRoomId(
   roomId: string
 ): Promise<ChatMessageDto[]> {
-  const result = await chatMessageModel.findChatMessagesByRoomId(roomId);
+  const result = await chatMessageModel.findChatMessagesByRoomIds(roomId);
   if (result === null) {
     throw new Error(`找不到聊天室訊息: ${roomId}`);
   }
   return result;
+}
+
+async function removeManyByRoomIds(roomIds: string[]): Promise<void> {
+  const result = await chatMessageModel.removeManyByRoomIds(roomIds);
+  if (!result) {
+    throw new Error(`刪除聊天室訊息失敗: ${roomIds.join(', ')}`);
+  }
 }
 
 async function sendChatMessage(
@@ -60,5 +67,6 @@ export default {
   createChatMessage,
   findChatMessageById,
   findChatMessagesByRoomId,
+  removeManyByRoomIds,
   sendChatMessage,
 };

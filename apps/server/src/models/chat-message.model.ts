@@ -71,7 +71,7 @@ async function findChatMessageById(
   }
 }
 
-async function findChatMessagesByRoomId(
+async function findChatMessagesByRoomIds(
   roomId: string
 ): Promise<ChatMessageDto[] | null> {
   const chatMessages = getCollection<ChatMessageEntity>('chat_messages');
@@ -87,8 +87,25 @@ async function findChatMessagesByRoomId(
   }
 }
 
+async function removeManyByRoomIds(roomIds: string[]): Promise<boolean> {
+  const chatMessages = getCollection<ChatMessageEntity>('chat_messages');
+
+  try {
+    const result = await chatMessages.deleteMany({
+      roomId: { $in: roomIds },
+    });
+
+    console.log(`批量刪除 ChatMessage 成功: ${roomIds.join(', ')}`);
+    return result.acknowledged;
+  } catch (error: unknown) {
+    console.error(`批量刪除 ChatMessage 失敗: ${roomIds.join(', ')}`, error);
+    return false;
+  }
+}
+
 export default {
   createChatMessage,
   findChatMessageById,
-  findChatMessagesByRoomId,
+  findChatMessagesByRoomIds,
+  removeManyByRoomIds,
 };

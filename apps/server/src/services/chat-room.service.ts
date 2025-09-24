@@ -1,6 +1,7 @@
 import type { ChatRoomDto } from '@packages/lib';
 
 import chatRoomModel from '@/models/chat-room.model';
+import chatMessageService from '@/services/chat-message.service';
 
 async function createChatRoom(userIds: string[]): Promise<ChatRoomDto> {
   const currentTime = new Date();
@@ -39,6 +40,10 @@ async function removeEmptyChatRooms(): Promise<void> {
     return;
   }
 
+  // 先移除聊天室中的所有訊息
+  await chatMessageService.removeManyByRoomIds(emptyChatRoomIds);
+
+  // 再移除聊天室
   const result = await chatRoomModel.removeMany(emptyChatRoomIds);
 
   if (!result) {

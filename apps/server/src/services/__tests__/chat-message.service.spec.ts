@@ -10,7 +10,8 @@ vi.mock('@/models/chat-message.model', () => ({
   default: {
     createChatMessage: vi.fn(),
     findChatMessageById: vi.fn(),
-    findChatMessagesByRoomId: vi.fn(),
+    findChatMessagesByRoomIds: vi.fn(),
+    removeManyByRoomIds: vi.fn(),
   },
 }));
 
@@ -43,7 +44,9 @@ describe('Chat Message Service', () => {
         roomId: mockChatMessageData.roomId,
         userId: mockChatMessageData.userId,
       };
-      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(mockChatMessageResult);
+      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
+        mockChatMessageResult
+      );
 
       const actual = await chatMessageService.createChatMessage(
         mockChatMessageData,
@@ -112,7 +115,9 @@ describe('Chat Message Service', () => {
         userId: '507f1f77bcf86cd799439011',
       };
 
-      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(mockChatMessage);
+      vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(
+        mockChatMessage
+      );
 
       const actual =
         await chatMessageService.findChatMessageById(mockMessageId);
@@ -151,7 +156,7 @@ describe('Chat Message Service', () => {
     });
   });
 
-  describe('findChatMessagesByRoomId', () => {
+  describe('findChatMessagesByRoomIds', () => {
     it('當找到聊天訊息時應返回聊天訊息', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
       const mockChatMessages = [
@@ -175,15 +180,17 @@ describe('Chat Message Service', () => {
         },
       ];
 
-      vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockResolvedValue(mockChatMessages);
+      vi.mocked(chatMessageModel.findChatMessagesByRoomIds).mockResolvedValue(
+        mockChatMessages
+      );
 
       const actual =
         await chatMessageService.findChatMessagesByRoomId(mockRoomId);
       expect(actual).toBe(mockChatMessages);
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledWith(
+      expect(chatMessageModel.findChatMessagesByRoomIds).toHaveBeenCalledWith(
         mockRoomId
       );
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledTimes(
+      expect(chatMessageModel.findChatMessagesByRoomIds).toHaveBeenCalledTimes(
         1
       );
     });
@@ -191,17 +198,17 @@ describe('Chat Message Service', () => {
     it('當找不到聊天訊息時應拋出錯誤', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
-      vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockResolvedValue(
+      vi.mocked(chatMessageModel.findChatMessagesByRoomIds).mockResolvedValue(
         null
       );
 
       await expect(
         chatMessageService.findChatMessagesByRoomId(mockRoomId)
       ).rejects.toThrow(`找不到聊天室訊息: ${mockRoomId}`);
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledWith(
+      expect(chatMessageModel.findChatMessagesByRoomIds).toHaveBeenCalledWith(
         mockRoomId
       );
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledTimes(
+      expect(chatMessageModel.findChatMessagesByRoomIds).toHaveBeenCalledTimes(
         1
       );
     });
@@ -209,14 +216,14 @@ describe('Chat Message Service', () => {
     it('如果模型拋出錯誤時應拋出錯誤', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
 
-      vi.mocked(chatMessageModel.findChatMessagesByRoomId).mockRejectedValue(
+      vi.mocked(chatMessageModel.findChatMessagesByRoomIds).mockRejectedValue(
         new Error('Find chat messages failed')
       );
 
       await expect(
         chatMessageService.findChatMessagesByRoomId(mockRoomId)
       ).rejects.toThrow('Find chat messages failed');
-      expect(chatMessageModel.findChatMessagesByRoomId).toHaveBeenCalledTimes(
+      expect(chatMessageModel.findChatMessagesByRoomIds).toHaveBeenCalledTimes(
         1
       );
     });
@@ -250,7 +257,9 @@ describe('Chat Message Service', () => {
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
-      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(mockChatMessage);
+      vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
+        mockChatMessage
+      );
 
       const actual =
         await chatMessageService.sendChatMessage(mockChatMessageData);
@@ -308,6 +317,64 @@ describe('Chat Message Service', () => {
         mockChatMessageData.userId
       );
       expect(chatMessageModel.createChatMessage).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('removeManyByRoomIds', () => {
+    it('應該成功刪除指定聊天室的所有訊息', async () => {
+      const mockRoomIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
+
+      vi.mocked(chatMessageModel.removeManyByRoomIds).mockResolvedValue(true);
+
+      await expect(
+        chatMessageService.removeManyByRoomIds(mockRoomIds)
+      ).resolves.not.toThrow();
+
+      expect(chatMessageModel.removeManyByRoomIds).toHaveBeenCalledWith(
+        mockRoomIds
+      );
+      expect(chatMessageModel.removeManyByRoomIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('當刪除訊息失敗時應拋出錯誤', async () => {
+      const mockRoomIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
+
+      vi.mocked(chatMessageModel.removeManyByRoomIds).mockResolvedValue(false);
+
+      await expect(
+        chatMessageService.removeManyByRoomIds(mockRoomIds)
+      ).rejects.toThrow(`刪除聊天室訊息失敗: ${mockRoomIds.join(', ')}`);
+
+      expect(chatMessageModel.removeManyByRoomIds).toHaveBeenCalledWith(
+        mockRoomIds
+      );
+      expect(chatMessageModel.removeManyByRoomIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('如果模型拋出錯誤時應拋出錯誤', async () => {
+      const mockRoomIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
+
+      vi.mocked(chatMessageModel.removeManyByRoomIds).mockRejectedValue(
+        new Error('Remove chat messages failed')
+      );
+
+      await expect(
+        chatMessageService.removeManyByRoomIds(mockRoomIds)
+      ).rejects.toThrow('Remove chat messages failed');
+
+      expect(chatMessageModel.removeManyByRoomIds).toHaveBeenCalledWith(
+        mockRoomIds
+      );
+      expect(chatMessageModel.removeManyByRoomIds).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import chatRoomModel from '@/models/chat-room.model';
+import chatMessageService from '@/services/chat-message.service';
 import chatRoomService from '@/services/chat-room.service';
 
 vi.mock('@/models/chat-room.model', () => ({
@@ -10,6 +11,12 @@ vi.mock('@/models/chat-room.model', () => ({
     findChatRoomById: vi.fn(),
     removeMany: vi.fn(),
     removeUserFromChatRoom: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/chat-message.service', () => ({
+  default: {
+    removeManyByRoomIds: vi.fn(),
   },
 }));
 
@@ -212,14 +219,22 @@ describe('Chat Room Service', () => {
       vi.mocked(chatRoomModel.findAllChatRooms).mockResolvedValue(
         mockChatRooms
       );
+      vi.mocked(chatMessageService.removeManyByRoomIds).mockResolvedValue();
       vi.mocked(chatRoomModel.removeMany).mockResolvedValue(true);
 
       await chatRoomService.removeEmptyChatRooms();
 
-      expect(chatRoomModel.removeMany).toHaveBeenCalledWith([
+      const expectedEmptyRoomIds = [
         '507f1f77bcf86cd799439011',
         '507f1f77bcf86cd799439013',
-      ]);
+      ];
+      expect(chatMessageService.removeManyByRoomIds).toHaveBeenCalledWith(
+        expectedEmptyRoomIds
+      );
+      expect(chatMessageService.removeManyByRoomIds).toHaveBeenCalledTimes(1);
+      expect(chatRoomModel.removeMany).toHaveBeenCalledWith(
+        expectedEmptyRoomIds
+      );
       expect(chatRoomModel.removeMany).toHaveBeenCalledTimes(1);
     });
 
@@ -243,6 +258,7 @@ describe('Chat Room Service', () => {
 
       await chatRoomService.removeEmptyChatRooms();
 
+      expect(chatMessageService.removeManyByRoomIds).not.toHaveBeenCalled();
       expect(chatRoomModel.removeMany).not.toHaveBeenCalled();
     });
 
@@ -252,6 +268,7 @@ describe('Chat Room Service', () => {
       await expect(chatRoomService.removeEmptyChatRooms()).rejects.toThrow(
         '查詢聊天室失敗'
       );
+      expect(chatMessageService.removeManyByRoomIds).not.toHaveBeenCalled();
       expect(chatRoomModel.removeMany).not.toHaveBeenCalled();
     });
 
@@ -267,14 +284,19 @@ describe('Chat Room Service', () => {
       vi.mocked(chatRoomModel.findAllChatRooms).mockResolvedValue(
         mockChatRooms
       );
+      vi.mocked(chatMessageService.removeManyByRoomIds).mockResolvedValue();
       vi.mocked(chatRoomModel.removeMany).mockResolvedValue(false);
 
       await expect(chatRoomService.removeEmptyChatRooms()).rejects.toThrow(
         '刪除聊天室失敗: 507f1f77bcf86cd799439011'
       );
-      expect(chatRoomModel.removeMany).toHaveBeenCalledWith([
-        '507f1f77bcf86cd799439011',
-      ]);
+      const expectedEmptyRoomIds = ['507f1f77bcf86cd799439011'];
+      expect(chatMessageService.removeManyByRoomIds).toHaveBeenCalledWith(
+        expectedEmptyRoomIds
+      );
+      expect(chatRoomModel.removeMany).toHaveBeenCalledWith(
+        expectedEmptyRoomIds
+      );
     });
   });
 });
