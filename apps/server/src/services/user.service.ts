@@ -89,7 +89,7 @@ async function removeInactiveUsers(): Promise<void> {
   const inactiveUsers = users.filter((user) => {
     const lastActiveTime = new Date(user.lastActiveAt).getTime();
     const currentTime = Date.now();
-    const inactiveThreshold = 5 * 60 * 1000; // 5 分鐘
+    const inactiveThreshold = 60 * 60 * 1000; // 1 小時
     return currentTime - lastActiveTime > inactiveThreshold;
   });
 
