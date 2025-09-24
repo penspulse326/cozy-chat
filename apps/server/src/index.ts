@@ -1,9 +1,10 @@
 
 import express from 'express';
 import http from 'http';
+// import { fileURLToPath } from 'url';
+import cron from 'node-cron';
 // import { dirname } from 'path';
 import { Server } from 'socket.io';
-// import { fileURLToPath } from 'url';
 
 import { connectToDB, disconnectFromDB } from '@/config/db';
 import { setupSocketServer } from '@/socket';
@@ -40,6 +41,10 @@ async function bootstrap() {
 
     server.listen(port, () => {
       console.log(`Server 啟動成功: *:${port}`);
+    });
+
+    cron.schedule('*/1 * * * *', () => {
+      console.log('執行測試排程:', new Date().toISOString());
     });
   } catch (error) {
     console.error('Server 啟動失敗:', error);

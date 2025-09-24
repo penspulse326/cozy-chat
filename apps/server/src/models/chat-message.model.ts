@@ -1,7 +1,10 @@
 import type { ChatMessageDto, CreateChatMessageDto } from '@packages/lib';
 import type { OptionalId } from 'mongodb';
 
-import { chatMessageDtoSchema, createChatMessageDtoSchema } from '@packages/lib';
+import {
+  chatMessageDtoSchema,
+  createChatMessageDtoSchema,
+} from '@packages/lib';
 import { ObjectId } from 'mongodb';
 
 import { getCollection } from '@/config/db';
@@ -30,7 +33,7 @@ async function createChatMessage(
       ...validatedChatMessage,
       _id: newObjectId,
     });
-    console.log('新增 ChatMessageDto 成功');
+    console.log('新增 ChatMessage 成功');
 
     if (result.acknowledged) {
       return convertToDto({
@@ -41,7 +44,7 @@ async function createChatMessage(
 
     return null;
   } catch (error: unknown) {
-    console.error('新增 ChatMessageDto 失敗', error);
+    console.error('新增 ChatMessage 失敗', error);
 
     return null;
   }
@@ -63,7 +66,7 @@ async function findChatMessageById(
     console.log(`找不到 ChatMessageDto: ${_id}`);
     return null;
   } catch (error: unknown) {
-    console.error(`查詢 ChatMessageDto 失敗: ${_id}`, error);
+    console.error(`查詢 ChatMessage 失敗: ${_id}`, error);
     return null;
   }
 }
@@ -77,7 +80,7 @@ async function findChatMessagesByRoomId(
     const messages = await chatMessages.find({ roomId: roomId }).toArray();
     console.log(`找到 ChatMessages: ${roomId}: ${JSON.stringify(messages)}`);
 
-    return messages.map(message => convertToDto(message));
+    return messages.map((message) => convertToDto(message));
   } catch (error: unknown) {
     console.error(`查詢 ChatMessages 失敗: ${roomId}`, error);
     return null;

@@ -20,7 +20,7 @@ vi.mock('@/services/user.service', () => ({
   },
 }));
 
-describe('UserDto Handlers', () => {
+describe('User Handlers', () => {
   let mockIo: Partial<Server>;
   let mockSocket: Partial<Socket>;
   let mockSocketsMap: Map<string, Socket>;

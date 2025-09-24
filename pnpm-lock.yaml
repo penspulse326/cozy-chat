@@ -105,6 +105,9 @@ importers:
       mongodb:
         specifier: ^6.18.0
         version: 6.20.0
+      node-cron:
+        specifier: ^4.2.1
+        version: 4.2.1
     devDependencies:
       '@types/express':
         specifier: ^5.0.2
@@ -112,6 +115,9 @@ importers:
       '@types/mongodb':
         specifier: ^4.0.7
         version: 4.0.7
+      '@types/node-cron':
+        specifier: ^3.0.11
+        version: 3.0.11
 
   apps/web:
     dependencies:
@@ -1071,6 +1077,9 @@ packages:
   '@types/mongodb@4.0.7':
     resolution: {integrity: sha512-lPUYPpzA43baXqnd36cZ9xxorprybxXDzteVKCPAdp14ppHtFJHnXYvNpmBvtMUTb5fKXVv6sVbzo1LHkWhJlw==}
     deprecated: mongodb provides its own types. @types/mongodb is no longer needed.
+
+  '@types/node-cron@3.0.11':
+    resolution: {integrity: sha512-0ikrnug3/IyneSHqCBeslAhlK2aBfYek1fGo4bP4QnZPmiqSGRK+Oy7ZMisLWkesffJvQ1cqAcBnJC+8+nxIAg==}
 
   '@types/node@22.18.6':
     resolution: {integrity: sha512-r8uszLPpeIWbNKtvWRt/DbVi5zbqZyj1PTmhRMqBMvDnaz1QpmSKujUtJLrqGZeoM8v72MfYggDceY4K1itzWQ==}
@@ -2771,6 +2780,10 @@ packages:
 
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
+
+  node-cron@4.2.1:
+    resolution: {integrity: sha512-lgimEHPE/QDgFlywTd8yTR61ptugX3Qer29efeyWw2rv259HtGBNn1vZVmp8lB9uo9wC0t/AT4iGqXxia+CJFg==}
+    engines: {node: '>=6.0.0'}
 
   node-releases@2.0.21:
     resolution: {integrity: sha512-5b0pgg78U3hwXkCM8Z9b2FJdPZlr9Psr9V2gQPESdGHqbntyFJKFW4r5TeWGFzafGY3hzs1JC62VEQMbl1JFkw==}
@@ -4727,6 +4740,8 @@ snapshots:
       - snappy
       - socks
 
+  '@types/node-cron@3.0.11': {}
+
   '@types/node@22.18.6':
     dependencies:
       undici-types: 6.21.0
@@ -6640,6 +6655,8 @@ snapshots:
       - babel-plugin-macros
 
   nice-try@1.0.5: {}
+
+  node-cron@4.2.1: {}
 
   node-releases@2.0.21: {}
 

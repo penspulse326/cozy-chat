@@ -13,11 +13,9 @@ const convertToDto = (entity: UserEntity): UserDto => {
     id: entity._id.toString(),
   };
   return userDtoSchema.parse(candidate);
-}
+};
 
-async function createUser(
-  dto: CreateUserDto
-): Promise<null | UserDto> {
+async function createUser(dto: CreateUserDto): Promise<null | UserDto> {
   const users = getCollection<UserEntity>('users');
 
   try {
@@ -28,7 +26,7 @@ async function createUser(
       ...candidate,
       _id: newObjectId,
     });
-    console.log('新增 UserDto 成功');
+    console.log('新增 User 成功');
 
     if (result.acknowledged) {
       return convertToDto({
@@ -39,7 +37,7 @@ async function createUser(
 
     return null;
   } catch (error: unknown) {
-    console.error('新增 UserDto 失敗', error);
+    console.error('新增 User 失敗', error);
 
     return null;
   }
@@ -50,7 +48,7 @@ async function findUserById(userId: string): Promise<null | UserDto> {
 
   try {
     const user = await users.findOne({ _id: new ObjectId(userId) });
-    console.log('查詢 UserDto 成功');
+    console.log('查詢 User 成功');
 
     if (user) {
       return convertToDto({
@@ -61,7 +59,7 @@ async function findUserById(userId: string): Promise<null | UserDto> {
 
     return null;
   } catch (error: unknown) {
-    console.error('查詢 UserDto 失敗', error);
+    console.error('查詢 User 失敗', error);
 
     return null;
   }
@@ -72,19 +70,20 @@ async function findUsersByRoomId(roomId: string): Promise<null | UserDto[]> {
 
   try {
     const result = await users.find({ roomId: roomId }).toArray();
-    console.log('查詢 UserDto 成功');
+    console.log('查詢 User 成功');
 
-    return result.map(user => convertToDto({
-      ...user,
-      _id: user._id,
-    }));
+    return result.map((user) =>
+      convertToDto({
+        ...user,
+        _id: user._id,
+      })
+    );
   } catch (error: unknown) {
-    console.error('查詢 UserDto 失敗', error);
+    console.error('查詢 User 失敗', error);
 
     return null;
   }
 }
-
 
 async function updateManyUserRoomId(
   userIds: string[],
@@ -98,20 +97,24 @@ async function updateManyUserRoomId(
       { _id: { $in: objectIds } },
       { $set: { roomId: roomId } }
     );
-    console.log('批量更新 UserDto RoomId 成功');
+    console.log('批量更新 User RoomId 成功');
 
     if (result.acknowledged) {
       // 查找所有更新後的使用者並返回
-      const updatedUsers = await users.find({ _id: { $in: objectIds } }).toArray();
-      return updatedUsers.map(user => convertToDto({
-        ...user,
-        _id: user._id,
-      }));
+      const updatedUsers = await users
+        .find({ _id: { $in: objectIds } })
+        .toArray();
+      return updatedUsers.map((user) =>
+        convertToDto({
+          ...user,
+          _id: user._id,
+        })
+      );
     }
 
     return null;
   } catch (error: unknown) {
-    console.error('批量更新 UserDto RoomId 失敗', error);
+    console.error('批量更新 User RoomId 失敗', error);
     return null;
   }
 }
@@ -128,7 +131,7 @@ async function updateUserRoomId(
       { $set: { roomId: roomId } },
       { returnDocument: 'after' }
     );
-    console.log('更新 UserDto RoomId 成功');
+    console.log('更新 User RoomId 成功');
 
     if (result) {
       return convertToDto({
@@ -139,7 +142,7 @@ async function updateUserRoomId(
 
     return null;
   } catch (error: unknown) {
-    console.error('更新 UserDto RoomId 失敗', error);
+    console.error('更新 User RoomId 失敗', error);
     return null;
   }
 }
@@ -166,7 +169,7 @@ async function updateUserStatus(
 
     return null;
   } catch (error: unknown) {
-    console.error('更新 UserDto Status 失敗', error);
+    console.error('更新 User Status 失敗', error);
     return null;
   }
 }

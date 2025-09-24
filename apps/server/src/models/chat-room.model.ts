@@ -28,7 +28,7 @@ async function createChatRoom(
       ...candidate,
       _id: newObjectId,
     });
-    console.log('新增 ChatRoomDto 成功');
+    console.log('新增 ChatRoom 成功');
 
     if (result.acknowledged) {
       return convertToDto({
@@ -39,7 +39,7 @@ async function createChatRoom(
 
     return null;
   } catch (error) {
-    console.error('新增 ChatRoomDto 失敗', error);
+    console.error('新增 ChatRoom 失敗', error);
 
     return null;
   }
@@ -50,7 +50,7 @@ async function findChatRoomById(id: string): Promise<ChatRoomDto | null> {
 
   try {
     const result = await chatRooms.findOne({ _id: new ObjectId(id) });
-    console.log('查詢 ChatRoomDto 成功');
+    console.log('查詢 ChatRoom 成功');
 
     if (result) {
       return convertToDto(result);
@@ -58,12 +58,11 @@ async function findChatRoomById(id: string): Promise<ChatRoomDto | null> {
 
     return null;
   } catch (error) {
-    console.error('查詢 ChatRoomDto 失敗', error);
+    console.error('查詢 ChatRoom 失敗', error);
 
     return null;
   }
 }
-
 
 const chatRoomModel = {
   createChatRoom,
