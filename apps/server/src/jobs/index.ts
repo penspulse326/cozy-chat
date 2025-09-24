@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 
-import { setupRemoveEmptyRoomsJob } from './remove-empty-rooms';
+import { setupRemoveEmptyRooms } from './remove-empty-rooms';
 import { setupRemoveInactiveUsers } from './remove-inactive-users';
 
 export function setupCronJobs() {
@@ -12,5 +12,5 @@ export function setupCronJobs() {
   setupRemoveInactiveUsers();
 
   // 移除空的聊天室
-  setupRemoveEmptyRoomsJob();
+  setupRemoveEmptyRooms();
 }
