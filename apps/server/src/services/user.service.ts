@@ -26,7 +26,7 @@ async function createMatchedUsers(
   // 1. 並行建立兩個 user
   const [newUserResult, peerUserResult] = await Promise.all([
     createUser(newUser),
-    createUser(peerUser)
+    createUser(peerUser),
   ]);
   // createUser 已經處理了錯誤情況
 
@@ -49,9 +49,7 @@ async function createMatchedUsers(
   return updatedUsers;
 }
 
-async function createUser(
-  user: WaitingUser
-): Promise<UserDto> {
+async function createUser(user: WaitingUser): Promise<UserDto> {
   const currentTime = new Date();
   const dto = {
     createdAt: currentTime,
@@ -81,6 +79,31 @@ async function findUsersByRoomId(roomId: string): Promise<UserDto[]> {
     throw new Error(`找不到聊天室的使用者: ${roomId}`);
   }
   return result;
+}
+
+async function removeInactiveUsers(): Promise<void> {
+  const users = await userModel.findAllUsers();
+  if (users === null) {
+    throw new Error(`查詢使用者失敗`);
+  }
+
+  const inactiveUserIds = users
+    .filter((user) => {
+      const lastActiveTime = new Date(user.lastActiveAt).getTime();
+      const currentTime = Date.now();
+      const inactiveThreshold = 5 * 60 * 1000; // 5 分鐘
+      return currentTime - lastActiveTime > inactiveThreshold;
+    })
+    .map((user) => user.id);
+
+  if (inactiveUserIds.length === 0) {
+    return;
+  }
+
+  const result = await userModel.removeMany(inactiveUserIds);
+  if (!result) {
+    throw new Error(`移除不活躍使用者失敗: ${inactiveUserIds.join(', ')}`);
+  }
 }
 
 async function updateUserRoomId(
@@ -119,6 +142,7 @@ export default {
   createUser,
   findUserById,
   findUsersByRoomId,
+  removeInactiveUsers,
   updateUserRoomId,
   updateUserStatus,
 };

@@ -43,6 +43,26 @@ async function createUser(dto: CreateUserDto): Promise<null | UserDto> {
   }
 }
 
+async function findAllUsers(): Promise<null | UserDto[]> {
+  const users = getCollection<UserEntity>('users');
+
+  try {
+    const result = await users.find({}).toArray();
+    console.log('查詢所有 User 成功');
+
+    return result.map((user) =>
+      convertToDto({
+        ...user,
+        _id: user._id,
+      })
+    );
+  } catch (error: unknown) {
+    console.error('查詢所有 User 失敗', error);
+
+    return null;
+  }
+}
+
 async function findUserById(userId: string): Promise<null | UserDto> {
   const users = getCollection<UserEntity>('users');
 
@@ -82,6 +102,21 @@ async function findUsersByRoomId(roomId: string): Promise<null | UserDto[]> {
     console.error('查詢 User 失敗', error);
 
     return null;
+  }
+}
+
+async function removeMany(userIds: string[]): Promise<boolean> {
+  const users = getCollection<UserEntity>('users');
+
+  try {
+    const objectIds = userIds.map((id) => new ObjectId(id));
+    const result = await users.deleteMany({ _id: { $in: objectIds } });
+    console.log('批量刪除 User 成功');
+
+    return result.acknowledged;
+  } catch (error: unknown) {
+    console.error('批量刪除 User 失敗', error);
+    return false;
   }
 }
 
@@ -176,8 +211,10 @@ async function updateUserStatus(
 
 const userModel = {
   createUser,
+  findAllUsers,
   findUserById,
   findUsersByRoomId,
+  removeMany,
   updateManyUserRoomId,
   updateUserRoomId,
   updateUserStatus,

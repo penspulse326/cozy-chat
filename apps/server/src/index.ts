@@ -1,12 +1,11 @@
-
 import express from 'express';
 import http from 'http';
-// import { fileURLToPath } from 'url';
-import cron from 'node-cron';
 // import { dirname } from 'path';
 import { Server } from 'socket.io';
 
 import { connectToDB, disconnectFromDB } from '@/config/db';
+// import { fileURLToPath } from 'url';
+import { setupCronJobs } from '@/jobs';
 import { setupSocketServer } from '@/socket';
 
 const port = process.env.PORT ?? '9001';
@@ -43,9 +42,7 @@ async function bootstrap() {
       console.log(`Server 啟動成功: *:${port}`);
     });
 
-    cron.schedule('*/1 * * * *', () => {
-      console.log('執行測試排程:', new Date().toISOString());
-    });
+    setupCronJobs();
   } catch (error) {
     console.error('Server 啟動失敗:', error);
     await disconnectFromDB();

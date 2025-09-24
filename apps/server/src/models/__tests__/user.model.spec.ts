@@ -12,6 +12,7 @@ vi.mock('@/config/db', () => ({
 
 describe('User Model', () => {
   const mockCollection = {
+    deleteMany: vi.fn(),
     find: vi.fn(),
     findOne: vi.fn(),
     findOneAndUpdate: vi.fn(),
@@ -60,15 +61,19 @@ describe('User Model', () => {
 
       const actual = await userModel.createUser(mockUser);
 
-      expect(actual).toEqual(expect.objectContaining({
-        createdAt: expect.any(Date),
-        device: mockUser.device,
-        lastActiveAt: expect.any(Date),
-        status: mockUser.status
-      }));
+      expect(actual).toEqual(
+        expect.objectContaining({
+          createdAt: expect.any(Date),
+          device: mockUser.device,
+          lastActiveAt: expect.any(Date),
+          status: mockUser.status,
+        })
+      );
       expect(actual?.id).toBeTruthy(); // 只檢查 ID 存在
       expect(getCollection).toHaveBeenCalledWith('users');
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockUser));
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(
+        expect.objectContaining(mockUser)
+      );
     });
 
     it('當驗證失敗時應返回 null', async () => {
@@ -100,7 +105,9 @@ describe('User Model', () => {
 
       expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(mockCollection.insertOne).toHaveBeenCalledWith(expect.objectContaining(mockUser));
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(
+        expect.objectContaining(mockUser)
+      );
     });
   });
 
@@ -158,6 +165,53 @@ describe('User Model', () => {
     });
   });
 
+  describe('findAllUsers', () => {
+    it('應該成功找到所有使用者並返回結果', async () => {
+      const mockUsers = [
+        {
+          _id: new ObjectId('507f1f77bcf86cd799439011'),
+          createdAt: mockCurrentDate,
+          device: 'APP' as Device,
+          lastActiveAt: mockCurrentDate,
+          status: 'ACTIVE' as UserStatus,
+        },
+        {
+          _id: new ObjectId('507f1f77bcf86cd799439012'),
+          createdAt: mockCurrentDate,
+          device: 'PC' as Device,
+          lastActiveAt: mockCurrentDate,
+          status: 'ACTIVE' as UserStatus,
+        },
+      ];
+
+      mockFindCursor.toArray.mockResolvedValue(mockUsers);
+
+      const actual = await userModel.findAllUsers();
+
+      expect(actual).toEqual(
+        mockUsers.map((user) => ({
+          createdAt: user.createdAt,
+          device: user.device,
+          id: user._id.toString(),
+          lastActiveAt: user.lastActiveAt,
+          status: user.status,
+        }))
+      );
+      expect(getCollection).toHaveBeenCalledWith('users');
+      expect(mockCollection.find).toHaveBeenCalledWith({});
+      expect(mockFindCursor.toArray).toHaveBeenCalled();
+    });
+
+    it('當資料庫操作失敗時應返回 null', async () => {
+      mockFindCursor.toArray.mockRejectedValue(new Error('DB Error'));
+
+      const actual = await userModel.findAllUsers();
+
+      expect(actual).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('findUsersByRoomId', () => {
     it('應該成功找到房間內的使用者並返回結果', async () => {
       const mockRoomId = '507f1f77bcf86cd799439022';
@@ -184,14 +238,16 @@ describe('User Model', () => {
 
       const actual = await userModel.findUsersByRoomId(mockRoomId);
 
-      expect(actual).toEqual(mockUsers.map(user => ({
-        createdAt: user.createdAt,
-        device: user.device,
-        id: user._id.toString(),
-        lastActiveAt: user.lastActiveAt,
-        roomId: user.roomId,
-        status: user.status,
-      })));
+      expect(actual).toEqual(
+        mockUsers.map((user) => ({
+          createdAt: user.createdAt,
+          device: user.device,
+          id: user._id.toString(),
+          lastActiveAt: user.lastActiveAt,
+          roomId: user.roomId,
+          status: user.status,
+        }))
+      );
       expect(getCollection).toHaveBeenCalledWith('users');
       expect(mockCollection.find).toHaveBeenCalledWith({ roomId: mockRoomId });
       expect(mockFindCursor.toArray).toHaveBeenCalled();
@@ -249,22 +305,24 @@ describe('User Model', () => {
         mockRoomId
       );
 
-      expect(actual).toEqual(mockUpdatedUsers.map(user => ({
-        createdAt: user.createdAt,
-        device: user.device,
-        id: user._id.toString(),
-        lastActiveAt: user.lastActiveAt,
-        roomId: user.roomId,
-        status: user.status,
-      })));
+      expect(actual).toEqual(
+        mockUpdatedUsers.map((user) => ({
+          createdAt: user.createdAt,
+          device: user.device,
+          id: user._id.toString(),
+          lastActiveAt: user.lastActiveAt,
+          roomId: user.roomId,
+          status: user.status,
+        }))
+      );
       expect(getCollection).toHaveBeenCalledWith('users');
       expect(mockCollection.updateMany).toHaveBeenCalledWith(
         { _id: { $in: expect.any(Array) } },
         { $set: { roomId: mockRoomId } }
       );
-      expect(mockCollection.find).toHaveBeenCalledWith(
-        { _id: { $in: expect.any(Array) } }
-      );
+      expect(mockCollection.find).toHaveBeenCalledWith({
+        _id: { $in: expect.any(Array) },
+      });
     });
 
     it('當資料庫操作失敗時應返回 null', async () => {
@@ -372,6 +430,43 @@ describe('User Model', () => {
       const actual = await userModel.updateUserStatus(mockUserId, mockStatus);
 
       expect(actual).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('removeMany', () => {
+    it('應該成功移除多個使用者', async () => {
+      const mockUserIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
+      const mockDeleteResult = {
+        acknowledged: true,
+        deletedCount: 2,
+      };
+
+      mockCollection.deleteMany.mockResolvedValue(mockDeleteResult);
+
+      const actual = await userModel.removeMany(mockUserIds);
+
+      expect(actual).toBe(true);
+      expect(getCollection).toHaveBeenCalledWith('users');
+      expect(mockCollection.deleteMany).toHaveBeenCalledWith({
+        _id: { $in: mockUserIds.map((id) => new ObjectId(id)) },
+      });
+    });
+
+    it('當資料庫操作失敗時應返回 false', async () => {
+      const mockUserIds = [
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+      ];
+
+      mockCollection.deleteMany.mockRejectedValue(new Error('DB Error'));
+
+      const actual = await userModel.removeMany(mockUserIds);
+
+      expect(actual).toBe(false);
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });

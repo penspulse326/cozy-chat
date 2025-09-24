@@ -1,6 +1,6 @@
 import type { Device, UserStatus } from '@packages/lib';
 
-import { beforeEach, describe, expect, it, vi, } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import userModel from '@/models/user.model';
 import chatRoomService from '@/services/chat-room.service';
@@ -9,8 +9,10 @@ import userService from '@/services/user.service';
 vi.mock('@/models/user.model', () => ({
   default: {
     createUser: vi.fn(),
+    findAllUsers: vi.fn(),
     findUserById: vi.fn(),
     findUsersByRoomId: vi.fn(),
+    removeMany: vi.fn(),
     updateManyUserRoomId: vi.fn(),
     updateUserRoomId: vi.fn(),
     updateUserStatus: vi.fn(),
@@ -32,7 +34,6 @@ describe('User Service', () => {
 
   describe('createUser', () => {
     it('應該使用正確的資料建立使用者', async () => {
-
       const mockUserData = {
         device: 'APP' as any,
         socketId: 'socket123',
@@ -558,6 +559,106 @@ describe('User Service', () => {
       expect(userModel.createUser).toHaveBeenCalledTimes(2);
       expect(chatRoomService.createChatRoom).toHaveBeenCalledTimes(1);
       expect(userModel.updateUserRoomId).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removeInactiveUsers', () => {
+    it('應該成功移除不活躍的使用者', async () => {
+      const mockUsers = [
+        {
+          createdAt: ANY_DATE,
+          device: 'APP' as Device,
+          id: 'mockUserId1',
+          lastActiveAt: new Date(Date.now() - 6 * 60 * 1000), // 6 分鐘前
+          socketId: 'socket111',
+          status: 'ACTIVE' as UserStatus,
+        },
+        {
+          createdAt: ANY_DATE,
+          device: 'PC' as Device,
+          id: 'mockUserId2',
+          lastActiveAt: new Date(Date.now() - 7 * 60 * 1000), // 7 分鐘前
+          socketId: 'socket222',
+          status: 'ACTIVE' as UserStatus,
+        },
+        {
+          createdAt: ANY_DATE,
+          device: 'APP' as Device,
+          id: 'mockUserId3',
+          lastActiveAt: new Date(Date.now() - 2 * 60 * 1000), // 2 分鐘前
+          socketId: 'socket333',
+          status: 'ACTIVE' as UserStatus,
+        },
+      ];
+
+      vi.mocked(userModel.findAllUsers).mockResolvedValue(mockUsers);
+      vi.mocked(userModel.removeMany).mockResolvedValue(true);
+
+      await userService.removeInactiveUsers();
+
+      expect(userModel.removeMany).toHaveBeenCalledWith([
+        'mockUserId1',
+        'mockUserId2',
+      ]);
+      expect(userModel.removeMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('當沒有不活躍的使用者時不應呼叫 removeMany', async () => {
+      const mockUsers = [
+        {
+          createdAt: ANY_DATE,
+          device: 'APP' as Device,
+          id: 'mockUserId1',
+          lastActiveAt: new Date(Date.now() - 2 * 60 * 1000), // 2 分鐘前
+          socketId: 'socket111',
+          status: 'ACTIVE' as UserStatus,
+        },
+        {
+          createdAt: ANY_DATE,
+          device: 'PC' as Device,
+          id: 'mockUserId2',
+          lastActiveAt: new Date(Date.now() - 3 * 60 * 1000), // 3 分鐘前
+          socketId: 'socket222',
+          status: 'ACTIVE' as UserStatus,
+        },
+      ];
+
+      vi.mocked(userModel.findAllUsers).mockResolvedValue(mockUsers);
+
+      await userService.removeInactiveUsers();
+
+      expect(userModel.removeMany).not.toHaveBeenCalled();
+    });
+
+    it('當查詢使用者失敗時應拋出錯誤', async () => {
+      vi.mocked(userModel.findAllUsers).mockResolvedValue(null);
+
+      await expect(userService.removeInactiveUsers()).rejects.toThrow(
+        '查詢使用者失敗'
+      );
+      expect(userModel.removeMany).not.toHaveBeenCalled();
+    });
+
+    it('當移除使用者失敗時應拋出錯誤', async () => {
+      const mockUsers = [
+        {
+          createdAt: ANY_DATE,
+          device: 'APP' as Device,
+          id: 'mockUserId1',
+          lastActiveAt: new Date(Date.now() - 6 * 60 * 1000), // 6 分鐘前
+          socketId: 'socket111',
+          status: 'ACTIVE' as UserStatus,
+        },
+      ];
+
+      vi.mocked(userModel.findAllUsers).mockResolvedValue(mockUsers);
+      vi.mocked(userModel.removeMany).mockResolvedValue(false);
+
+      await expect(userService.removeInactiveUsers()).rejects.toThrow(
+        '移除不活躍使用者失敗: mockUserId1'
+      );
+      expect(userModel.removeMany).toHaveBeenCalledWith(['mockUserId1']);
+      expect(userModel.removeMany).toHaveBeenCalledTimes(1);
     });
   });
 });
