@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 
-import { setupRemoveInactiveDocuments } from './remove-inactive-documents';
+import { setupRemoveEmptyRoomsJob } from './remove-empty-rooms';
+import { setupRemoveInactiveUsers } from './remove-inactive-users';
 
 export function setupCronJobs() {
   cron.schedule('*/10 * * * *', () => {
@@ -8,5 +9,8 @@ export function setupCronJobs() {
   });
 
   // 移除不活躍的使用者
-  setupRemoveInactiveDocuments();
+  setupRemoveInactiveUsers();
+
+  // 移除空的聊天室
+  setupRemoveEmptyRoomsJob();
 }

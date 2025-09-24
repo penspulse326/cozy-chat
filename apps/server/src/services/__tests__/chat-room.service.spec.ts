@@ -6,7 +6,9 @@ import chatRoomService from '@/services/chat-room.service';
 vi.mock('@/models/chat-room.model', () => ({
   default: {
     createChatRoom: vi.fn(),
+    findAllChatRooms: vi.fn(),
     findChatRoomById: vi.fn(),
+    removeMany: vi.fn(),
     removeUserFromChatRoom: vi.fn(),
   },
 }));
@@ -184,6 +186,95 @@ describe('Chat Room Service', () => {
         chatRoomService.removeUserFromChatRoom(mockRoomId, mockUserId)
       ).rejects.toThrow('Remove user from chat room failed');
       expect(chatRoomModel.removeUserFromChatRoom).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('removeEmptyChatRooms', () => {
+    it('應該成功刪除所有使用者數量小於 2 的聊天室', async () => {
+      const mockChatRooms = [
+        {
+          createdAt: ANY_DATE,
+          id: '507f1f77bcf86cd799439011',
+          users: ['507f1f77bcf86cd799439001'], // 只有一個使用者
+        },
+        {
+          createdAt: ANY_DATE,
+          id: '507f1f77bcf86cd799439012',
+          users: ['507f1f77bcf86cd799439002', '507f1f77bcf86cd799439003'], // 兩個使用者
+        },
+        {
+          createdAt: ANY_DATE,
+          id: '507f1f77bcf86cd799439013',
+          users: [], // 沒有使用者
+        },
+      ];
+
+      vi.mocked(chatRoomModel.findAllChatRooms).mockResolvedValue(
+        mockChatRooms
+      );
+      vi.mocked(chatRoomModel.removeMany).mockResolvedValue(true);
+
+      await chatRoomService.removeEmptyChatRooms();
+
+      expect(chatRoomModel.removeMany).toHaveBeenCalledWith([
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439013',
+      ]);
+      expect(chatRoomModel.removeMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('當沒有需要刪除的聊天室時不應呼叫 removeMany', async () => {
+      const mockChatRooms = [
+        {
+          createdAt: ANY_DATE,
+          id: '507f1f77bcf86cd799439011',
+          users: ['507f1f77bcf86cd799439001', '507f1f77bcf86cd799439002'],
+        },
+        {
+          createdAt: ANY_DATE,
+          id: '507f1f77bcf86cd799439012',
+          users: ['507f1f77bcf86cd799439003', '507f1f77bcf86cd799439004'],
+        },
+      ];
+
+      vi.mocked(chatRoomModel.findAllChatRooms).mockResolvedValue(
+        mockChatRooms
+      );
+
+      await chatRoomService.removeEmptyChatRooms();
+
+      expect(chatRoomModel.removeMany).not.toHaveBeenCalled();
+    });
+
+    it('當查詢聊天室失敗時應拋出錯誤', async () => {
+      vi.mocked(chatRoomModel.findAllChatRooms).mockResolvedValue(null);
+
+      await expect(chatRoomService.removeEmptyChatRooms()).rejects.toThrow(
+        '查詢聊天室失敗'
+      );
+      expect(chatRoomModel.removeMany).not.toHaveBeenCalled();
+    });
+
+    it('當刪除聊天室失敗時應拋出錯誤', async () => {
+      const mockChatRooms = [
+        {
+          createdAt: ANY_DATE,
+          id: '507f1f77bcf86cd799439011',
+          users: ['507f1f77bcf86cd799439001'], // 只有一個使用者
+        },
+      ];
+
+      vi.mocked(chatRoomModel.findAllChatRooms).mockResolvedValue(
+        mockChatRooms
+      );
+      vi.mocked(chatRoomModel.removeMany).mockResolvedValue(false);
+
+      await expect(chatRoomService.removeEmptyChatRooms()).rejects.toThrow(
+        '刪除聊天室失敗: 507f1f77bcf86cd799439011'
+      );
+      expect(chatRoomModel.removeMany).toHaveBeenCalledWith([
+        '507f1f77bcf86cd799439011',
+      ]);
     });
   });
 });

@@ -4,12 +4,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCollection } from '@/config/db';
 import chatRoomModel from '@/models/chat-room.model';
 
+const mockFindCursor = {
+  toArray: vi.fn(),
+};
+
 vi.mock('@/config/db', () => ({
   getCollection: vi.fn(),
 }));
 
 describe('Chat Room Model', () => {
   const mockCollection = {
+    deleteOne: vi.fn(),
+    find: vi.fn(),
     findOne: vi.fn(),
     findOneAndUpdate: vi.fn(),
     insertOne: vi.fn(),
@@ -22,6 +28,7 @@ describe('Chat Room Model', () => {
     vi.mocked(getCollection).mockReturnValue(
       mockCollection as unknown as ReturnType<typeof getCollection>
     );
+    mockCollection.find.mockReturnValue(mockFindCursor);
 
     consoleErrorSpy = vi
       .spyOn(console, 'error')
@@ -94,6 +101,49 @@ describe('Chat Room Model', () => {
       expect(mockCollection.insertOne).toHaveBeenCalledWith(
         expect.objectContaining(mockChatRoom)
       );
+    });
+  });
+
+  describe('findAllChatRooms', () => {
+    it('應該成功找到所有聊天室並返回結果', async () => {
+      const mockChatRooms = [
+        {
+          _id: new ObjectId('507f1f77bcf86cd799439011'),
+          createdAt: new Date(),
+          users: ['507f1f77bcf86cd799439001', '507f1f77bcf86cd799439002'],
+        },
+        {
+          _id: new ObjectId('507f1f77bcf86cd799439012'),
+          createdAt: new Date(),
+          users: ['507f1f77bcf86cd799439003'],
+        },
+      ];
+
+      mockFindCursor.toArray.mockResolvedValue(mockChatRooms);
+
+      const actual = await chatRoomModel.findAllChatRooms();
+
+      expect(actual).toEqual(
+        mockChatRooms.map((room) => ({
+          createdAt: room.createdAt,
+          id: room._id.toString(),
+          users: room.users,
+        }))
+      );
+      expect(getCollection).toHaveBeenCalledWith('chat_rooms');
+      expect(mockCollection.find).toHaveBeenCalledWith({});
+      expect(mockFindCursor.toArray).toHaveBeenCalled();
+    });
+
+    it('當資料庫操作失敗時應返回 null', async () => {
+      mockCollection.find.mockImplementation(() => {
+        throw new Error('DB Error');
+      });
+
+      const actual = await chatRoomModel.findAllChatRooms();
+
+      expect(actual).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });
 
@@ -205,6 +255,54 @@ describe('Chat Room Model', () => {
       );
 
       expect(actual).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteChatRoom', () => {
+    it('應該成功刪除聊天室', async () => {
+      const mockRoomId = '507f1f77bcf86cd799439022';
+      const mockDeleteResult = {
+        acknowledged: true,
+        deletedCount: 1,
+      };
+
+      mockCollection.deleteOne.mockResolvedValue(mockDeleteResult);
+
+      const actual = await chatRoomModel.deleteChatRoom(mockRoomId);
+
+      expect(actual).toBe(true);
+      expect(getCollection).toHaveBeenCalledWith('chat_rooms');
+      expect(mockCollection.deleteOne).toHaveBeenCalledWith({
+        _id: expect.any(ObjectId),
+      });
+    });
+
+    it('當聊天室不存在時應返回 true', async () => {
+      const mockRoomId = '507f1f77bcf86cd799439022';
+      const mockDeleteResult = {
+        acknowledged: true,
+        deletedCount: 0,
+      };
+
+      mockCollection.deleteOne.mockResolvedValue(mockDeleteResult);
+
+      const actual = await chatRoomModel.deleteChatRoom(mockRoomId);
+
+      expect(actual).toBe(true);
+      expect(mockCollection.deleteOne).toHaveBeenCalledWith({
+        _id: expect.any(ObjectId),
+      });
+    });
+
+    it('當資料庫操作失敗時應返回 false', async () => {
+      const mockRoomId = '507f1f77bcf86cd799439022';
+
+      mockCollection.deleteOne.mockRejectedValue(new Error('DB Error'));
+
+      const actual = await chatRoomModel.deleteChatRoom(mockRoomId);
+
+      expect(actual).toBe(false);
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
   });

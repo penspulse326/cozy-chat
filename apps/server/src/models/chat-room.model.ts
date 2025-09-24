@@ -45,6 +45,36 @@ async function createChatRoom(
   }
 }
 
+async function deleteChatRoom(roomId: string): Promise<boolean> {
+  const chatRooms = getCollection<ChatRoomEntity>('chat_rooms');
+
+  try {
+    const result = await chatRooms.deleteOne({ _id: new ObjectId(roomId) });
+    console.log('刪除 ChatRoom 成功');
+
+    return result.acknowledged;
+  } catch (error) {
+    console.error('刪除 ChatRoom 失敗', error);
+
+    return false;
+  }
+}
+
+async function findAllChatRooms(): Promise<ChatRoomDto[] | null> {
+  const chatRooms = getCollection<ChatRoomEntity>('chat_rooms');
+
+  try {
+    const result = await chatRooms.find({}).toArray();
+    console.log('查詢所有 ChatRoom 成功');
+
+    return result.map((room) => convertToDto(room));
+  } catch (error) {
+    console.error('查詢所有 ChatRoom 失敗', error);
+
+    return null;
+  }
+}
+
 async function findChatRoomById(id: string): Promise<ChatRoomDto | null> {
   const chatRooms = getCollection<ChatRoomEntity>('chat_rooms');
 
@@ -61,6 +91,22 @@ async function findChatRoomById(id: string): Promise<ChatRoomDto | null> {
     console.error('查詢 ChatRoom 失敗', error);
 
     return null;
+  }
+}
+
+async function removeMany(roomIds: string[]): Promise<boolean> {
+  const chatRooms = getCollection<ChatRoomEntity>('chat_rooms');
+
+  try {
+    const objectIds = roomIds.map((id) => new ObjectId(id));
+    const result = await chatRooms.deleteMany({ _id: { $in: objectIds } });
+    console.log('批量刪除 ChatRoom 成功');
+
+    return result.acknowledged;
+  } catch (error) {
+    console.error('批量刪除 ChatRoom 失敗', error);
+
+    return false;
   }
 }
 
@@ -92,7 +138,10 @@ async function removeUserFromChatRoom(
 
 const chatRoomModel = {
   createChatRoom,
+  deleteChatRoom,
+  findAllChatRooms,
   findChatRoomById,
+  removeMany,
   removeUserFromChatRoom,
 };
 

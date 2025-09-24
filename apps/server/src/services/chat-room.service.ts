@@ -24,6 +24,28 @@ async function findChatRoomById(id: string): Promise<ChatRoomDto> {
   return result;
 }
 
+async function removeEmptyChatRooms(): Promise<void> {
+  const chatRooms = await chatRoomModel.findAllChatRooms();
+
+  if (chatRooms === null) {
+    throw new Error('查詢聊天室失敗');
+  }
+
+  const emptyChatRoomIds = chatRooms
+    .filter((room) => room.users.length < 2)
+    .map((room) => room.id);
+
+  if (emptyChatRoomIds.length === 0) {
+    return;
+  }
+
+  const result = await chatRoomModel.removeMany(emptyChatRoomIds);
+
+  if (!result) {
+    throw new Error(`刪除聊天室失敗: ${emptyChatRoomIds.join(', ')}`);
+  }
+}
+
 async function removeUserFromChatRoom(
   roomId: string,
   userId: string
@@ -38,5 +60,6 @@ async function removeUserFromChatRoom(
 export default {
   createChatRoom,
   findChatRoomById,
+  removeEmptyChatRooms,
   removeUserFromChatRoom,
 };
