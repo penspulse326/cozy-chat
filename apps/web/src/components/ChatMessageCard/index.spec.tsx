@@ -21,7 +21,7 @@ describe('ChatMessageCard', () => {
       screen.getByText('Hello, this is a test message!')
     ).toBeInTheDocument();
     expect(screen.getByText('行動裝置')).toBeInTheDocument();
-    expect(screen.getByText('2023/10/27')).toBeInTheDocument();
+    expect(screen.getByText('698 天前')).toBeInTheDocument();
   });
 
   it('應該正確渲染訊息內容、裝置和時間 (作為對方)', () => {
@@ -32,7 +32,7 @@ describe('ChatMessageCard', () => {
       screen.getByText('Hello, this is a test message!')
     ).toBeInTheDocument();
     expect(screen.getByText('行動裝置')).toBeInTheDocument();
-    expect(screen.getByText('2023/10/27')).toBeInTheDocument();
+    expect(screen.getByText('698 天前')).toBeInTheDocument();
   });
 
   it('當 device 不合法時，應能正常渲染而不顯示裝置資訊', () => {

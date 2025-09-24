@@ -1,6 +1,8 @@
 import { DeviceEnum } from '@/types';
+import { formatMessageTime } from '@/utils/formatTime';
 import { Flex, Stack, Text, alpha } from '@mantine/core';
 import { ChatMessageDto } from '@packages/lib';
+import { useEffect, useState } from 'react';
 import styles from './styles.module.css';
 
 interface MessageContentProps {
@@ -10,7 +12,18 @@ interface MessageContentProps {
 
 export default function ChatMessageCard({ data, isUser }: MessageContentProps) {
   const { device, content, createdAt } = data;
+  const [formattedTime, setFormattedTime] = useState<string>(
+    formatMessageTime(createdAt)
+  );
   const justify = isUser ? styles.wrapperEnd : styles.wrapperStart;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFormattedTime(formatMessageTime(createdAt));
+    }, 1000 * 60);
+
+    return () => clearInterval(interval);
+  }, [createdAt]);
 
   return (
     <Flex
@@ -28,13 +41,7 @@ export default function ChatMessageCard({ data, isUser }: MessageContentProps) {
         className={`${styles.infoStack} ${isUser ? styles.infoStackRight : styles.infoStackLeft}`}
       >
         <Text size="xs">{DeviceEnum[device]}</Text>
-        <Text size="xs">
-          {new Date(createdAt).toLocaleDateString('zh-TW', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-          })}
-        </Text>
+        <Text size="xs">{formattedTime}</Text>
       </Stack>
     </Flex>
   );
