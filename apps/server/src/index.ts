@@ -19,6 +19,11 @@ const server = http.createServer(app);
 //   res.sendFile(__dirname + '/index.html');
 // });
 
+app.get('/health', () => {
+  console.log('健康檢查');
+  return 'OK';
+});
+
 async function bootstrap() {
   const url =
     process.env.ENV === 'production'
