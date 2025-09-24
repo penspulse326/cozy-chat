@@ -19,9 +19,9 @@ const server = http.createServer(app);
 //   res.sendFile(__dirname + '/index.html');
 // });
 
-app.get('/health', () => {
+app.get('/health', (_, res) => {
   console.log('健康檢查');
-  return 'OK';
+  res.send('OK');
 });
 
 async function bootstrap() {
