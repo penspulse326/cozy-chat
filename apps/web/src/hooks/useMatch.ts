@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { MatchStatus, MatchSuccessData } from '../types';
 import useSocket from './useSocket';
 
+import { getDeviceType } from '@/utils/getDeviceType';
+
 export default function useMatch() {
   const socket = useSocket();
   const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
@@ -38,7 +40,7 @@ export default function useMatch() {
 
     if (message.userId !== userId && newMsgAudioRef.current) {
       newMsgAudioRef.current.currentTime = 0;
-      newMsgAudioRef.current.play().catch(() => {});
+      newMsgAudioRef.current.play().catch(() => { });
     }
   }
 
@@ -49,7 +51,7 @@ export default function useMatch() {
 
   // Socket actions
   function startMatch() {
-    socket.emit(MATCH_EVENT.START, 'PC');
+    socket.emit(MATCH_EVENT.START, getDeviceType());
   }
 
   function cancelMatch() {
