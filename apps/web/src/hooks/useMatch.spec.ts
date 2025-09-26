@@ -1,10 +1,15 @@
+import { CHAT_EVENT } from '@packages/lib';
 import { act, renderHook } from '@testing-library/react';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import useMatch from '../useMatch';
+import useMatch from './useMatch';
 
 beforeAll(() => {
-  vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
-  vi.spyOn(window.HTMLMediaElement.prototype, 'pause').mockImplementation(() => { });
+  vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(() =>
+    Promise.resolve()
+  );
+  vi.spyOn(window.HTMLMediaElement.prototype, 'pause').mockImplementation(
+    () => {}
+  );
 });
 
 const localStorageMock = (() => {
@@ -38,7 +43,6 @@ const mockSocket = {
 vi.mock('../useSocket', () => ({
   default: () => mockSocket,
 }));
-
 
 describe('useMatch', () => {
   beforeEach(() => {
@@ -109,11 +113,26 @@ describe('useMatch', () => {
       });
 
       // 檢查是否設定了正確的事件監聽器
-      expect(mockSocket.on).toHaveBeenCalledWith('connect', expect.any(Function));
-      expect(mockSocket.on).toHaveBeenCalledWith('match:success', expect.any(Function));
-      expect(mockSocket.on).toHaveBeenCalledWith('match:leave', expect.any(Function));
-      expect(mockSocket.on).toHaveBeenCalledWith('chat:send', expect.any(Function));
-      expect(mockSocket.on).toHaveBeenCalledWith('chat:load', expect.any(Function));
+      expect(mockSocket.on).toHaveBeenCalledWith(
+        'connect',
+        expect.any(Function)
+      );
+      expect(mockSocket.on).toHaveBeenCalledWith(
+        'match:success',
+        expect.any(Function)
+      );
+      expect(mockSocket.on).toHaveBeenCalledWith(
+        'match:leave',
+        expect.any(Function)
+      );
+      expect(mockSocket.on).toHaveBeenCalledWith(
+        'chat:send',
+        expect.any(Function)
+      );
+      expect(mockSocket.on).toHaveBeenCalledWith(
+        'chat:load',
+        expect.any(Function)
+      );
     });
 
     it('處理配對成功事件時應該更新狀態', () => {
@@ -124,8 +143,9 @@ describe('useMatch', () => {
       });
 
       // 模擬配對成功事件
-      const matchSuccessHandler = mockSocket.on.mock.calls
-        .find(call => call[0] === 'match:success')?.[1];
+      const matchSuccessHandler = mockSocket.on.mock.calls.find(
+        (call) => call[0] === 'match:success'
+      )?.[1];
 
       act(() => {
         matchSuccessHandler?.({ roomId: 'room123', userId: 'user456' });
@@ -148,8 +168,9 @@ describe('useMatch', () => {
       });
 
       // 模擬配對離開事件
-      const matchLeaveHandler = mockSocket.on.mock.calls
-        .find(call => call[0] === 'match:leave')?.[1];
+      const matchLeaveHandler = mockSocket.on.mock.calls.find(
+        (call) => call[0] === 'match:leave'
+      )?.[1];
 
       act(() => {
         matchLeaveHandler?.();
@@ -175,8 +196,9 @@ describe('useMatch', () => {
       };
 
       // 模擬收到訊息事件
-      const messageReceiveHandler = mockSocket.on.mock.calls
-        .find(call => call[0] === 'chat:send')?.[1];
+      const messageReceiveHandler = mockSocket.on.mock.calls.find(
+        (call) => call[0] === 'chat:send'
+      )?.[1];
 
       act(() => {
         messageReceiveHandler?.(newMessage);
@@ -194,8 +216,9 @@ describe('useMatch', () => {
       });
 
       // 模擬配對成功以設定 userId
-      const matchSuccessHandler = mockSocket.on.mock.calls
-        .find(call => call[0] === 'match:success')?.[1];
+      const matchSuccessHandler = mockSocket.on.mock.calls.find(
+        (call) => call[0] === 'match:success'
+      )?.[1];
 
       act(() => {
         matchSuccessHandler?.({ roomId: 'room123', userId: 'user456' });
@@ -211,8 +234,9 @@ describe('useMatch', () => {
       };
 
       // 模擬收到訊息事件
-      const messageReceiveHandler = mockSocket.on.mock.calls
-        .find(call => call[0] === 'chat:send')?.[1];
+      const messageReceiveHandler = mockSocket.on.mock.calls.find(
+        (call) => call[0] === 'chat:send'
+      )?.[1];
 
       act(() => {
         messageReceiveHandler?.(newMessage);
@@ -220,6 +244,42 @@ describe('useMatch', () => {
 
       expect(result.current.messages).toContain(newMessage);
       expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(1);
+    });
+
+    it('處理訊息已讀事件時應該更新訊息列表', () => {
+      const { result } = renderHook(() => useMatch());
+
+      act(() => {
+        result.current.setMatchStatus('waiting');
+      });
+
+      // Initial load with an unread message
+      const initialMessage = {
+        id: 'msg1',
+        isRead: false,
+        content: 'test',
+        // ... other properties
+      } as any;
+      const chatLoadHandler = mockSocket.on.mock.calls.find(
+        (call) => call[0] === 'chat:load'
+      )?.[1];
+      act(() => {
+        chatLoadHandler?.([initialMessage]);
+      });
+
+      expect(result.current.messages[0].isRead).toBe(false);
+
+      // Simulate the message_read event
+      const updatedMessage = { ...initialMessage, isRead: true };
+      const messageReadHandler = mockSocket.on.mock.calls.find(
+        (call) => call[0] === 'chat:read'
+      )?.[1];
+
+      act(() => {
+        messageReadHandler?.(updatedMessage);
+      });
+
+      expect(result.current.messages[0].isRead).toBe(true);
     });
   });
 
@@ -236,6 +296,17 @@ describe('useMatch', () => {
         userId: null,
         content: '測試訊息',
       });
+    });
+
+    it('readMessage 應該發送正確的 socket 事件', () => {
+      const { result } = renderHook(() => useMatch());
+      const messageId = 'msg-to-read';
+
+      act(() => {
+        result.current.readMessage(messageId);
+      });
+
+      expect(mockSocket.emit).toHaveBeenCalledWith(CHAT_EVENT.READ, messageId);
     });
 
     it('設定為 quit 時應該處理離開邏輯', () => {

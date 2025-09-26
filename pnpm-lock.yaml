@@ -142,6 +142,9 @@ importers:
       chroma-js:
         specifier: ^3.1.2
         version: 3.1.2
+      dayjs:
+        specifier: ^1.11.18
+        version: 1.11.18
       next:
         specifier: 15.3.5
         version: 15.3.5(@babel/core@7.28.4)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)

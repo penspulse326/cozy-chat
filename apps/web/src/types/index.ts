@@ -12,7 +12,7 @@ export type MatchSuccessData = {
   userId: string;
 };
 
-export enum DeviceEnum {
+export enum DeviceNameMap {
   APP = 'APP',
   MB = '行動裝置',
   PC = '網站',

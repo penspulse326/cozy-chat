@@ -40,13 +40,21 @@ export default function useMatch() {
 
     if (message.userId !== userId && newMsgAudioRef.current) {
       newMsgAudioRef.current.currentTime = 0;
-      newMsgAudioRef.current.play().catch(() => { });
+      newMsgAudioRef.current.play().catch(() => {});
     }
   }
 
   function handleMessagesLoad(data: unknown) {
     const messageList = data as ChatMessageDto[];
     setMessages(messageList);
+  }
+
+  function handleMessageRead(data: unknown) {
+    const updatedMessage = data as ChatMessageDto;
+
+    setMessages((prev) =>
+      prev.map((msg) => (msg.id === updatedMessage.id ? updatedMessage : msg))
+    );
   }
 
   // Socket actions
@@ -84,12 +92,17 @@ export default function useMatch() {
     });
   }
 
+  function readMessage(messageId: string) {
+    socket.emit(CHAT_EVENT.READ, messageId);
+  }
+
   // Socket management
   function setupSocketEvents() {
     socket.on(MATCH_EVENT.SUCCESS, handleMatchSuccess);
     socket.on(MATCH_EVENT.LEAVE, handleMatchLeave);
     socket.on(CHAT_EVENT.SEND, handleMessageReceive);
     socket.on(CHAT_EVENT.LOAD, handleMessagesLoad);
+    socket.on(CHAT_EVENT.READ, handleMessageRead);
   }
 
   function connectSocket() {
@@ -154,5 +167,5 @@ export default function useMatch() {
     };
   }, []);
 
-  return { matchStatus, setMatchStatus, sendMessage, messages };
+  return { matchStatus, setMatchStatus, sendMessage, readMessage, messages };
 }

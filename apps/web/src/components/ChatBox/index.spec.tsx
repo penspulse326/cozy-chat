@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests';
 import { ChatMessageDto } from '@packages/lib';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import ChatBox from './index';
 
 describe('ChatBox', () => {
@@ -12,6 +12,7 @@ describe('ChatBox', () => {
       content: '嗨，你好！',
       createdAt: new Date(),
       device: 'PC',
+      isRead: false,
     },
     {
       id: '2',
@@ -20,30 +21,55 @@ describe('ChatBox', () => {
       content: '你好啊！',
       createdAt: new Date(),
       device: 'MB',
+      isRead: false,
     },
   ];
 
   it('當 matchStatus 為 waiting 時，應顯示配對中訊息', () => {
-    render(<ChatBox userId="user1" messages={[]} matchStatus="waiting" />);
+    render(
+      <ChatBox
+        userId="user1"
+        messages={[]}
+        matchStatus="waiting"
+        onRead={vi.fn()}
+      />
+    );
     expect(screen.getByText('配對中...')).toBeInTheDocument();
   });
 
   it('當 matchStatus 為 left 時，應顯示對方已離開訊息', () => {
     render(
-      <ChatBox userId="user1" messages={mockMessages} matchStatus="left" />
+      <ChatBox
+        userId="user1"
+        messages={mockMessages}
+        matchStatus="left"
+        onRead={vi.fn()}
+      />
     );
     expect(screen.getByText('對方已離開')).toBeInTheDocument();
   });
 
   it('當 matchStatus 為 matched 且沒有訊息時，應顯示配對成功訊息', () => {
-    render(<ChatBox userId="user1" messages={[]} matchStatus="matched" />);
+    render(
+      <ChatBox
+        userId="user1"
+        messages={[]}
+        matchStatus="matched"
+        onRead={vi.fn()}
+      />
+    );
     expect(screen.getByText('配對成功！')).toBeInTheDocument();
-    expect(screen.getByText('開始聊天吧！')).toBeInTheDocument();
+    expect(screen.getByText(/開始聊天吧/)).toBeInTheDocument();
   });
 
   it('當有訊息時，應正確渲染訊息列表', () => {
     render(
-      <ChatBox userId="user1" messages={mockMessages} matchStatus="matched" />
+      <ChatBox
+        userId="user1"
+        messages={mockMessages}
+        matchStatus="matched"
+        onRead={vi.fn()}
+      />
     );
 
     // 檢查兩則訊息是否都已渲染
@@ -57,12 +83,39 @@ describe('ChatBox', () => {
     expect(messageElements.length).toBe(mockMessages.length);
   });
 
+  // Mock IntersectionObserver
+  const intersectionObserverMock = () => {
+    let callback: (entries: any[]) => void = () => {};
+    return {
+      observe: vi.fn(),
+      unobserve: vi.fn(),
+      disconnect: vi.fn(),
+      trigger: (entries: any[]) => callback(entries),
+      callback: (cb: (entries: any[]) => void) => {
+        callback = cb;
+      },
+    };
+  };
+  const observer = intersectionObserverMock();
+  vi.stubGlobal(
+    'IntersectionObserver',
+    vi.fn().mockImplementation((cb) => {
+      observer.callback(cb);
+      return observer;
+    })
+  );
+
   it('應根據 userId 正確判斷是否為使用者本人訊息', () => {
     // 這個測試需要檢查傳遞給 ChatMessageCard 的 isUser prop
     // 這通常需要對 ChatMessageCard 進行 mock，或者在 ChatMessageCard 內部渲染一些可供測試的標記
     // 這裡我們先用一個簡化的方式，假設 isUser 會影響樣式或特定文字
     render(
-      <ChatBox userId="user1" messages={mockMessages} matchStatus="matched" />
+      <ChatBox
+        userId="user1"
+        messages={mockMessages}
+        matchStatus="matched"
+        onRead={vi.fn()}
+      />
     );
 
     // 假設使用者自己的訊息會有一個 'is-user' 的 class 或 data-attribute

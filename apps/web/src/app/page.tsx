@@ -27,7 +27,8 @@ export default function Home() {
   const [opened, { toggle }] = useDisclosure();
   const viewport = useRef<HTMLDivElement>(null);
 
-  const { matchStatus, setMatchStatus, messages, sendMessage } = useMatch();
+  const { matchStatus, setMatchStatus, messages, sendMessage, readMessage } =
+    useMatch();
 
   function handleScrollToBottom() {
     viewport.current?.scrollTo({
@@ -105,6 +106,7 @@ export default function Home() {
                 userId={userId}
                 messages={messages}
                 matchStatus={matchStatus}
+                onRead={readMessage}
               />
             )}
           </Stack>

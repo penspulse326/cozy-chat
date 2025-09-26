@@ -14,11 +14,29 @@
 .messageBox {
   padding: var(--mantine-spacing-xs);
   max-width: 300px;
-  border-radius: var(--mantine-radius-md);
+  height: 44px;
+  border: 1px solid var(--mantine-color-moss-green-4);
+  position: relative;
+  transition: 0.3s ease;
+  box-sizing: border-box;
 
   @media (max-width: 768px) {
     max-width: 240px;
   }
+}
+
+.messageBoxUser {
+  border-radius: 12px 12px 0 12px;
+}
+
+.messageBoxOther {
+  border-radius: 12px 12px 12px 0;
+}
+
+.messageBox:hover {
+  border-width: 1px;
+  border-color: var(--mantine-color-moss-green-8);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
 }
 
 .messageText {

@@ -37,6 +37,10 @@ export function setupSocketServer(io: Server) {
       void chatHandlers.handleChatSend(data);
     });
 
+    client.on(CHAT_EVENT.READ, (messageId: string) => {
+      void chatHandlers.handleChatRead(messageId);
+    });
+
     client.on('disconnect', () => {
       waitingPool.removeUserFromPool(client.id);
       console.log('使用者斷開連線:', client.id);

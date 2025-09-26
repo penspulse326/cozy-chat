@@ -29,8 +29,6 @@ vi.mock('@/socket/waiting-pool', () => ({
   createWaitingPool: vi.fn(),
 }));
 
-
-
 interface MockServer extends Partial<Server> {
   connectionCallback?: (socket: Socket) => void;
 }
@@ -65,6 +63,7 @@ describe('Socket Server', () => {
     };
 
     mockChatHandlers = {
+      handleChatRead: vi.fn(),
       handleChatSend: vi.fn(),
     };
 
@@ -164,6 +163,10 @@ describe('Socket Server', () => {
     );
     expect(mockSocket.on).toHaveBeenCalledWith(
       'chat:send',
+      expect.any(Function)
+    );
+    expect(mockSocket.on).toHaveBeenCalledWith(
+      'chat:read',
       expect.any(Function)
     );
     expect(mockSocket.on).toHaveBeenCalledWith(
@@ -295,6 +298,39 @@ describe('Socket Server', () => {
     }
 
     expect(mockChatHandlers.handleChatSend).toHaveBeenCalledWith(chatMessage);
+  });
+
+  it('當收到 chat:read 事件時，應該呼叫 handleChatRead', () => {
+    setupSocketServer(mockIo as Server);
+
+    // 使用存儲的 callback
+    if (!mockIo.connectionCallback) {
+      return;
+    }
+    mockIo.connectionCallback(mockSocket as Socket);
+
+    // 直接獲取並呼叫事件處理程序
+    const onMock = vi.mocked(mockSocket.on);
+    if (!onMock) {
+      return;
+    }
+
+    const chatReadHandler = onMock.mock.calls.find(
+      (call) => call[0] === 'chat:read'
+    )?.[1] as ((data: any) => void) | undefined;
+
+    expect(chatReadHandler).toBeDefined();
+
+    const readData = {
+      messageId: 'message123',
+      userId: 'user456',
+    };
+
+    if (chatReadHandler) {
+      chatReadHandler(readData);
+    }
+
+    expect(mockChatHandlers.handleChatRead).toHaveBeenCalledWith(readData);
   });
 
   it('當斷開連接時，應該從等待池中移除使用者', () => {

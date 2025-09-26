@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { io } from 'socket.io-client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import useSocket from '../useSocket';
+import useSocket from './useSocket';
 
 // Mock socket.io-client
 const mockSocketInstance = {
@@ -112,7 +112,9 @@ describe('useSocket', () => {
         result.current.emit('test-event', { data: 'test' });
       });
 
-      expect(mockSocketInstance.emit).toHaveBeenCalledWith('test-event', { data: 'test' });
+      expect(mockSocketInstance.emit).toHaveBeenCalledWith('test-event', {
+        data: 'test',
+      });
     });
 
     it('應該能發送沒有資料的事件', () => {
@@ -130,7 +132,10 @@ describe('useSocket', () => {
         result.current.emit('test-event');
       });
 
-      expect(mockSocketInstance.emit).toHaveBeenCalledWith('test-event', undefined);
+      expect(mockSocketInstance.emit).toHaveBeenCalledWith(
+        'test-event',
+        undefined
+      );
     });
   });
 
@@ -151,7 +156,10 @@ describe('useSocket', () => {
         result.current.on('test-event', mockHandler);
       });
 
-      expect(mockSocketInstance.on).toHaveBeenCalledWith('test-event', mockHandler);
+      expect(mockSocketInstance.on).toHaveBeenCalledWith(
+        'test-event',
+        mockHandler
+      );
     });
   });
 

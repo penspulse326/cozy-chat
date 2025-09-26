@@ -42,6 +42,7 @@ export const chatMessageDtoSchema = z.object({
   createdAt: z.date(),
   device: deviceSchema,
   id: z.string(),
+  isRead: z.boolean().default(false),
   roomId: z.string(),
   userId: z.string(),
 });

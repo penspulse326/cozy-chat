@@ -9,12 +9,14 @@ interface ChatBoxProps {
   userId: string | null;
   messages: ChatMessageDto[];
   matchStatus: MatchStatus;
+  onRead: (id: string) => void;
 }
 
 export default function ChatBox({
   userId,
   messages,
   matchStatus,
+  onRead,
 }: ChatBoxProps) {
   return (
     <>
@@ -23,11 +25,11 @@ export default function ChatBox({
         bg={alpha('var(--mantine-color-moss-green-2)', 0.4)}
       >
         {matchStatus === 'waiting' ? (
-          <Text>配對中...</Text>
+          <Text className={styles.chatBoxHint}>配對中...</Text>
         ) : (
           <>
-            <Text>配對成功！</Text>
-            <Text className={styles.chatBoxTextMb}>開始聊天吧！</Text>
+            <Text className={styles.chatBoxHint}>配對成功！</Text>
+            <Text className={styles.chatBoxTextMb}>開始聊天吧 🤝</Text>
 
             <Stack className={styles.messagesContainer}>
               {messages.map((message: ChatMessageDto) => (
@@ -35,6 +37,7 @@ export default function ChatBox({
                   key={message.id}
                   data={message}
                   isUser={message.userId === userId}
+                  onRead={onRead}
                 />
               ))}
             </Stack>

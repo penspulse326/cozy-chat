@@ -14,7 +14,9 @@ describe('Chat Message Model', () => {
   const mockCollection = {
     find: vi.fn(),
     findOne: vi.fn(),
+    findOneAndUpdate: vi.fn(),
     insertOne: vi.fn(),
+    updateOne: vi.fn(),
   };
 
   const mockFindCursor = {
@@ -45,6 +47,7 @@ describe('Chat Message Model', () => {
         content: 'Hello world',
         createdAt: new Date(),
         device: 'APP' as Device,
+        isRead: false,
         roomId: '507f1f77bcf86cd799439022',
         userId: '507f1f77bcf86cd799439011',
       };
@@ -78,11 +81,41 @@ describe('Chat Message Model', () => {
       );
     });
 
+    it('建立新訊息時 isRead 應預設為 false', async () => {
+      const mockChatMessage = {
+        content: 'Hello world',
+        createdAt: new Date(),
+        device: 'APP' as Device,
+        isRead: false,
+        roomId: '507f1f77bcf86cd799439022',
+        userId: '507f1f77bcf86cd799439011',
+      };
+
+      const mockObjectId = new ObjectId();
+      const mockInsertResult = {
+        acknowledged: true,
+        insertedId: mockObjectId,
+      };
+
+      mockCollection.insertOne.mockImplementation(() => {
+        return mockInsertResult;
+      });
+
+      const actual = await chatMessageModel.createChatMessage(mockChatMessage);
+
+      expect(actual).toEqual(
+        expect.objectContaining({
+          isRead: false,
+        })
+      );
+    });
+
     it('當驗證失敗時應返回 null', async () => {
       const mockInvalidChatMessage = {
         content: 123 as unknown as string,
         createdAt: new Date(),
         device: 'INVALID_DEVICE' as Device,
+        isRead: false,
         roomId: '',
         userId: '',
       };
@@ -101,6 +134,7 @@ describe('Chat Message Model', () => {
         content: 'Hello world',
         createdAt: new Date(),
         device: 'APP' as Device,
+        isRead: false,
         roomId: '507f1f77bcf86cd799439022',
         userId: '507f1f77bcf86cd799439011',
       };
@@ -126,6 +160,7 @@ describe('Chat Message Model', () => {
         content: 'Hello world',
         createdAt: new Date(),
         device: 'APP' as Device,
+        isRead: false,
         roomId: '507f1f77bcf86cd799439022',
         userId: '507f1f77bcf86cd799439011',
       };
@@ -138,6 +173,7 @@ describe('Chat Message Model', () => {
         createdAt: mockChatMessage.createdAt,
         device: mockChatMessage.device,
         id: mockMessageId,
+        isRead: false,
         roomId: mockChatMessage.roomId,
         userId: mockChatMessage.userId,
       });
@@ -179,6 +215,7 @@ describe('Chat Message Model', () => {
           content: 'Hello world',
           createdAt: new Date(),
           device: 'APP' as Device,
+          isRead: false,
           roomId: mockRoomId,
           userId: '507f1f77bcf86cd799439011',
         },
@@ -187,6 +224,7 @@ describe('Chat Message Model', () => {
           content: 'How are you?',
           createdAt: new Date(),
           device: 'PC' as Device,
+          isRead: false,
           roomId: mockRoomId,
           userId: '507f1f77bcf86cd799439012',
         },
@@ -202,6 +240,7 @@ describe('Chat Message Model', () => {
           createdAt: message.createdAt,
           device: message.device,
           id: message._id.toString(),
+          isRead: false,
           roomId: message.roomId,
           userId: message.userId,
         }))
@@ -217,6 +256,75 @@ describe('Chat Message Model', () => {
 
       const actual =
         await chatMessageModel.findChatMessagesByRoomIds(mockRoomId);
+
+      expect(actual).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('updateChatMessage', () => {
+    it('應該成功更新聊天訊息並返回更新後的訊息', async () => {
+      const mockMessageId = '507f1f77bcf86cd799439033';
+      const mockUpdatePayload = { isRead: true };
+      const mockUpdatedMessage = {
+        _id: new ObjectId(mockMessageId),
+        content: 'Original content',
+        createdAt: new Date(),
+        device: 'APP',
+        isRead: true,
+        roomId: 'room123',
+        userId: 'user123',
+      };
+
+      mockCollection.findOneAndUpdate.mockResolvedValue(mockUpdatedMessage);
+
+      const actual = await chatMessageModel.updateChatMessage(
+        mockMessageId,
+        mockUpdatePayload
+      );
+
+      expect(getCollection).toHaveBeenCalledWith('chat_messages');
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: new ObjectId(mockMessageId) },
+        { $set: mockUpdatePayload },
+        { returnDocument: 'after' }
+      );
+      expect(actual).toEqual({
+        content: mockUpdatedMessage.content,
+        createdAt: mockUpdatedMessage.createdAt,
+        device: mockUpdatedMessage.device,
+        id: mockMessageId,
+        isRead: mockUpdatedMessage.isRead,
+        roomId: mockUpdatedMessage.roomId,
+        userId: mockUpdatedMessage.userId,
+      });
+    });
+
+    it('當找不到聊天訊息時應返回 null', async () => {
+      const mockMessageId = '507f1f77bcf86cd799439033';
+      const mockUpdatePayload = { isRead: true };
+
+      mockCollection.findOneAndUpdate.mockResolvedValue(null);
+
+      const actual = await chatMessageModel.updateChatMessage(
+        mockMessageId,
+        mockUpdatePayload
+      );
+
+      expect(actual).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it('當資料庫操作失敗時應返回 null', async () => {
+      const mockMessageId = '507f1f77bcf86cd799439033';
+      const mockUpdatePayload = { isRead: true };
+
+      mockCollection.findOneAndUpdate.mockRejectedValue(new Error('DB Error'));
+
+      const actual = await chatMessageModel.updateChatMessage(
+        mockMessageId,
+        mockUpdatePayload
+      );
 
       expect(actual).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalled();

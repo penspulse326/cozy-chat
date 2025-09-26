@@ -12,6 +12,7 @@ async function createChatMessage(
     content: data.content,
     createdAt: currentTime,
     device,
+    isRead: false,
     roomId: data.roomId,
     userId: data.userId,
   };
@@ -42,6 +43,18 @@ async function findChatMessagesByRoomId(
   return result;
 }
 
+async function markAsRead(messageId: string): Promise<ChatMessageDto> {
+  const updatedMessage = await chatMessageModel.updateChatMessage(messageId, {
+    isRead: true,
+  });
+
+  if (!updatedMessage) {
+    throw new Error('更新聊天訊息失敗');
+  }
+
+  return updatedMessage;
+}
+
 async function removeManyByRoomIds(roomIds: string[]): Promise<void> {
   const result = await chatMessageModel.removeManyByRoomIds(roomIds);
   if (!result) {
@@ -67,6 +80,7 @@ export default {
   createChatMessage,
   findChatMessageById,
   findChatMessagesByRoomId,
+  markAsRead,
   removeManyByRoomIds,
   sendChatMessage,
 };

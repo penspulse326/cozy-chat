@@ -1,4 +1,4 @@
-import type { Device, UserStatus } from '@packages/lib';
+import type { ChatMessageDto, Device, UserStatus } from '@packages/lib';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -12,6 +12,7 @@ vi.mock('@/models/chat-message.model', () => ({
     findChatMessageById: vi.fn(),
     findChatMessagesByRoomIds: vi.fn(),
     removeManyByRoomIds: vi.fn(),
+    updateChatMessage: vi.fn(), // Add mock for update
   },
 }));
 
@@ -28,6 +29,51 @@ describe('Chat Message Service', () => {
     vi.clearAllMocks();
   });
 
+  describe('markAsRead', () => {
+    it('應該成功將訊息標記為已讀', async () => {
+      const messageId = 'message-1';
+
+      const mockMessage = {
+        content: 'Hello',
+        createdAt: ANY_DATE,
+        device: 'APP' as Device,
+        id: messageId,
+        isRead: false,
+        roomId: 'room-1',
+        userId: 'user-1',
+      };
+
+      const updatedMessage = { ...mockMessage, isRead: true };
+
+      vi.mocked(chatMessageModel.updateChatMessage).mockResolvedValue(
+        updatedMessage as ChatMessageDto
+      );
+
+      const result = await chatMessageService.markAsRead(messageId);
+
+      expect(chatMessageModel.updateChatMessage).toHaveBeenCalledWith(
+        messageId,
+        { isRead: true }
+      );
+      expect(result).toEqual(updatedMessage);
+    });
+
+    it('當更新訊息失敗時應拋出錯誤', async () => {
+      const messageId = 'message-1';
+
+      vi.mocked(chatMessageModel.updateChatMessage).mockResolvedValue(null);
+
+      await expect(chatMessageService.markAsRead(messageId)).rejects.toThrow(
+        '更新聊天訊息失敗'
+      );
+
+      expect(chatMessageModel.updateChatMessage).toHaveBeenCalledWith(
+        messageId,
+        { isRead: true }
+      );
+    });
+  });
+
   describe('createChatMessage', () => {
     it('應該使用正確的載荷建立聊天訊息', async () => {
       const mockChatMessageData = {
@@ -41,11 +87,12 @@ describe('Chat Message Service', () => {
         createdAt: ANY_DATE,
         device: mockDevice as Device,
         id: '507f1f77bcf86cd799439033',
+        isRead: false,
         roomId: mockChatMessageData.roomId,
         userId: mockChatMessageData.userId,
       };
       vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
-        mockChatMessageResult
+        mockChatMessageResult as ChatMessageDto
       );
 
       const actual = await chatMessageService.createChatMessage(
@@ -106,22 +153,23 @@ describe('Chat Message Service', () => {
     it('當找到聊天訊息時應返回聊天訊息', async () => {
       const mockMessageId = '507f1f77bcf86cd799439033';
       const mockChatMessage = {
-        _id: 'mockMessageId',
+        _id: '507f1f77bcf86cd799439033',
         content: 'Hello world',
         createdAt: ANY_DATE,
         device: 'APP' as Device,
         id: mockMessageId,
+        isRead: false,
         roomId: '507f1f77bcf86cd799439022',
         userId: '507f1f77bcf86cd799439011',
       };
 
       vi.mocked(chatMessageModel.findChatMessageById).mockResolvedValue(
-        mockChatMessage
+        mockChatMessage as ChatMessageDto
       );
 
       const actual =
         await chatMessageService.findChatMessageById(mockMessageId);
-      expect(actual).toBe(mockChatMessage);
+      expect(actual).toEqual(mockChatMessage);
       expect(chatMessageModel.findChatMessageById).toHaveBeenCalledWith(
         mockMessageId
       );
@@ -166,6 +214,7 @@ describe('Chat Message Service', () => {
           createdAt: ANY_DATE,
           device: 'APP' as Device,
           id: '507f1f77bcf86cd799439033',
+          isRead: false,
           roomId: mockRoomId,
           userId: '507f1f77bcf86cd799439011',
         },
@@ -175,6 +224,7 @@ describe('Chat Message Service', () => {
           createdAt: ANY_DATE,
           device: 'PC' as Device,
           id: '507f1f77bcf86cd799439034',
+          isRead: false,
           roomId: mockRoomId,
           userId: '507f1f77bcf86cd799439012',
         },
@@ -252,13 +302,14 @@ describe('Chat Message Service', () => {
         createdAt: ANY_DATE,
         device: mockUser.device,
         id: '507f1f77bcf86cd799439033',
+        isRead: false,
         roomId: mockChatMessageData.roomId,
         userId: mockChatMessageData.userId,
       };
 
       vi.mocked(userModel.findUserById).mockResolvedValue(mockUser);
       vi.mocked(chatMessageModel.createChatMessage).mockResolvedValue(
-        mockChatMessage
+        mockChatMessage as ChatMessageDto
       );
 
       const actual =

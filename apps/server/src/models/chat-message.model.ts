@@ -103,9 +103,36 @@ async function removeManyByRoomIds(roomIds: string[]): Promise<boolean> {
   }
 }
 
+async function updateChatMessage(
+  id: string,
+  payload: Partial<ChatMessageDto>
+): Promise<ChatMessageDto | null> {
+  const chatMessages = getCollection<ChatMessageEntity>('chat_messages');
+
+  try {
+    const result = await chatMessages.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: payload },
+      { returnDocument: 'after' }
+    );
+
+    if (result) {
+      console.log(`更新 ChatMessage 成功: ${id}`);
+      return convertToDto(result);
+    }
+
+    console.error(`找不到 ChatMessage 進行更新: ${id}`);
+    return null;
+  } catch (error: unknown) {
+    console.error(`更新 ChatMessage 失敗: ${id}`, error);
+    return null;
+  }
+}
+
 export default {
   createChatMessage,
   findChatMessageById,
   findChatMessagesByRoomIds,
   removeManyByRoomIds,
+  updateChatMessage,
 };
