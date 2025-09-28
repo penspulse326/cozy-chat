@@ -14,7 +14,7 @@
 .messageBox {
   padding: var(--mantine-spacing-xs);
   max-width: 300px;
-  height: 44px;
+
   border: 1px solid var(--mantine-color-moss-green-4);
   position: relative;
   transition: 0.3s ease;

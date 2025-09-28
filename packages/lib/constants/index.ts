@@ -1,7 +1,9 @@
 export enum CHAT_EVENT {
+  BLOCK = 'chat:block',
   LOAD = 'chat:load',
   READ = 'chat:read',
   SEND = 'chat:send',
+  UNBLOCK = 'chat:unblock',
 }
 
 export enum MATCH_EVENT {

@@ -1,8 +1,6 @@
-import ClientPage from './client-page';
-
 async function getTrends() {
   const res = await fetch(
-    'https://penspulse326.github.io/cozy-chat/google-trends.json',
+    'https://raw.githubusercontent.com/penspulse326/cozy-chat/refs/heads/google-trends/google-trends.json',
     {
       next: {
         revalidate: 3600, // 每小時重新驗證一次
@@ -17,8 +15,8 @@ async function getTrends() {
   return res.json();
 }
 
-export default async function Home() {
-  const data = await getTrends();
+export default async function TrendsPage() {
+  const trends = await getTrends();
 
-  return <ClientPage trends={data.trends} />;
+  return <pre>{JSON.stringify(trends, null, 2)}</pre>;
 }
