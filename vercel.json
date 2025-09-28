@@ -1,0 +1,13 @@
+{
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "develop": true,
+      "feature/*": false
+    }
+  },
+  "buildCommand": "pnpm web:build",
+  "outputDirectory": "apps/web/.next",
+  "installCommand": "pnpm install",
+  "framework": "nextjs"
+}
