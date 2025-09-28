@@ -28,7 +28,7 @@ jobs:
         run: npx puppeteer browsers install chrome
 
       - name: Run Puppeteer Scraper
-        run: pnpm run start
+        run: pnpm run scrape
 
       - name: Commit and Push Results
         env:
