@@ -1,0 +1,177 @@
+# ==============================================================================
+# Casual Meet Monorepo - Unified .gitignore
+# ==============================================================================
+
+# ==============================================================================
+# Dependencies & Package Managers
+# ==============================================================================
+node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+jspm_packages/
+bower_components/
+
+# Package manager debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Package manager cache
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ==============================================================================
+# Environment Variables
+# ==============================================================================
+.env
+.env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ==============================================================================
+# Build Outputs & Distribution
+# ==============================================================================
+build/
+dist/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Next.js specific
+/.next/
+.next/
+
+# TypeScript
+*.tsbuildinfo
+
+# Production builds
+/production
+
+# ==============================================================================
+# Testing & Coverage
+# ==============================================================================
+/coverage
+coverage/
+*.lcov
+.nyc_output
+lib-cov
+
+# ==============================================================================
+# Logs & Runtime Data
+# ==============================================================================
+logs/
+*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# ==============================================================================
+# Cache & Temporary Files
+# ==============================================================================
+.cache
+.parcel-cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.temp
+.cache/
+.docusaurus
+
+# Tool specific caches
+.eslintcache
+.stylelintcache
+.fusebox/
+.dynamodb/
+
+# ==============================================================================
+# Development Tools & Editors
+# ==============================================================================
+.vscode/
+.vscode-test
+.idea/
+*.swp
+*.swo
+*~
+.tern-port
+
+# ==============================================================================
+# OS Generated Files
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ==============================================================================
+# Deployment & Services
+# ==============================================================================
+.vercel
+.serverless/
+
+# ==============================================================================
+# Monorepo Tools
+# ==============================================================================
+.turbo
+
+# ==============================================================================
+# Misc
+# ==============================================================================
+*.tgz
+*.pem
+.yarn-integrity
+.node_repl_history
+tmp/
+temp/
+.lock-wscript
+web_modules/
+
+# ==============================================================================
+# Database Files
+# ==============================================================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==============================================================================
+# Framework Specific
+# ==============================================================================
+
+# Next.js
+.next
+out
+.nuxt
+
+# Gatsby
+.cache/
+# public
+
+# Vuepress
+.vuepress/dist
+.vitepress/dist
+.vitepress/cache
+
+# Snowpack
+web_modules/
+
+# Grunt
+.grunt
