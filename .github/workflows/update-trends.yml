@@ -1,9 +1,12 @@
 name: Update Google Trends
 
 on:
+  push:
+    branches:
+      - google-trends
   schedule:
-    - cron: "0,30 * * * *" # 每小時第 5 和 35 分鐘執行
-  workflow_dispatch: # 保留手動觸發的選項
+    - cron: "5,35 * * * *" # 每小時第 5 和 35 分鐘執行
+  workflow_dispatch:
 
 jobs:
   update:
