@@ -10,6 +10,7 @@ export default function useMatch() {
   const socket = useSocket();
   const [matchStatus, setMatchStatus] = useState<MatchStatus>('standby');
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
+  const [isBlocked, setIsBlocked] = useState(false);
   const newMsgAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const [userId, setUserId, removeUserId] = useLocalStorage<string | null>({
@@ -34,13 +35,30 @@ export default function useMatch() {
     setMatchStatus('left');
   }
 
+  function handleMessageBlock(data: unknown) {
+    const blockData = data as { error: string; userId: string };
+
+    console.log(blockData.error)
+
+    if (blockData.userId === userId) {
+      setIsBlocked(true);
+    }
+  }
+
+  function handleMessageUnblock(data: unknown) {
+    const unblockData = data as { userId: string };
+    if (unblockData.userId === userId) {
+      setIsBlocked(false);
+    }
+  }
+
   function handleMessageReceive(data: unknown) {
     const message = data as ChatMessageDto;
     setMessages((prev) => [...prev, message]);
 
     if (message.userId !== userId && newMsgAudioRef.current) {
       newMsgAudioRef.current.currentTime = 0;
-      newMsgAudioRef.current.play().catch(() => {});
+      newMsgAudioRef.current.play().catch(() => { });
     }
   }
 
@@ -103,6 +121,8 @@ export default function useMatch() {
     socket.on(CHAT_EVENT.SEND, handleMessageReceive);
     socket.on(CHAT_EVENT.LOAD, handleMessagesLoad);
     socket.on(CHAT_EVENT.READ, handleMessageRead);
+    socket.on(CHAT_EVENT.BLOCK, handleMessageBlock);
+    socket.on(CHAT_EVENT.UNBLOCK, handleMessageUnblock);
   }
 
   function connectSocket() {
@@ -167,5 +187,5 @@ export default function useMatch() {
     };
   }, []);
 
-  return { matchStatus, setMatchStatus, sendMessage, readMessage, messages };
+  return { matchStatus, setMatchStatus, sendMessage, readMessage, messages, isBlocked };
 }

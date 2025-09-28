@@ -9,6 +9,7 @@ interface ChatBoxProps {
   userId: string | null;
   messages: ChatMessageDto[];
   matchStatus: MatchStatus;
+  isBlocked: boolean;
   onRead: (id: string) => void;
 }
 
@@ -16,6 +17,7 @@ export default function ChatBox({
   userId,
   messages,
   matchStatus,
+  isBlocked,
   onRead,
 }: ChatBoxProps) {
   return (
@@ -40,6 +42,11 @@ export default function ChatBox({
                   onRead={onRead}
                 />
               ))}
+              {isBlocked && (
+                <Text className={styles.chatBoxAlert}>
+                  短時間內發送訊息過多，請稍後再試
+                </Text>
+              )}
             </Stack>
           </>
         )}

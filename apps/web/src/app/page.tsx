@@ -27,8 +27,14 @@ export default function Home() {
   const [opened, { toggle }] = useDisclosure();
   const viewport = useRef<HTMLDivElement>(null);
 
-  const { matchStatus, setMatchStatus, messages, sendMessage, readMessage } =
-    useMatch();
+  const {
+    matchStatus,
+    setMatchStatus,
+    messages,
+    sendMessage,
+    readMessage,
+    isBlocked,
+  } = useMatch();
 
   function handleScrollToBottom() {
     viewport.current?.scrollTo({
@@ -39,7 +45,8 @@ export default function Home() {
 
   useEffect(() => {
     handleScrollToBottom();
-  }, [matchStatus, messages]);
+    console.log('isBlocked', isBlocked);
+  }, [matchStatus, messages, isBlocked]);
 
   return (
     <AppShell
@@ -106,6 +113,7 @@ export default function Home() {
                 userId={userId}
                 messages={messages}
                 matchStatus={matchStatus}
+                isBlocked={isBlocked}
                 onRead={readMessage}
               />
             )}
@@ -115,6 +123,7 @@ export default function Home() {
 
       <ChatActionBar
         matchStatus={matchStatus}
+        isBlocked={isBlocked}
         onLeave={() => setMatchStatus('quit')}
         onSend={sendMessage}
       />

@@ -73,7 +73,7 @@ export function createMatchHandlers(io: Server, waitingPool: WaitingPool) {
     );
 
     if (updatedUser.roomId) {
-      notifyMatchLeave(updatedUser.roomId.toString());
+      notifyMatchLeave(updatedUser.roomId);
     }
   }
 

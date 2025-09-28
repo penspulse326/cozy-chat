@@ -5,12 +5,14 @@ import styles from './styles.module.css';
 
 interface ChatActionBarProps {
   matchStatus: MatchStatus;
+  isBlocked: boolean;
   onSend: (message: string) => void;
   onLeave: () => void;
 }
 
 export default function ChatActionBar({
   matchStatus,
+  isBlocked,
   onSend,
   onLeave,
 }: ChatActionBarProps) {
@@ -44,7 +46,7 @@ export default function ChatActionBar({
       </Button>
       <Input
         value={message}
-        disabled={matchStatus !== 'matched'}
+        disabled={matchStatus !== 'matched' || isBlocked}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
@@ -65,7 +67,7 @@ export default function ChatActionBar({
         }}
       />
       <Button
-        disabled={matchStatus !== 'matched'}
+        disabled={matchStatus !== 'matched' || isBlocked}
         onClick={handleSendMessage}
         classNames={{ root: styles.sendButtonRoot }}
       >
