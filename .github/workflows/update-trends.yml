@@ -5,7 +5,7 @@ on:
     branches:
       - google-trends
   schedule:
-    - cron: "5,35 * * * *" # 每小時第 5 和 35 分鐘執行
+    - cron: "10,50 * * * *" # 每小時第 5 和 35 分鐘執行
   workflow_dispatch: # 保留手動觸發的選項
 
 jobs:
