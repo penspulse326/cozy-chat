@@ -23,7 +23,7 @@ export default function ChatBox({
   isBlocked,
   onRead,
 }: ChatBoxProps) {
-  const filteredTrends = trends
+  const filteredTrends = (trends || [])
     .filter((trend: { content: string }) => trend.content !== '')
     .sort(() => Math.random() - 0.5)
     .slice(0, Math.min(5, trends.length));

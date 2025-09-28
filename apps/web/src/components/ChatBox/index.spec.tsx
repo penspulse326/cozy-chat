@@ -32,6 +32,8 @@ describe('ChatBox', () => {
         messages={[]}
         matchStatus="waiting"
         onRead={vi.fn()}
+        trends={[]}
+        isBlocked={false}
       />
     );
     expect(screen.getByText('配對中...')).toBeInTheDocument();
@@ -44,6 +46,8 @@ describe('ChatBox', () => {
         messages={mockMessages}
         matchStatus="left"
         onRead={vi.fn()}
+        trends={[]}
+        isBlocked={false}
       />
     );
     expect(screen.getByText('對方已離開')).toBeInTheDocument();
@@ -56,6 +60,8 @@ describe('ChatBox', () => {
         messages={[]}
         matchStatus="matched"
         onRead={vi.fn()}
+        trends={[]}
+        isBlocked={false}
       />
     );
     expect(screen.getByText('配對成功！')).toBeInTheDocument();
@@ -69,6 +75,8 @@ describe('ChatBox', () => {
         messages={mockMessages}
         matchStatus="matched"
         onRead={vi.fn()}
+        trends={[]}
+        isBlocked={false}
       />
     );
 
@@ -115,6 +123,8 @@ describe('ChatBox', () => {
         messages={mockMessages}
         matchStatus="matched"
         onRead={vi.fn()}
+        trends={[]}
+        isBlocked={false}
       />
     );
 

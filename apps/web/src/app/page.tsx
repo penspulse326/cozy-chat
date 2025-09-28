@@ -2,10 +2,10 @@ import ClientPage from './client-page';
 
 async function getTrends() {
   const res = await fetch(
-    'https://penspulse326.github.io/cozy-chat/google-trends.json',
+    'https://raw.githubusercontent.com/penspulse326/google-trends/refs/heads/main/data.json',
     {
       next: {
-        revalidate: 3600, // 每小時重新驗證一次
+        revalidate: 1800,
       },
     }
   );
