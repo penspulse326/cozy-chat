@@ -8,7 +8,7 @@ beforeAll(() => {
     Promise.resolve()
   );
   vi.spyOn(window.HTMLMediaElement.prototype, 'pause').mockImplementation(
-    () => {}
+    () => { }
   );
 });
 
@@ -40,7 +40,7 @@ const mockSocket = {
   isConnected: vi.fn(() => false),
 };
 
-vi.mock('../useSocket', () => ({
+vi.mock('./useSocket', () => ({
   default: () => mockSocket,
 }));
 
