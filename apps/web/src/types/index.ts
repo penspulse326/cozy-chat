@@ -17,3 +17,7 @@ export enum DeviceNameMap {
   MB = '行動裝置',
   PC = '網站',
 }
+
+export type Trend = {
+  content: string;
+};

@@ -2,13 +2,13 @@ import { Stack, Text, alpha } from '@mantine/core';
 import ChatMessageCard from '../ChatMessageCard';
 import styles from './styles.module.css';
 
-import { MatchStatus } from '@/types';
+import { MatchStatus, Trend } from '@/types';
 import { ChatMessageDto } from '@packages/lib';
 import Link from 'next/link';
 
 interface ChatBoxProps {
   userId: string | null;
-  trends: any;
+  trends: Trend[];
   messages: ChatMessageDto[];
   matchStatus: MatchStatus;
   isBlocked: boolean;
@@ -39,15 +39,15 @@ export default function ChatBox({
           <>
             <Text className={styles.chatBoxHint}>配對成功！</Text>
             <Text className={styles.chatBoxTextMb}>開始聊天吧 🤝</Text>
-            {filteredTrends.map((trend: { content: string }) => (
-              <Text className={styles.chatBoxTopic}>
+            {filteredTrends.map(({ content }: Trend) => (
+              <Text key={content} className={styles.chatBoxTopic}>
                 來聊聊
                 <Link
-                  href={`https://www.google.com.tw/search?q=${trend.content}&hl=zh-TW`}
+                  href={`https://www.google.com.tw/search?q=${content}&hl=zh-TW`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {trend.content}
+                  {content}
                 </Link>
                 吧
               </Text>
