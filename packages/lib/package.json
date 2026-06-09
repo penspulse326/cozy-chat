@@ -1,7 +1,7 @@
 {
   "name": "@packages/lib",
   "version": "1.0.0",
-  "description": "Shared utilities and types for casual-meet monorepo",
+  "description": "Shared utilities and types for cozy-chat monorepo",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
