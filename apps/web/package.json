@@ -18,7 +18,7 @@
     "@packages/lib": "workspace:*",
     "chroma-js": "^3.1.2",
     "dayjs": "^1.11.18",
-    "next": "15.3.5",
+    "next": "15.5.19",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -26,7 +26,7 @@
     "@eslint/eslintrc": "^3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint-config-next": "15.3.5",
+    "eslint-config-next": "15.5.19",
     "postcss": "^8.5.6",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1"
